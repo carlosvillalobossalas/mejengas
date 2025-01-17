@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Checkbox,
   FormControl,
   Grid2,
   InputLabel,
@@ -11,7 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { Outlet } from "react-router";
 import { getAllPlayers } from "../firebase/endpoints";
 import dayjs from "dayjs";
@@ -22,6 +23,7 @@ import TabPanel from "@mui/lab/TabPanel";
 
 const NewMatch = () => {
   const navigate = useNavigate();
+  const { admin } = useParams();
   const [players, setPlayers] = useState([]);
   const [tabIndex, setTabIndex] = useState("1");
   const [newMatchForm, setNewMatchForm] = useState({
@@ -29,14 +31,6 @@ const NewMatch = () => {
     players1: [],
     players2: [],
   });
-
-  useEffect(() => {
-    getAllPlayers().then((res) => setPlayers(res));
-  }, []);
-
-  useEffect(() => {
-    console.log(players);
-  }, [players]);
 
   const handleSave = () => {
     console.log(newMatchForm);
@@ -46,20 +40,23 @@ const NewMatch = () => {
     setTabIndex(newValue);
   };
 
+  const handleShouldBeDisabled = (playerId) => {
+    const players1 = newMatchForm.players1.map((player) => player.id);
+    const players2 = newMatchForm.players2.map((player) => player.id);
+
+    return players1.includes(playerId) || players2.includes(playerId);
+  };
+  useEffect(() => {
+    getAllPlayers().then((res) => setPlayers(res));
+  }, []);
+
+  useEffect(() => {
+    console.log(players);
+  }, [players]);
+
   return (
     <>
       <Grid2 container flexGrow={1} direction="column">
-        <Grid2
-          container
-          alignItems="center"
-          justifyContent="space-around"
-          flexGrow={1}
-          marginTop={2}
-        >
-          <Button onClick={() => navigate("/assistants")}>Asistencias</Button>
-          <Typography>Registrar Partido</Typography>
-          <Button onClick={() => navigate("/scorers")}>Goleadores</Button>
-        </Grid2>
         <Grid2
           container
           flexGrow={1}
@@ -68,14 +65,13 @@ const NewMatch = () => {
           marginTop={2}
           direction="column"
         >
-          <DatePicker
-            label="Fecha"
-            value={newMatchForm.date}
-            onChange={(value) =>
-              setNewMatchForm((prev) => ({ ...prev, date: value }))
-            }
-          />
-          <Box sx={{ width: "100%", typography: "body1", marginTop: 2 }}>
+          <Box
+            sx={{
+              width: "100%",
+              typography: "body1",
+              marginTop: 2,
+            }}
+          >
             <TabContext value={tabIndex}>
               <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
                 <TabList
@@ -87,13 +83,21 @@ const NewMatch = () => {
                   <Tab label="Equipo 2" value="2" />
                 </TabList>
               </Box>
-              <TabPanel value="1">
+              <TabPanel
+                value="1"
+                sx={{ padding: 0, paddingRight: 1, marginTop: 1 }}
+              >
                 <Grid2
                   container
-                  sx={{ width: "100%" }}
+                  sx={{
+                    width: "100%",
+                    margin: 0,
+                    padding: 0,
+                  }}
                   direction="column"
                   spacing={2}
                 >
+                  <Typography sx={{ paddingLeft: 1 }}>P?</Typography>
                   {[0, 1, 2, 3, 4, 5, 6].map((value) => {
                     return (
                       <Grid2
@@ -105,6 +109,28 @@ const NewMatch = () => {
                         alignItems="center"
                         justifyContent="center"
                       >
+                        <Checkbox
+                          size="small"
+                          sx={{
+                            marginRight: 0,
+                            paddingRight: 0.5,
+                            paddingLeft: 0.5,
+                          }}
+                          value={newMatchForm?.players1[value]?.isGK ?? false}
+                          onChange={({ target }) => {
+                            setNewMatchForm((prev) => {
+                              const updatedPlayers = [...prev.players1];
+                              updatedPlayers[value] = {
+                                ...updatedPlayers[value],
+                                isGK: target.value,
+                              };
+                              return {
+                                ...prev,
+                                players1: updatedPlayers,
+                              };
+                            });
+                          }}
+                        />
                         <FormControl sx={{ flexGrow: 1 }}>
                           <InputLabel id={`player${value}`}>{`Jugador #${
                             value + 1
@@ -129,11 +155,18 @@ const NewMatch = () => {
                               })
                             }
                           >
-                            {players.map((player) => (
-                              <MenuItem key={player.id} value={player.id}>
-                                {player.name}
-                              </MenuItem>
-                            ))}
+                            {players.map((player) => {
+                              const disable = handleShouldBeDisabled(player.id);
+                              return (
+                                <MenuItem
+                                  disabled={disable}
+                                  key={player.id}
+                                  value={player.id}
+                                >
+                                  {player.name}
+                                </MenuItem>
+                              );
+                            })}
                           </Select>
                         </FormControl>
                         <TextField
@@ -179,24 +212,53 @@ const NewMatch = () => {
                   })}
                 </Grid2>
               </TabPanel>
-              <TabPanel value="2">
+              <TabPanel
+                value="2"
+                sx={{ padding: 0, paddingRight: 1, marginTop: 1 }}
+              >
                 <Grid2
                   container
-                  sx={{ width: "100%" }}
+                  sx={{
+                    width: "100%",
+                    margin: 0,
+                    padding: 0,
+                  }}
                   direction="column"
                   spacing={2}
                 >
+                  <Typography sx={{ paddingLeft: 1 }}>P?</Typography>
                   {[0, 1, 2, 3, 4, 5, 6].map((value) => {
                     return (
                       <Grid2
                         key={value}
                         container
                         direction="row"
-                        // flexGrow={1}
                         sx={{ width: "100%" }}
                         alignItems="center"
                         justifyContent="center"
                       >
+                        <Checkbox
+                          size="small"
+                          sx={{
+                            marginRight: 0,
+                            paddingRight: 0.5,
+                            paddingLeft: 0.5,
+                          }}
+                          value={newMatchForm?.players2[value]?.isGK ?? false}
+                          onChange={({ target }) => {
+                            setNewMatchForm((prev) => {
+                              const updatedPlayers = [...prev.players2];
+                              updatedPlayers[value] = {
+                                ...updatedPlayers[value],
+                                isGK: target.value,
+                              };
+                              return {
+                                ...prev,
+                                players2: updatedPlayers,
+                              };
+                            });
+                          }}
+                        />
                         <FormControl sx={{ flexGrow: 1 }}>
                           <InputLabel id={`player${value}`}>{`Jugador #${
                             value + 1
@@ -274,11 +336,30 @@ const NewMatch = () => {
             </TabContext>
           </Box>
 
-          <Box marginTop={2} marginBottom={5}>
-            <Button variant="contained" onClick={handleSave}>
+          <Grid2
+            marginTop={2}
+            marginBottom={5}
+            direction="row"
+            alignItems="center"
+            flexGrow={1}
+            spacing={2}
+            container
+          >
+            <DatePicker
+              label="Fecha"
+              value={newMatchForm.date}
+              onChange={(value) =>
+                setNewMatchForm((prev) => ({ ...prev, date: value }))
+              }
+            />
+            <Button
+              disabled={admin === "false"}
+              variant="contained"
+              onClick={handleSave}
+            >
               Guardar
             </Button>
-          </Box>
+          </Grid2>
         </Grid2>
       </Grid2>
       <Outlet />
