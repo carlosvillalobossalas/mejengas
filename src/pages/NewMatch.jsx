@@ -276,7 +276,7 @@ const NewMatch = () => {
             </TabContext>
           </Box>
 
-          <Box marginTop={5}>
+          <Box marginTop={5} marginBottom={5}>
             <Button variant="contained" onClick={handleSave}>
               Guardar
             </Button>
