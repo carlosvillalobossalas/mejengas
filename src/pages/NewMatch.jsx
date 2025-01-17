@@ -94,7 +94,6 @@ const NewMatch = () => {
                   direction="column"
                   spacing={2}
                 >
-                  <Typography paddingLeft={2}>Equipo 1</Typography>
                   {[0, 1, 2, 3, 4, 5, 6].map((value) => {
                     return (
                       <Grid2
@@ -187,7 +186,6 @@ const NewMatch = () => {
                   direction="column"
                   spacing={2}
                 >
-                  <Typography paddingLeft={2}>Equipo 2</Typography>
                   {[0, 1, 2, 3, 4, 5, 6].map((value) => {
                     return (
                       <Grid2
