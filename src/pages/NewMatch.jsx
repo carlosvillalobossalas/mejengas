@@ -1,47 +1,41 @@
 import {
+  Box,
   Button,
-  Fab,
   Grid2,
-  Modal,
+  MenuItem,
+  Select,
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import AddIcon from "@mui/icons-material/Add";
-import { addNewPlayer } from "../firebase/endpoints";
-
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 400,
-  bgcolor: "background.paper",
-  boxShadow: 24,
-  p: 4,
-};
+import { Outlet } from "react-router";
+import { getAllPlayers } from "../firebase/endpoints";
+import dayjs from "dayjs";
+import { DatePicker } from "@mui/x-date-pickers";
 
 const NewMatch = () => {
   const navigate = useNavigate();
+  const [players, setPlayers] = useState([]);
+  const [newMatchForm, setNewMatchForm] = useState({
+    date: dayjs(new Date()),
+    players1: [],
+  });
+  useEffect(() => {
+    getAllPlayers().then((res) => setPlayers(res));
+  }, []);
 
-  const [openModal, setOpenModal] = useState(false);
-  const [newPlayerForm, setNewPlayerForm] = useState("");
+  useEffect(() => {
+    console.log(players);
+  }, [players]);
 
-  const saveNewPlayer = async () => {
-    if (newPlayerForm.length > 0) {
-      //TODO: agregar toast
-      const response = await addNewPlayer(newPlayerForm);
-      if (response) {
-        setNewPlayerForm("");
-        setOpenModal(false);
-      }
-    }
-  };
+  const handleSave = ()=>{
+    console.log(newMatchForm)
+  }
 
   return (
     <>
-      <Grid2 container flexGrow={1}>
+      <Grid2 container flexGrow={1} direction="column">
         <Grid2
           container
           alignItems="center"
@@ -53,29 +47,113 @@ const NewMatch = () => {
           <Typography>Registrar Partido</Typography>
           <Button onClick={() => navigate("/scorers")}>Goleadores</Button>
         </Grid2>
-
-        <Fab
-          color="primary"
-          aria-label="add"
-          sx={{ position: "absolute", bottom: 15, right: 15 }}
-          onClick={() => setOpenModal(true)}
+        <Grid2
+          container
+          flexGrow={1}
+          alignItems="center"
+          justifyContent="center"
+          marginTop={5}
+          direction="column"
         >
-          <AddIcon />
-        </Fab>
-      </Grid2>
-      <Modal open={openModal} onClose={() => setOpenModal(false)}>
-        <Grid2 container sx={style} spacing={3} direction="column">
-          <Typography>Registrar nuevo Jugador</Typography>
-          <TextField
-            placeholder="Nombre"
-            value={newPlayerForm}
-            onChange={({ target }) => setNewPlayerForm(target.value)}
+          <DatePicker
+            label="Fecha"
+            value={newMatchForm.date}
+            onChange={(value) =>
+              setNewMatchForm((prev) => ({ ...prev, date: value }))
+            }
           />
-          <Button variant="contained" onClick={saveNewPlayer}>
-            Guardar
-          </Button>
+          <Grid2
+            container
+            sx={{ width: "100%" }}
+            direction="column"
+            marginTop={2}
+            spacing={2}
+          >
+            <Typography paddingLeft={2}>Equipo 1</Typography>
+            {[0, 1, 2, 3, 4, 5, 6].map((value) => {
+              return (
+                <Grid2
+                  key={value}
+                  container
+                  direction="row"
+                  // flexGrow={1}
+                  sx={{ width: "100%" }}
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <Select
+                    value={newMatchForm?.players1[value]?.id ?? ""}
+                    label={`Jugador #${value + 1}`}
+                    sx={{ minWidth: "50%" }}
+                    onChange={({ target }) =>
+                      setNewMatchForm((prev) => {
+                        const updatedPlayers = [...prev.players1];
+                        updatedPlayers[value] = {
+                          id: target.value,
+                          goals: 0,
+                          assists: 0,
+                        };
+                        return {
+                          ...prev,
+                          players1: updatedPlayers,
+                        };
+                      })
+                    }
+                  >
+                    {players.map((player) => (
+                      <MenuItem key={player.id} value={player.id}>
+                        {player.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  <TextField
+                    label="Goles"
+                    type="number"
+                    sx={{ width: "20%" }}
+                    value={newMatchForm?.players1[value]?.goals ?? 0}
+                    onChange={({ target }) =>
+                      setNewMatchForm((prev) => {
+                        const updatedPlayers = [...prev.players1];
+                        updatedPlayers[value] = {
+                          ...updatedPlayers[value],
+                          goals: target.value,
+                        };
+                        return {
+                          ...prev,
+                          players1: updatedPlayers,
+                        };
+                      })
+                    }
+                  />
+                  <TextField
+                    label="Asistencias"
+                    type="number"
+                    sx={{ width: "20%" }}
+                    value={newMatchForm?.players1[value]?.assists ?? 0}
+                    onChange={({ target }) =>
+                      setNewMatchForm((prev) => {
+                        const updatedPlayers = [...prev.players1];
+                        updatedPlayers[value] = {
+                          ...updatedPlayers[value],
+                          assists: target.value,
+                        };
+                        return {
+                          ...prev,
+                          players1: updatedPlayers,
+                        };
+                      })
+                    }
+                  />
+                </Grid2>
+              );
+            })}
+          </Grid2>
+          <Box marginTop={5}>
+            <Button variant="contained" onClick={handleSave}>Guardar</Button>
+          </Box>
         </Grid2>
-      </Modal>
+      </Grid2>
+      <Outlet />
     </>
   );
 };
