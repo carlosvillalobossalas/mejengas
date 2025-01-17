@@ -11,7 +11,7 @@ const App = () => {
       <Route path="" element={<ScorersPage />} />
       <Route path="assistants" element={<AssistantsPage />} />
       <Route path="admin">
-        <Route  element={<NewMatch />}>
+        <Route path="" element={<NewMatch />}>
           <Route path=":admin/newplayer" element={<AddNewPlayerButton />} />
         </Route>
       </Route>

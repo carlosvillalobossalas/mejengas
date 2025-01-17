@@ -52,7 +52,7 @@ const NewMatch = () => {
           flexGrow={1}
           alignItems="center"
           justifyContent="center"
-          marginTop={5}
+          marginTop={2}
           direction="column"
         >
           <DatePicker
