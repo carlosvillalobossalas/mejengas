@@ -27,12 +27,12 @@ const TablesPage = ({ players }) => {
   };
 
   return (
-    <Grid2 container flexGrow={1} sx={{ padding: 2 }}>
+    <Grid2 container flexGrow={1} sx={{ padding: 1 }}>
       <Box
         sx={{
           width: "100%",
           typography: "body1",
-          // marginTop: 2,
+          marginTop: 1,
         }}
       >
         <TabContext value={tabIndex}>
@@ -112,7 +112,10 @@ const TablesPage = ({ players }) => {
             )}
             {tabIndex === 2 && (
               <CustomTableComponent
-                players={players}
+                players={players.map((p) => ({
+                  ...p,
+                  lost: p.matches - p.won,
+                }))}
                 getComparator={getComparator}
                 initialOrderBy={"won"}
                 headCells={[
@@ -131,9 +134,16 @@ const TablesPage = ({ players }) => {
                     disablePadding: false,
                   },
                   {
+                    id: "lost",
+                    align: "center",
+                    label: "Perdidos",
+                    numeric: true,
+                    disablePadding: false,
+                  },
+                  {
                     id: "matches",
                     align: "center",
-                    label: "Partidos",
+                    label: "Total",
                     numeric: true,
                     disablePadding: false,
                   },
