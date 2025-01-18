@@ -47,7 +47,7 @@ const TablesPage = ({ players, goalkeepers, matches }) => {
             >
               <Tab label="Historico" />
               <Tab label="Stats" />
-              <Tab label="Imbatidos" />
+              <Tab label="Porteros" />
               <Tab label="Partidos" />
             </Tabs>
           </Box>
