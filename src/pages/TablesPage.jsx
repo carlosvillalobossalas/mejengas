@@ -2,6 +2,7 @@ import { TabContext } from "@mui/lab";
 import { Box, Grid2, Tab, Tabs } from "@mui/material";
 import React, { useState } from "react";
 import CustomTableComponent from "../components/CustomTableComponent";
+import HistoricMatchesList from "../components/HistoricMatchesList";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -19,7 +20,7 @@ function getComparator(order, orderBy) {
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-const TablesPage = ({ players }) => {
+const TablesPage = ({ players, goalkeepers, matches }) => {
   const [tabIndex, setTabIndex] = useState(0);
 
   const handleTabChange = (event, newValue) => {
@@ -47,6 +48,7 @@ const TablesPage = ({ players }) => {
               <Tab label="Asistencias" />
               <Tab label="Partidos" />
               <Tab label="Imbatidos" />
+              <Tab label="Historico" />
             </Tabs>
           </Box>
           <Box sx={{ padding: 0, paddingRight: 1, marginTop: 1 }}>
@@ -150,6 +152,51 @@ const TablesPage = ({ players }) => {
                 ]}
               />
             )}
+            {tabIndex === 3 && (
+              <CustomTableComponent
+                players={goalkeepers}
+                getComparator={getComparator}
+                initialOrderBy={"cleanSheet"}
+                headCells={[
+                  {
+                    id: "name",
+                    align: "left",
+                    label: "Nombre",
+                    numeric: false,
+                    disablePadding: true,
+                  },
+                  {
+                    id: "cleanSheet",
+                    align: "center",
+                    label: "Imbatido",
+                    numeric: true,
+                    disablePadding: false,
+                  },
+                  {
+                    id: "goals",
+                    align: "center",
+                    label: "Recibidos",
+                    numeric: true,
+                    disablePadding: false,
+                  },
+                  {
+                    id: "won",
+                    align: "center",
+                    label: "Ganados",
+                    numeric: true,
+                    disablePadding: false,
+                  },
+                  {
+                    id: "matches",
+                    align: "center",
+                    label: "Total",
+                    numeric: true,
+                    disablePadding: false,
+                  },
+                ]}
+              />
+            )}
+            {tabIndex === 4 && <HistoricMatchesList matches={matches} />}
           </Box>
         </TabContext>
       </Box>

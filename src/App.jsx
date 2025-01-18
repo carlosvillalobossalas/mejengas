@@ -5,16 +5,29 @@ import TablesPage from "./pages/TablesPage";
 import AddNewPlayerButton from "./components/AddNewPlayerButton";
 import { Button, Grid2 } from "@mui/material";
 import { ToastContainer } from "react-toastify";
-import { getAllPlayers } from "./firebase/endpoints";
+import { getAllGKs, getAllMatches, getAllPlayers } from "./firebase/endpoints";
 
 const App = () => {
   const navigate = useNavigate();
   const [players, setPlayers] = useState([]);
-
+  const [goalkeepers, setGoalkeepers] = useState([]);
+  const [matches, setMatches] = useState([]);
   const { pathname } = window.location;
 
   useEffect(() => {
     const unsubscribe = getAllPlayers(setPlayers);
+
+    return () => unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = getAllGKs(setGoalkeepers);
+
+    return () => unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = getAllMatches(setMatches);
 
     return () => unsubscribe;
   }, []);
@@ -43,7 +56,16 @@ const App = () => {
         </Button>
       </Grid2>
       <Routes>
-        <Route path="" element={<TablesPage players={players} />} />
+        <Route
+          path=""
+          element={
+            <TablesPage
+              players={players}
+              goalkeepers={goalkeepers}
+              matches={matches}
+            />
+          }
+        />
         <Route path="admin/:admin">
           <Route path="" element={<NewMatch players={players} />}>
             <Route path="" element={<AddNewPlayerButton />} />

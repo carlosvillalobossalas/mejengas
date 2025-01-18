@@ -46,6 +46,46 @@ export const getAllPlayers = async (callback) => {
   }
 };
 
+export const getAllGKs = async (callback) => {
+  try {
+    const gkCollectionRef = collection(db, "Goalkeepers");
+
+    // Configura el listener y ejecuta el callback con los datos actualizados
+    const unsubscribe = onSnapshot(gkCollectionRef, (snapshot) => {
+      const gks = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      callback(gks); // Llama al callback con la lista actualizada de jugadores
+    });
+
+    // Devuelve la función para cancelar la suscripción
+    return unsubscribe;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+export const getAllMatches = async (callback) => {
+  try {
+    const matchCollectionRef = collection(db, "Matches");
+
+    // Configura el listener y ejecuta el callback con los datos actualizados
+    const unsubscribe = onSnapshot(matchCollectionRef, (snapshot) => {
+      const matches = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      callback(matches); // Llama al callback con la lista actualizada de jugadores
+    });
+
+    // Devuelve la función para cancelar la suscripción
+    return unsubscribe;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 export const saveNewMatch = async (data, players) => {
   try {
     //new match save
@@ -69,6 +109,7 @@ export const saveNewMatch = async (data, players) => {
 
     //update gks
     const gk1 = data.players1.find((p) => p.isGK);
+    const playerGK1 = players.find((p) => p.id === gk1.id);
     const gk1DocRef = doc(db, "Goalkeepers", gk1.id);
     const gk1Doc = await getDoc(gk1DocRef);
     let gk1Data = gk1Doc.data();
@@ -80,6 +121,7 @@ export const saveNewMatch = async (data, players) => {
     await setDoc(
       gk1DocRef,
       {
+        ...playerGK1,
         ...gk1Data,
         cleanSheet: gk1Data.cleanSheet + (gk1CleanSheet ? 1 : 0),
         matches: gk1Data.matches + 1,
@@ -91,6 +133,8 @@ export const saveNewMatch = async (data, players) => {
     );
 
     const gk2 = data.players2.find((p) => p.isGK);
+    const playerGK2 = players.find((p) => p.id === gk1.id);
+
     const gk2DocRef = doc(db, "Goalkeepers", gk2.id);
     const gk2Doc = await getDoc(gk2DocRef);
     let gk2Data = gk2Doc.data();
@@ -102,6 +146,7 @@ export const saveNewMatch = async (data, players) => {
     await setDoc(
       gk2DocRef,
       {
+        ...playerGK2,
         ...gk2Data,
         cleanSheet: gk2Data.cleanSheet + (gk2CleanSheet ? 1 : 0),
         matches: gk2Data.matches + 1,

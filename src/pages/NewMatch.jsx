@@ -31,7 +31,7 @@ const initialState = {
   goalsTeam2: 0,
 };
 
-const NewMatch = ({ players }) => {
+const NewMatch = ({ players = [] }) => {
   const { admin } = useParams();
   const [isSaving, setIsSaving] = useState(false);
   const [tabIndex, setTabIndex] = useState("1");
@@ -45,16 +45,26 @@ const NewMatch = ({ players }) => {
     } else if (newMatchForm.players2.filter((p) => p.isGK).length > 1) {
       toast.error("Equipo 2 tiene mas de un portero");
       return;
+    } else if (newMatchForm.players1.length !== 7) {
+      toast.error("A Equipo 1 le faltan jugadores");
+      return;
+    } else if (newMatchForm.players2.length !== 7) {
+      toast.error("A Equipo 2 le faltan jugadores");
+      return;
     }
     setIsSaving(true);
-    // else if (newMatchForm.players1.length !== 7) {
-    //   toast.error("A Equipo 1 le faltan jugadores");
-    //   return;
-    // } else if (newMatchForm.players2.length !== 7) {
-    //   toast.error("A Equipo 2 le faltan jugadores");
-    //   return;
-    // }
-    await saveNewMatch(newMatchForm, players);
+    const newMatchData = {
+      ...newMatchForm,
+      players1: newMatchForm.players1.map((player) => ({
+        ...player,
+        name: players.find((p) => p.id === player.id).name,
+      })),
+      players2: newMatchForm.players2.map((player) => ({
+        ...player,
+        name: players.find((p) => p.id === player.id).name,
+      })),
+    };
+    await saveNewMatch(newMatchData, players);
     setIsSaving(false);
     setNewMatchForm(initialState);
     toast.success("Partido registrado");
@@ -168,7 +178,7 @@ const NewMatch = ({ players }) => {
                             labelId={`player${value}`}
                             value={newMatchForm?.players1[value]?.id ?? ""}
                             label={`Jugador #${value + 1}`}
-                            sx={{ width: "100%" }}
+                            sx={{ width: "100%", maxWidth: 150 }}
                             onChange={({ target }) =>
                               setNewMatchForm((prev) => {
                                 const updatedPlayers = [...prev.players1];
@@ -302,7 +312,7 @@ const NewMatch = ({ players }) => {
                             value={newMatchForm?.players2[value]?.id ?? ""}
                             label={`Jugador #${value + 1}`}
                             labelId={`player${value}`}
-                            sx={{ minWidth: "50%" }}
+                            sx={{ width: "100%", maxWidth: 150 }}
                             onChange={({ target }) =>
                               setNewMatchForm((prev) => {
                                 const updatedPlayers = [...prev.players2];
@@ -311,7 +321,6 @@ const NewMatch = ({ players }) => {
                                   goals: 0,
                                   assists: 0,
                                   isGK: false,
-
                                 };
                                 return {
                                   ...prev,
