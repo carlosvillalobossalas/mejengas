@@ -58,7 +58,7 @@ const CustomTableComponent = ({
 
   return (
     <Paper sx={{ width: "100%", overflow: "hidden" }}>
-      <TableContainer sx={{ maxHeight: "85vh" }} ref={tableRef}>
+      <TableContainer sx={{ maxHeight: "85vh", backgroundColor: 'white' }} ref={tableRef}>
         <Table stickyHeader>
           <TableHead>
             <TableRow>
