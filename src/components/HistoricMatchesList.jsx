@@ -2,7 +2,6 @@ import {
   ExpandLess,
   ExpandMore,
   SportsSoccer,
-  CrisisAlert,
 } from "@mui/icons-material";
 import {
   Box,
@@ -12,6 +11,7 @@ import {
   ListItemText,
 } from "@mui/material";
 import React, { useState } from "react";
+import AssistIcon from "/assets/shoe.png";
 
 const HistoricMatchesList = ({ matches = [] }) => {
   const [openItems, setOpenItems] = useState({});
@@ -52,7 +52,9 @@ const HistoricMatchesList = ({ matches = [] }) => {
               }
               secondary={match.date.toDate().toISOString().split("T")[0]}
             />
-            <Box sx={{marginLeft: 2}}>{openItems[index] ? <ExpandLess /> : <ExpandMore />}</Box>
+            <Box sx={{ marginLeft: 2 }}>
+              {openItems[index] ? <ExpandLess /> : <ExpandMore />}
+            </Box>
           </ListItemButton>
           <Collapse in={openItems[index]} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
@@ -89,8 +91,9 @@ const HistoricMatchesList = ({ matches = [] }) => {
                           )}
                           {Array.from({ length: player1.assists }).map(
                             (_, index) => (
-                              <CrisisAlert
+                              <img
                                 key={index}
+                                src={AssistIcon}
                                 style={{ marginLeft: 4 }}
                               />
                             )
@@ -118,8 +121,9 @@ const HistoricMatchesList = ({ matches = [] }) => {
                           )}
                           {Array.from({ length: player2.assists }).map(
                             (_, index) => (
-                              <CrisisAlert
+                              <img
                                 key={index}
+                                src={AssistIcon}
                                 style={{ marginLeft: 4 }}
                               />
                             )

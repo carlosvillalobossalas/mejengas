@@ -1,9 +1,10 @@
 import { TabContext } from "@mui/lab";
 import { Box, Grid2, Tab, Tabs } from "@mui/material";
-import { SportsSoccer, CrisisAlert, Stadium } from "@mui/icons-material";
+import { SportsSoccer, Stadium } from "@mui/icons-material";
 import React, { useState } from "react";
 import CustomTableComponent from "../components/CustomTableComponent";
 import HistoricMatchesList from "../components/HistoricMatchesList";
+import AssistIcon from "/assets/shoe.png";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -83,7 +84,7 @@ const TablesPage = ({ players, goalkeepers, matches }) => {
                     label: "Asistencias",
                     numeric: true,
                     disablePadding: false,
-                    icon: <CrisisAlert />,
+                    icon: <img src={AssistIcon} />,
                   },
                   {
                     id: "matches",
