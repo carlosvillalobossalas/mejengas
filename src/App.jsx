@@ -3,7 +3,7 @@ import { Route, Routes, useNavigate } from "react-router";
 import NewMatch from "./pages/NewMatch";
 import TablesPage from "./pages/TablesPage";
 import AddNewPlayerButton from "./components/AddNewPlayerButton";
-import { Button, Grid2 } from "@mui/material";
+import { Button, Grid2, Typography } from "@mui/material";
 import { ToastContainer } from "react-toastify";
 import { getAllGKs, getAllMatches, getAllPlayers } from "./firebase/endpoints";
 
@@ -34,7 +34,7 @@ const App = () => {
 
   return (
     <>
-      <Grid2
+      {/* <Grid2
         container
         alignItems="center"
         justifyContent="space-around"
@@ -54,7 +54,7 @@ const App = () => {
         >
           Tablas
         </Button>
-      </Grid2>
+      </Grid2> */}
       <Routes>
         <Route
           path=""

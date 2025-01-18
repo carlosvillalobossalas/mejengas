@@ -1,4 +1,9 @@
-import { ExpandLess, ExpandMore, SportsSoccer, CrisisAlert } from "@mui/icons-material";
+import {
+  ExpandLess,
+  ExpandMore,
+  SportsSoccer,
+  CrisisAlert,
+} from "@mui/icons-material";
 import {
   Box,
   Collapse,
@@ -25,7 +30,9 @@ const HistoricMatchesList = ({ matches = [] }) => {
         <div key={index}>
           <ListItemButton
             onClick={() => handleClick(index)}
-            sx={{ bgcolor: index % 2 === 0 ? "grey.100" : "grey.50" }}
+            sx={{
+              bgcolor: index % 2 === 0 ? "grey.100" : "grey.50",
+            }}
           >
             <ListItemText
               primary={
@@ -45,7 +52,7 @@ const HistoricMatchesList = ({ matches = [] }) => {
               }
               secondary={match.date.toDate().toISOString().split("T")[0]}
             />
-            {openItems[index] ? <ExpandLess /> : <ExpandMore />}
+            <Box sx={{marginLeft: 2}}>{openItems[index] ? <ExpandLess /> : <ExpandMore />}</Box>
           </ListItemButton>
           <Collapse in={openItems[index]} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
@@ -80,7 +87,7 @@ const HistoricMatchesList = ({ matches = [] }) => {
                               />
                             )
                           )}
-                           {Array.from({ length: player1.assists }).map(
+                          {Array.from({ length: player1.assists }).map(
                             (_, index) => (
                               <CrisisAlert
                                 key={index}
@@ -109,7 +116,7 @@ const HistoricMatchesList = ({ matches = [] }) => {
                               />
                             )
                           )}
-                           {Array.from({ length: player2.assists }).map(
+                          {Array.from({ length: player2.assists }).map(
                             (_, index) => (
                               <CrisisAlert
                                 key={index}

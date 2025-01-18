@@ -1,5 +1,6 @@
 import { TabContext } from "@mui/lab";
 import { Box, Grid2, Tab, Tabs } from "@mui/material";
+import { SportsSoccer, CrisisAlert, Stadium } from "@mui/icons-material";
 import React, { useState } from "react";
 import CustomTableComponent from "../components/CustomTableComponent";
 import HistoricMatchesList from "../components/HistoricMatchesList";
@@ -28,15 +29,15 @@ const TablesPage = ({ players, goalkeepers, matches }) => {
   };
 
   return (
-    <Grid2 container flexGrow={1} sx={{ padding: 1 }}>
+    <Grid2 container flexGrow={1}>
       <Box
         sx={{
           width: "100%",
           typography: "body1",
-          marginTop: 1,
+          paddingTop: 1,
         }}
       >
-        <TabContext value={tabIndex}>
+        <TabContext value={tabIndex} col>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
             <Tabs
               variant="scrollable"
@@ -44,18 +45,19 @@ const TablesPage = ({ players, goalkeepers, matches }) => {
               aria-label="lab API tabs example"
               value={tabIndex}
             >
-              <Tab label="Goles" />
-              <Tab label="Asistencias" />
-              <Tab label="Partidos" />
-              <Tab label="Imbatidos" />
               <Tab label="Historico" />
+              <Tab label="Stats" />
+              <Tab label="Imbatidos" />
+              <Tab label="Partidos" />
             </Tabs>
           </Box>
-          <Box sx={{ padding: 0, paddingRight: 1, marginTop: 1 }}>
-            {tabIndex === 0 && (
+          <Box sx={{ padding: 0 }}>
+            {tabIndex === 0 && <HistoricMatchesList matches={matches} />}
+
+            {tabIndex === 1 && (
               <CustomTableComponent
                 players={players}
-                title="Goleadores"
+                title="Jugadores"
                 getComparator={getComparator}
                 initialOrderBy={"goals"}
                 headCells={[
@@ -65,6 +67,7 @@ const TablesPage = ({ players, goalkeepers, matches }) => {
                     label: "Nombre",
                     numeric: false,
                     disablePadding: true,
+                    icon: null,
                   },
                   {
                     id: "goals",
@@ -72,30 +75,7 @@ const TablesPage = ({ players, goalkeepers, matches }) => {
                     label: "Goles",
                     numeric: true,
                     disablePadding: false,
-                  },
-                  {
-                    id: "matches",
-                    align: "center",
-                    label: "Partidos",
-                    numeric: true,
-                    disablePadding: false,
-                  },
-                ]}
-              />
-            )}
-            {tabIndex === 1 && (
-              <CustomTableComponent
-                players={players}
-                title="Asistidores"
-                getComparator={getComparator}
-                initialOrderBy={"assists"}
-                headCells={[
-                  {
-                    id: "name",
-                    align: "left",
-                    label: "Nombre",
-                    numeric: false,
-                    disablePadding: true,
+                    icon: <SportsSoccer />,
                   },
                   {
                     id: "assists",
@@ -103,6 +83,7 @@ const TablesPage = ({ players, goalkeepers, matches }) => {
                     label: "Asistencias",
                     numeric: true,
                     disablePadding: false,
+                    icon: <CrisisAlert />,
                   },
                   {
                     id: "matches",
@@ -110,11 +91,63 @@ const TablesPage = ({ players, goalkeepers, matches }) => {
                     label: "Partidos",
                     numeric: true,
                     disablePadding: false,
+                    icon: <Stadium />,
                   },
                 ]}
               />
             )}
+
             {tabIndex === 2 && (
+              <CustomTableComponent
+                title="Porteros"
+                players={goalkeepers}
+                getComparator={getComparator}
+                initialOrderBy={"cleanSheet"}
+                headCells={[
+                  {
+                    id: "name",
+                    align: "left",
+                    label: "Nombre",
+                    numeric: false,
+                    disablePadding: true,
+                    icon: null,
+                  },
+                  {
+                    id: "cleanSheet",
+                    align: "center",
+                    label: "Imbatido",
+                    numeric: true,
+                    disablePadding: false,
+                    icon: null,
+                  },
+                  {
+                    id: "goals",
+                    align: "center",
+                    label: "Recibidos",
+                    numeric: true,
+                    disablePadding: false,
+                    icon: null,
+                  },
+                  {
+                    id: "won",
+                    align: "center",
+                    label: "Ganados",
+                    numeric: true,
+                    disablePadding: false,
+                    icon: null,
+                  },
+                  {
+                    id: "matches",
+                    align: "center",
+                    label: "Total",
+                    numeric: true,
+                    disablePadding: false,
+                    icon: null,
+                  },
+                ]}
+              />
+            )}
+            {tabIndex === 3 && (
               <CustomTableComponent
                 players={players.map((p) => ({
                   ...p,
@@ -130,6 +163,7 @@ const TablesPage = ({ players, goalkeepers, matches }) => {
                     label: "Nombre",
                     numeric: false,
                     disablePadding: true,
+                    icon: null,
                   },
                   {
                     id: "won",
@@ -137,6 +171,7 @@ const TablesPage = ({ players, goalkeepers, matches }) => {
                     label: "Ganados",
                     numeric: true,
                     disablePadding: false,
+                    icon: null,
                   },
                   {
                     id: "lost",
@@ -144,6 +179,7 @@ const TablesPage = ({ players, goalkeepers, matches }) => {
                     label: "Perdidos",
                     numeric: true,
                     disablePadding: false,
+                    icon: null,
                   },
                   {
                     id: "matches",
@@ -151,56 +187,11 @@ const TablesPage = ({ players, goalkeepers, matches }) => {
                     label: "Total",
                     numeric: true,
                     disablePadding: false,
+                    icon: null,
                   },
                 ]}
               />
             )}
-            {tabIndex === 3 && (
-              <CustomTableComponent
-                title="Porteros"
-                players={goalkeepers}
-                getComparator={getComparator}
-                initialOrderBy={"cleanSheet"}
-                headCells={[
-                  {
-                    id: "name",
-                    align: "left",
-                    label: "Nombre",
-                    numeric: false,
-                    disablePadding: true,
-                  },
-                  {
-                    id: "cleanSheet",
-                    align: "center",
-                    label: "Imbatido",
-                    numeric: true,
-                    disablePadding: false,
-                  },
-                  {
-                    id: "goals",
-                    align: "center",
-                    label: "Recibidos",
-                    numeric: true,
-                    disablePadding: false,
-                  },
-                  {
-                    id: "won",
-                    align: "center",
-                    label: "Ganados",
-                    numeric: true,
-                    disablePadding: false,
-                  },
-                  {
-                    id: "matches",
-                    align: "center",
-                    label: "Total",
-                    numeric: true,
-                    disablePadding: false,
-                  },
-                ]}
-              />
-            )}
-            {tabIndex === 4 && <HistoricMatchesList matches={matches} />}
           </Box>
         </TabContext>
       </Box>
