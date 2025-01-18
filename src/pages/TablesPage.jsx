@@ -55,6 +55,7 @@ const TablesPage = ({ players, goalkeepers, matches }) => {
             {tabIndex === 0 && (
               <CustomTableComponent
                 players={players}
+                title="Goleadores"
                 getComparator={getComparator}
                 initialOrderBy={"goals"}
                 headCells={[
@@ -85,6 +86,7 @@ const TablesPage = ({ players, goalkeepers, matches }) => {
             {tabIndex === 1 && (
               <CustomTableComponent
                 players={players}
+                title="Asistidores"
                 getComparator={getComparator}
                 initialOrderBy={"assists"}
                 headCells={[
@@ -118,6 +120,7 @@ const TablesPage = ({ players, goalkeepers, matches }) => {
                   ...p,
                   lost: p.matches - p.won,
                 }))}
+                title="Ganados"
                 getComparator={getComparator}
                 initialOrderBy={"won"}
                 headCells={[
@@ -154,6 +157,7 @@ const TablesPage = ({ players, goalkeepers, matches }) => {
             )}
             {tabIndex === 3 && (
               <CustomTableComponent
+                title="Porteros"
                 players={goalkeepers}
                 getComparator={getComparator}
                 initialOrderBy={"cleanSheet"}

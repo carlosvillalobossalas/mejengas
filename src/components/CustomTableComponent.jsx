@@ -1,7 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 
 import {
   Box,
+  Fab,
   Paper,
   Table,
   TableBody,
@@ -11,14 +12,18 @@ import {
   TableRow,
   TableSortLabel,
 } from "@mui/material";
+import DownloadIcon from "@mui/icons-material/Download";
 import { visuallyHidden } from "@mui/utils";
+import { toPng } from "html-to-image";
 
 const CustomTableComponent = ({
   getComparator,
   players,
   headCells,
   initialOrderBy,
+  title = "mejengas",
 }) => {
+  const tableRef = useRef(null);
   const [order, setOrder] = useState("desc");
   const [orderBy, setOrderBy] = useState(initialOrderBy);
 
@@ -37,9 +42,23 @@ const CustomTableComponent = ({
     handleRequestSort(event, property);
   };
 
+  const handleExport = async () => {
+    if (tableRef.current) {
+      try {
+        const dataUrl = await toPng(tableRef.current);
+        const link = document.createElement("a");
+        link.href = dataUrl;
+        link.download = title + ".png";
+        link.click();
+      } catch (error) {
+        console.error("Error al exportar la tabla como imagen:", error);
+      }
+    }
+  };
+
   return (
     <Paper sx={{ width: "100%", overflow: "hidden" }}>
-      <TableContainer sx={{ maxHeight: "85vh" }}>
+      <TableContainer sx={{ maxHeight: "85vh" }} ref={tableRef}>
         <Table stickyHeader>
           <TableHead>
             <TableRow>
@@ -82,6 +101,14 @@ const CustomTableComponent = ({
           </TableBody>
         </Table>
       </TableContainer>
+      <Fab
+        color="primary"
+        aria-label="add"
+        sx={{ position: "absolute", bottom: 15, right: 15 }}
+        onClick={handleExport}
+      >
+        <DownloadIcon />
+      </Fab>
     </Paper>
   );
 };
