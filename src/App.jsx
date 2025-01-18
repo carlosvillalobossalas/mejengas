@@ -1,15 +1,23 @@
-import React from "react";
-import { Route, Routes, useNavigate, useParams } from "react-router";
+import React, { useEffect, useState } from "react";
+import { Route, Routes, useNavigate } from "react-router";
 import NewMatch from "./pages/NewMatch";
-import ScorersPage from "./pages/ScorersPage";
-import AssistantsPage from "./pages/AssistantsPage";
+import TablesPage from "./pages/TablesPage";
 import AddNewPlayerButton from "./components/AddNewPlayerButton";
 import { Button, Grid2 } from "@mui/material";
+import { ToastContainer } from "react-toastify";
+import { getAllPlayers } from "./firebase/endpoints";
 
 const App = () => {
   const navigate = useNavigate();
+  const [players, setPlayers] = useState([]);
+
   const { pathname } = window.location;
-  console.log(window.location.pathname);
+
+  useEffect(() => {
+    const unsubscribe = getAllPlayers(setPlayers);
+
+    return () => unsubscribe;
+  }, []);
 
   return (
     <>
@@ -23,6 +31,7 @@ const App = () => {
         <Button
           variant={pathname === "/admin/false" ? "contained" : "outlined"}
           onClick={() => navigate("/admin/false")}
+          disabled={pathname !== "/admin"}
         >
           Partido
         </Button>
@@ -30,24 +39,18 @@ const App = () => {
           variant={pathname === "/" ? "contained" : "outlined"}
           onClick={() => navigate("/")}
         >
-          Goleadores
-        </Button>
-        <Button
-          variant={pathname === "/assistants" ? "contained" : "outlined"}
-          onClick={() => navigate("/assistants")}
-        >
-          Asistencias
+          Tablas
         </Button>
       </Grid2>
       <Routes>
-        <Route path="" element={<ScorersPage />} />
-        <Route path="assistants" element={<AssistantsPage />} />
+        <Route path="" element={<TablesPage players={players} />} />
         <Route path="admin/:admin">
-          <Route path="" element={<NewMatch />}>
-            <Route path=":admin/newplayer" element={<AddNewPlayerButton />} />
+          <Route path="" element={<NewMatch players={players} />}>
+            <Route path="" element={<AddNewPlayerButton />} />
           </Route>
         </Route>
       </Routes>
+      <ToastContainer position="top-right" />
     </>
   );
 };

@@ -10,6 +10,7 @@ import React, { useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { addNewPlayer } from "../firebase/endpoints";
 import { useParams } from "react-router";
+import { toast } from "react-toastify";
 
 const style = {
   position: "absolute",
@@ -25,18 +26,21 @@ const style = {
 const AddNewPlayerButton = () => {
   const [openModal, setOpenModal] = useState(false);
   const [newPlayerForm, setNewPlayerForm] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   const { admin } = useParams();
-  console.log("🚀 ~ AddNewPlayerButton ~ admin:", admin);
-
   const saveNewPlayer = async () => {
     if (newPlayerForm.length > 0) {
-      //TODO: agregar toast
+      setIsSaving(true);
       const response = await addNewPlayer(newPlayerForm);
       if (response) {
+        toast.success("Jugador agregado");
         setNewPlayerForm("");
         setOpenModal(false);
+      } else {
+        toast.error("Error");
       }
+      setIsSaving(false);
     }
   };
 
@@ -60,7 +64,11 @@ const AddNewPlayerButton = () => {
             value={newPlayerForm}
             onChange={({ target }) => setNewPlayerForm(target.value)}
           />
-          <Button variant="contained" onClick={saveNewPlayer}>
+          <Button
+            variant="contained"
+            onClick={saveNewPlayer}
+            disabled={isSaving}
+          >
             Guardar
           </Button>
         </Grid2>
