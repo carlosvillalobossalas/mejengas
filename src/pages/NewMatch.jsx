@@ -134,7 +134,7 @@ const NewMatch = ({ players = [] }) => {
                 >
                   <Typography sx={{ paddingLeft: 1 }}>P?</Typography>
 
-                  {[0, 1, 2, 3, 4, 5, 6].map((value) => {
+                  {[0, 1, 2, 3, 4, 5, 6].map((value, index) => {
                     return (
                       <Grid2
                         key={value}
@@ -179,6 +179,7 @@ const NewMatch = ({ players = [] }) => {
                             value={newMatchForm?.players1[value]?.id ?? ""}
                             label={`Jugador #${value + 1}`}
                             sx={{ width: "100%", maxWidth: 150 }}
+                            disabled={newMatchForm.players1.length < index}
                             onChange={({ target }) =>
                               setNewMatchForm((prev) => {
                                 const updatedPlayers = [...prev.players1];
@@ -269,7 +270,7 @@ const NewMatch = ({ players = [] }) => {
                   spacing={2}
                 >
                   <Typography sx={{ paddingLeft: 1 }}>P?</Typography>
-                  {[0, 1, 2, 3, 4, 5, 6].map((value) => {
+                  {[0, 1, 2, 3, 4, 5, 6].map((value, index) => {
                     return (
                       <Grid2
                         key={value}
@@ -312,6 +313,7 @@ const NewMatch = ({ players = [] }) => {
                             value={newMatchForm?.players2[value]?.id ?? ""}
                             label={`Jugador #${value + 1}`}
                             labelId={`player${value}`}
+                            disabled={newMatchForm.players2.length < index}
                             sx={{ width: "100%", maxWidth: 150 }}
                             onChange={({ target }) =>
                               setNewMatchForm((prev) => {
