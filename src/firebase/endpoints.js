@@ -5,6 +5,8 @@ import {
   getDoc,
   getDocs,
   onSnapshot,
+  orderBy,
+  query,
   setDoc,
   updateDoc,
 } from "firebase/firestore";
@@ -19,6 +21,7 @@ export const addNewPlayer = async (name) => {
       assists: 0,
       won: 0,
       matches: 0,
+      draw: 0,
     });
     return true;
   } catch (error) {
@@ -70,15 +73,17 @@ export const getAllMatches = async (callback) => {
   try {
     const matchCollectionRef = collection(db, "Matches");
 
+    // Crea una consulta que ordena los documentos por fecha en orden descendente
+    const matchesQuery = query(matchCollectionRef, orderBy("date", "desc"));
+
     // Configura el listener y ejecuta el callback con los datos actualizados
-    const unsubscribe = onSnapshot(matchCollectionRef, (snapshot) => {
+    const unsubscribe = onSnapshot(matchesQuery, (snapshot) => {
       const matches = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
       callback(matches); // Llama al callback con la lista actualizada de jugadores
     });
-
     // Devuelve la función para cancelar la suscripción
     return unsubscribe;
   } catch (error) {
@@ -128,6 +133,9 @@ export const saveNewMatch = async (data, players) => {
         goals: gk1Data.goals + match.goalsTeam2,
         won:
           (gk1Data?.won ?? 0) + (match.goalsTeam1 > match.goalsTeam2 ? 1 : 0),
+        draw:
+          (gk1Data?.draw ?? 0) +
+          (match.goalsTeam1 === match.goalsTeam2 ? 1 : 0),
       },
       { merge: true }
     );
@@ -153,6 +161,9 @@ export const saveNewMatch = async (data, players) => {
         goals: gk2Data.goals + match.goalsTeam1,
         won:
           (gk2Data?.won ?? 0) + (match.goalsTeam2 > match.goalsTeam1 ? 1 : 0),
+        draw:
+          (gk1Data?.draw ?? 0) +
+          (match.goalsTeam1 === match.goalsTeam2 ? 1 : 0),
       },
       { merge: true }
     );
@@ -165,6 +176,9 @@ export const saveNewMatch = async (data, players) => {
         ...player,
         won:
           oldPlayerRecord.won + (match.goalsTeam1 > match.goalsTeam2 ? 1 : 0),
+        draw:
+          oldPlayerRecord.draw +
+          (match.goalsTeam1 === match.goalsTeam2 ? 1 : 0),
         goals: player.goals + oldPlayerRecord.goals,
         assists: player.assists + oldPlayerRecord.assists,
         matches: (oldPlayerRecord.matches ?? 0) + 1,
@@ -183,6 +197,9 @@ export const saveNewMatch = async (data, players) => {
         goals: player.goals + oldPlayerRecord.goals,
         assists: player.assists + oldPlayerRecord.assists,
         matches: (oldPlayerRecord.matches ?? 0) + 1,
+        draw:
+          oldPlayerRecord.draw +
+          (match.goalsTeam1 === match.goalsTeam2 ? 1 : 0),
       });
     });
 

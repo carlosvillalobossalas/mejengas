@@ -433,7 +433,7 @@ const NewMatch = ({ players = [] }) => {
           </Grid2>
           <Grid2
             marginTop={2}
-            marginBottom={5}
+            marginBottom={10}
             direction="row"
             alignItems="center"
             flexGrow={1}

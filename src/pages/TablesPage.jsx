@@ -152,7 +152,7 @@ const TablesPage = ({ players, goalkeepers, matches }) => {
               <CustomTableComponent
                 players={players.map((p) => ({
                   ...p,
-                  lost: p.matches - p.won,
+                  lost: p.matches - (p.won + p.draw),
                 }))}
                 title="Ganados"
                 getComparator={getComparator}

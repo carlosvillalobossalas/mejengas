@@ -50,7 +50,7 @@ const AddNewPlayerButton = () => {
       <Fab
         color="primary"
         aria-label="add"
-        sx={{ position: "absolute", bottom: 15, right: 15 }}
+        sx={{ position: "fixed", bottom: 15, right: 15 }}
         onClick={() => setOpenModal(true)}
       >
         <AddIcon />
