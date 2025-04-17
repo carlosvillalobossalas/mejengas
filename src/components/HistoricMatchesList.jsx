@@ -1,8 +1,4 @@
-import {
-  ExpandLess,
-  ExpandMore,
-  SportsSoccer,
-} from "@mui/icons-material";
+import { ExpandLess, ExpandMore, SportsSoccer } from "@mui/icons-material";
 import {
   Box,
   Collapse,
@@ -81,22 +77,26 @@ const HistoricMatchesList = ({ matches = [] }) => {
                           <span style={{ marginLeft: 8 }}>
                             {(player1.isGK ? "GK " : "") + player1.name}
                           </span>
-                          {Array.from({ length: player1.goals }).map(
-                            (_, index) => (
-                              <SportsSoccer
-                                key={index}
-                                style={{ marginLeft: 4 }}
-                              />
-                            )
-                          )}
-                          {Array.from({ length: player1.assists }).map(
-                            (_, index) => (
-                              <img
-                                key={index}
-                                src={AssistIcon}
-                                style={{ marginLeft: 4 }}
-                              />
-                            )
+                          {player1.isGK ? (
+                            <></>
+                          ) : (
+                            <>
+                              {player1.goals > 0 ? (
+                                <>
+                                  <SportsSoccer style={{ marginLeft: 4 }} />x
+                                  {player1.goals}
+                                </>
+                              ) : null}
+                              {player1.assists > 0 ? (
+                                <>
+                                  <img
+                                    src={AssistIcon}
+                                    style={{ marginLeft: 4 }}
+                                  />
+                                  x{player1.assists}
+                                </>
+                              ) : null}
+                            </>
                           )}
                         </span>
                       }
@@ -111,23 +111,18 @@ const HistoricMatchesList = ({ matches = [] }) => {
                             justifyContent: "flex-end",
                           }}
                         >
-                          {Array.from({ length: player2.goals }).map(
-                            (_, index) => (
-                              <SportsSoccer
-                                key={index}
-                                style={{ marginLeft: 4 }}
-                              />
-                            )
-                          )}
-                          {Array.from({ length: player2.assists }).map(
-                            (_, index) => (
-                              <img
-                                key={index}
-                                src={AssistIcon}
-                                style={{ marginLeft: 4 }}
-                              />
-                            )
-                          )}
+                          {player2.goals > 0 ? (
+                            <>
+                              <SportsSoccer style={{ marginLeft: 4 }} />x
+                              {player2.goals}
+                            </>
+                          ) : null}
+                          {player2.assists > 0 ? (
+                            <>
+                              <img src={AssistIcon} style={{ marginLeft: 4 }} />
+                              x{player2.assists}
+                            </>
+                          ) : null}
                           <span style={{ marginLeft: 8 }}>
                             {(player2.isGK ? "GK " : "") + player2.name}
                           </span>
