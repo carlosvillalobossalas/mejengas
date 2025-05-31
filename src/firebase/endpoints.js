@@ -39,7 +39,7 @@ export const getAllPlayers = async (callback) => {
         id: doc.id,
         ...doc.data(),
       }));
-      callback(players); // Llama al callback con la lista actualizada de jugadores
+      callback(players.sort((a, b) => a.name.localeCompare(b.name))); // Llama al callback con la lista actualizada de jugadores
     });
 
     // Devuelve la función para cancelar la suscripción
