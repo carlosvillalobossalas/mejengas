@@ -90,7 +90,6 @@ const App = () => {
               break;
           }
         }}
-        sx={{ width: "100%", position: "absolute", bottom: 0 }}
       >
         <BottomNavigationAction label="Partidos" icon={<ScoreboardIcon />} />
         <BottomNavigationAction
