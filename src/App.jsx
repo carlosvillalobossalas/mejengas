@@ -1,18 +1,23 @@
-import React, { useEffect, useState } from "react";
-import { Route, Routes, useNavigate } from "react-router";
-import NewMatch from "./pages/NewMatch";
-import TablesPage from "./pages/TablesPage";
-import AddNewPlayerButton from "./components/AddNewPlayerButton";
-import { Button, Grid2, Typography } from "@mui/material";
-import { ToastContainer } from "react-toastify";
+import { BottomNavigation, BottomNavigationAction, Box } from "@mui/material";
 import { getAllGKs, getAllMatches, getAllPlayers } from "./firebase/endpoints";
+import { GoalkeepersTablePage } from "./pages/GoalkeepersTablePage";
+import { PlayersTablePage } from "./pages/PlayersTablePage";
+import { Route, Routes, useNavigate } from "react-router";
+import { ToastContainer } from "react-toastify";
+import { useEffect, useState } from "react";
+import AddNewPlayerButton from "./components/AddNewPlayerButton";
+import HistoricMatchesList from "./components/HistoricMatchesList";
+import NewMatch from "./pages/NewMatch";
+import ScoreboardIcon from "@mui/icons-material/Scoreboard";
+import SportsHandballIcon from "@mui/icons-material/SportsHandball";
+import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 
 const App = () => {
   const navigate = useNavigate();
   const [players, setPlayers] = useState([]);
   const [goalkeepers, setGoalkeepers] = useState([]);
   const [matches, setMatches] = useState([]);
-  const { pathname } = window.location;
+  const [currentTabValue, setCurrentTabValue] = useState(0);
 
   useEffect(() => {
     const unsubscribe = getAllPlayers(setPlayers);
@@ -34,37 +39,15 @@ const App = () => {
 
   return (
     <>
-      {/* <Grid2
-        container
-        alignItems="center"
-        justifyContent="space-around"
-        flexGrow={1}
-        marginTop={2}
-      >
-        <Button
-          variant={pathname === "/admin/false" ? "contained" : "outlined"}
-          onClick={() => navigate("/admin/false")}
-          disabled={pathname !== "/admin"}
-        >
-          Partido
-        </Button>
-        <Button
-          variant={pathname === "/" ? "contained" : "outlined"}
-          onClick={() => navigate("/")}
-        >
-          Tablas
-        </Button>
-      </Grid2> */}
       <Routes>
+        <Route path="" element={<HistoricMatchesList matches={matches} />} />
         <Route
-          path=""
-          element={
-            <TablesPage
-              players={players}
-              goalkeepers={goalkeepers}
-              matches={matches}
-            />
-          }
+          path="/jugadores"
+          element={<PlayersTablePage players={players} />}
+        />
+        <Route
+          path="/porteros"
+          element={<GoalkeepersTablePage goalkeepers={goalkeepers} />}
         />
         <Route path="admin/:admin">
           <Route path="" element={<NewMatch players={players} />}>
@@ -72,6 +55,40 @@ const App = () => {
           </Route>
         </Route>
       </Routes>
+      <Box sx={{ width: "100%", position: "absolute", bottom: 0 }}>
+        <BottomNavigation
+          showLabels
+          value={currentTabValue}
+          onChange={(event, newValue) => {
+            setCurrentTabValue(newValue);
+            switch (newValue) {
+              case 0:
+                navigate("/");
+                break;
+              case 1:
+                navigate("/jugadores");
+                break;
+              case 2:
+                navigate("/porteros");
+                break;
+              default:
+                navigate("/");
+                break;
+            }
+          }}
+          sx={{ paddingBottom: 1 }}
+        >
+          <BottomNavigationAction label="Partidos" icon={<ScoreboardIcon />} />
+          <BottomNavigationAction
+            label="Goles/Asistencias"
+            icon={<SportsSoccerIcon />}
+          />
+          <BottomNavigationAction
+            label="Porteros"
+            icon={<SportsHandballIcon />}
+          />
+        </BottomNavigation>
+      </Box>
       <ToastContainer position="top-right" />
     </>
   );
