@@ -18,7 +18,7 @@ export const PlayersTablePage = ({ players }) => {
         }}
       >
         <Typography variant="h6" textAlign={"center"} fontWeight={"bold"}>
-          Goles/Asistencias
+          Jugadores
         </Typography>
       </Box>
       <Box sx={{ flex: 1, overflowY: "auto", width: "100%" }}>

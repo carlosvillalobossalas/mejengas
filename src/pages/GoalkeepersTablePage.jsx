@@ -27,7 +27,7 @@ export const GoalkeepersTablePage = ({ goalkeepers }) => {
             {
               id: "name",
               align: "left",
-              label: "Nombre",
+              label: "Portero",
               numeric: false,
               disablePadding: true,
               icon: null,

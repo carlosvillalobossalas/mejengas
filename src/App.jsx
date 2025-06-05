@@ -93,7 +93,7 @@ const App = () => {
       >
         <BottomNavigationAction label="Partidos" icon={<ScoreboardIcon />} />
         <BottomNavigationAction
-          label="Goles/Asistencias"
+          label="Jugadores"
           icon={<SportsSoccerIcon />}
         />
         <BottomNavigationAction
