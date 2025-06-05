@@ -1,4 +1,9 @@
-import { BottomNavigation, BottomNavigationAction, Box } from "@mui/material";
+import {
+  BottomNavigation,
+  BottomNavigationAction,
+  Box,
+  Grid2,
+} from "@mui/material";
 import { getAllGKs, getAllMatches, getAllPlayers } from "./firebase/endpoints";
 import { GoalkeepersTablePage } from "./pages/GoalkeepersTablePage";
 import { PlayersTablePage } from "./pages/PlayersTablePage";
@@ -38,7 +43,15 @@ const App = () => {
   }, []);
 
   return (
-    <Box sx={{ height: "100vh", overflow: "hidden", position: "relative" }}>
+    <Grid2
+      container
+      sx={{
+        height: "100vh",
+        overflow: "hidden",
+        flexDirection: "column",
+        justifyContent: "space-between",
+      }}
+    >
       <Box sx={{ height: "calc(100vh - 56px)", overflow: "hidden" }}>
         <Routes>
           <Route path="" element={<HistoricMatchesList matches={matches} />} />
@@ -90,7 +103,7 @@ const App = () => {
         />
       </BottomNavigation>
       <ToastContainer position="top-right" />
-    </Box>
+    </Grid2>
   );
 };
 
