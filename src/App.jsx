@@ -43,14 +43,13 @@ const App = () => {
   }, []);
 
   return (
-    <Grid2
-      container
+    <Box
+      // container
       sx={{
         height: "100dvh",
-        // flex: 1,
-        overflow: "hidden",
+        display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between",
+        overflow: "hidden",
       }}
     >
       <Box sx={{ height: "calc(100vh - 56px)", overflow: "hidden" }}>
@@ -103,7 +102,7 @@ const App = () => {
         />
       </BottomNavigation>
       <ToastContainer position="top-right" />
-    </Grid2>
+    </Box>
   );
 };
 
