@@ -46,8 +46,8 @@ const App = () => {
     <Grid2
       container
       sx={{
-        // height: "100vh",
-        flex: 1,
+        height: "100dvh",
+        // flex: 1,
         overflow: "hidden",
         flexDirection: "column",
         justifyContent: "space-between",
