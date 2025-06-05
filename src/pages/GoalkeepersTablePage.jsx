@@ -11,20 +11,14 @@ export const GoalkeepersTablePage = ({ goalkeepers }) => {
       <Box
         sx={{
           paddingY: 1,
+          width: "100%",
         }}
       >
         <Typography variant="h6" textAlign={"center"} fontWeight={"bold"}>
           Porteros
         </Typography>
       </Box>
-      <Box
-        sx={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-        }}
-      >
+      <Box sx={{ flex: 1, overflowY: "auto", width: "100%" }}>
         <CustomTableComponent
           title="Porteros"
           players={goalkeepers}
