@@ -6,11 +6,10 @@ import CustomTableComponent from "../components/CustomTableComponent";
 //TODO: agregar mas stats: ganados, perdidos, empatados
 export const PlayersTablePage = ({ players }) => {
   return (
-    <Grid2
+   <Grid2
       container
-      flexDirection={"column"}
-      height={"100vh"}
-      overflow={"hidden"}
+      flexDirection="column"
+      sx={{ height: "100%", overflow: "hidden" }}
     >
       <Box
         sx={{
@@ -21,7 +20,7 @@ export const PlayersTablePage = ({ players }) => {
           Goles/Asistencias
         </Typography>
       </Box>
-      <Box sx={{ flex: 1, overflow: "scroll", width: "100%" }}>
+    <Box sx={{ flex: 1, overflowY: "auto" }}>
         <CustomTableComponent
           players={players}
           title="Jugadores"

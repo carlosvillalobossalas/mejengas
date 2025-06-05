@@ -23,9 +23,8 @@ const HistoricMatchesList = ({ matches = [] }) => {
   return (
     <Grid2
       container
-      flexDirection={"column"}
-      height={"100vh"}
-      overflow={"hidden"}
+      flexDirection="column"
+      sx={{ height: "100%", overflow: "hidden" }}
     >
       <Box
         sx={{
@@ -43,7 +42,6 @@ const HistoricMatchesList = ({ matches = [] }) => {
             bgcolor: "background.paper",
             padding: 0,
             margin: 0,
-            overflow: "scroll",
           }}
         >
           {matches.map((match, index) => (

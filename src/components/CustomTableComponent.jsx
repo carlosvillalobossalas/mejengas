@@ -14,11 +14,7 @@ import {
 import { visuallyHidden } from "@mui/utils";
 import { getComparator } from "../utils";
 
-const CustomTableComponent = ({
-  players,
-  headCells,
-  initialOrderBy,
-}) => {
+const CustomTableComponent = ({ players, headCells, initialOrderBy }) => {
   const [order, setOrder] = useState("desc");
   const [orderBy, setOrderBy] = useState(initialOrderBy);
 
@@ -38,11 +34,22 @@ const CustomTableComponent = ({
   };
 
   return (
-    <Paper sx={{ width: "100%", overflow: "scroll" }} elevation={0}>
+    <Paper
+      sx={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden", // evita que el Paper interfiera con scroll interno
+      }}
+      elevation={0}
+    >
       <TableContainer
         sx={{
           backgroundColor: "white",
-          maxHeight: '95vh'
+          overflowX: "auto",
+          overflowY: "auto",
+          flex: 1,
         }}
       >
         <Table stickyHeader>

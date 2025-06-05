@@ -38,59 +38,59 @@ const App = () => {
   }, []);
 
   return (
-    <>
-      <Routes>
-        <Route path="" element={<HistoricMatchesList matches={matches} />} />
-        <Route
-          path="/jugadores"
-          element={<PlayersTablePage players={players} />}
-        />
-        <Route
-          path="/porteros"
-          element={<GoalkeepersTablePage goalkeepers={goalkeepers} />}
-        />
-        <Route path="admin/:admin">
-          <Route path="" element={<NewMatch players={players} />}>
-            <Route path="" element={<AddNewPlayerButton />} />
+    <Box sx={{ height: "100vh", overflow: "hidden", position: "relative" }}>
+      <Box sx={{ height: "calc(100vh - 56px)", overflow: "hidden" }}>
+        <Routes>
+          <Route path="" element={<HistoricMatchesList matches={matches} />} />
+          <Route
+            path="/jugadores"
+            element={<PlayersTablePage players={players} />}
+          />
+          <Route
+            path="/porteros"
+            element={<GoalkeepersTablePage goalkeepers={goalkeepers} />}
+          />
+          <Route path="admin/:admin">
+            <Route path="" element={<NewMatch players={players} />}>
+              <Route path="" element={<AddNewPlayerButton />} />
+            </Route>
           </Route>
-        </Route>
-      </Routes>
-      <Box sx={{ width: "100%", position: "absolute", bottom: 0 }}>
-        <BottomNavigation
-          showLabels
-          value={currentTabValue}
-          onChange={(event, newValue) => {
-            setCurrentTabValue(newValue);
-            switch (newValue) {
-              case 0:
-                navigate("/");
-                break;
-              case 1:
-                navigate("/jugadores");
-                break;
-              case 2:
-                navigate("/porteros");
-                break;
-              default:
-                navigate("/");
-                break;
-            }
-          }}
-          sx={{ paddingBottom: 1 }}
-        >
-          <BottomNavigationAction label="Partidos" icon={<ScoreboardIcon />} />
-          <BottomNavigationAction
-            label="Goles/Asistencias"
-            icon={<SportsSoccerIcon />}
-          />
-          <BottomNavigationAction
-            label="Porteros"
-            icon={<SportsHandballIcon />}
-          />
-        </BottomNavigation>
+        </Routes>
       </Box>
+      <BottomNavigation
+        showLabels
+        value={currentTabValue}
+        onChange={(event, newValue) => {
+          setCurrentTabValue(newValue);
+          switch (newValue) {
+            case 0:
+              navigate("/");
+              break;
+            case 1:
+              navigate("/jugadores");
+              break;
+            case 2:
+              navigate("/porteros");
+              break;
+            default:
+              navigate("/");
+              break;
+          }
+        }}
+        sx={{ width: "100%", position: "absolute", bottom: 0 }}
+      >
+        <BottomNavigationAction label="Partidos" icon={<ScoreboardIcon />} />
+        <BottomNavigationAction
+          label="Goles/Asistencias"
+          icon={<SportsSoccerIcon />}
+        />
+        <BottomNavigationAction
+          label="Porteros"
+          icon={<SportsHandballIcon />}
+        />
+      </BottomNavigation>
       <ToastContainer position="top-right" />
-    </>
+    </Box>
   );
 };
 

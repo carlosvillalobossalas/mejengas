@@ -5,9 +5,8 @@ export const GoalkeepersTablePage = ({ goalkeepers }) => {
   return (
     <Grid2
       container
-      flexDirection={"column"}
-      height={"100vh"}
-      overflow={"hidden"}
+      flexDirection="column"
+      sx={{ height: "100%", overflow: "hidden" }}
     >
       <Box
         sx={{
@@ -18,7 +17,14 @@ export const GoalkeepersTablePage = ({ goalkeepers }) => {
           Porteros
         </Typography>
       </Box>
-      <Box sx={{ flex: 1, overflow: "auto", width: "100%" }}>
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
         <CustomTableComponent
           title="Porteros"
           players={goalkeepers}
