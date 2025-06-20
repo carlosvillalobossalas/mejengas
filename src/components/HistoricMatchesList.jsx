@@ -29,7 +29,7 @@ const HistoricMatchesList = ({ matches = [] }) => {
       <Box
         sx={{
           paddingY: 1,
-          marginRight: 7,
+          marginRight: 4,
         }}
       >
         <Typography variant="h6" textAlign={"center"} fontWeight={"bold"}>
