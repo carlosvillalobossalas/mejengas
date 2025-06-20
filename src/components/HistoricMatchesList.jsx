@@ -29,6 +29,7 @@ const HistoricMatchesList = ({ matches = [] }) => {
       <Box
         sx={{
           paddingY: 1,
+          marginRight: 7,
         }}
       >
         <Typography variant="h6" textAlign={"center"} fontWeight={"bold"}>
@@ -64,7 +65,6 @@ const HistoricMatchesList = ({ matches = [] }) => {
                     >
                       <strong>Equipo 1</strong>
                       <span
-                        style={{ margin: "0 10px" }}
                       >{`${match.goalsTeam1} - ${match.goalsTeam2}`}</span>
                       <strong>Equipo 2</strong>
                     </span>
