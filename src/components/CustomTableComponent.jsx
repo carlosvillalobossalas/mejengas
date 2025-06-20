@@ -81,11 +81,12 @@ const CustomTableComponent = ({ players, headCells, initialOrderBy }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {visibleRows.map((player) => {
+            {visibleRows.map((player, index) => {
               return (
                 <TableRow key={player.id}>
                   {headCells.map((headCell) => (
                     <TableCell key={headCell.id} align={headCell.align}>
+                      {headCell.id === 'name' && `${index + 1}. `}
                       {player[headCell.id]}
                     </TableCell>
                   ))}
