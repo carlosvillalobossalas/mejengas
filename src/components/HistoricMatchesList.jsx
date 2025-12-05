@@ -1,15 +1,19 @@
 import { ExpandLess, ExpandMore, SportsSoccer } from "@mui/icons-material";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import {
   Box,
   Collapse,
   Grid2,
+  IconButton,
   List,
   ListItemButton,
   ListItemText,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { useState } from "react";
 import AssistIcon from "/assets/shoe.png";
+import { formatMatchSummary, shareToWhatsApp } from "../utils/whatsappShare";
 
 const HistoricMatchesList = ({ matches = [] }) => {
   const [openItems, setOpenItems] = useState({});
@@ -19,6 +23,12 @@ const HistoricMatchesList = ({ matches = [] }) => {
       ...prev,
       [index]: !prev[index],
     }));
+  };
+
+  const handleShareWhatsApp = (match, event) => {
+    event.stopPropagation();
+    const message = formatMatchSummary(match);
+    shareToWhatsApp(message);
   };
   return (
     <Grid2
@@ -159,6 +169,38 @@ const HistoricMatchesList = ({ matches = [] }) => {
                       </Box>
                     );
                   })}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      padding: "12px 16px",
+                      bgcolor: "grey.200",
+                      borderTop: "1px solid",
+                      borderColor: "grey.300",
+                    }}
+                  >
+                    <Tooltip title="Compartir en WhatsApp">
+                      <IconButton
+                        onClick={(e) => handleShareWhatsApp(match, e)}
+                        disableRipple
+                        sx={{
+                          color: "#25D366",
+                          borderRadius: 1,
+                          "&:hover": {
+                            backgroundColor: "rgba(37, 211, 102, 0.08)",
+                          },
+                        }}
+                      >
+                        <WhatsAppIcon />
+                        <Typography
+                          variant="body2"
+                          sx={{ marginLeft: 1, fontWeight: 500 }}
+                        >
+                          Compartir resumen
+                        </Typography>
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
                 </List>
               </Collapse>
             </div>
