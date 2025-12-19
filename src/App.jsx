@@ -1,8 +1,5 @@
 import {
-  BottomNavigation,
-  BottomNavigationAction,
   Box,
-  Grid2,
   Drawer,
   IconButton,
   List,
@@ -17,32 +14,26 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import HomeIcon from "@mui/icons-material/Home";
+import HistoryIcon from "@mui/icons-material/History";
 import { getAllGKs, getAllMatches, getAllPlayers } from "./firebase/endpoints";
 import { GoalkeepersTablePage } from "./pages/GoalkeepersTablePage";
 import { PlayersTablePage } from "./pages/PlayersTablePage";
-import { Route, Routes, useNavigate, useLocation } from "react-router";
+import { Route, Routes, useNavigate } from "react-router";
 import { ToastContainer } from "react-toastify";
 import { useEffect, useState } from "react";
 import AddNewPlayerButton from "./components/AddNewPlayerButton";
 import HistoricMatchesList from "./components/HistoricMatchesList";
 import NewMatch from "./pages/NewMatch";
-import ScoreboardIcon from "@mui/icons-material/Scoreboard";
 import SportsHandballIcon from "@mui/icons-material/SportsHandball";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 import SeasonSummaryPage from "./pages/SeasonSummaryPage";
 
 const App = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [players, setPlayers] = useState([]);
   const [goalkeepers, setGoalkeepers] = useState([]);
   const [matches, setMatches] = useState([]);
-  const [currentTabValue, setCurrentTabValue] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
-
-  // Páginas donde se muestra el BottomNavigation
-  const showBottomNav = ['/', '/jugadores', '/porteros'].includes(location.pathname);
 
   const toggleDrawer = (open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -52,7 +43,7 @@ const App = () => {
   };
 
   const menuItems = [
-    { text: 'Inicio', icon: <HomeIcon />, path: '/' },
+    { text: 'Histórico de Partidos', icon: <HistoryIcon />, path: '/' },
     { text: 'Resumen de Temporada', icon: <EmojiEventsIcon />, path: '/resumen-temporada' },
     { text: 'Jugadores', icon: <SportsSoccerIcon />, path: '/jugadores' },
     { text: 'Porteros', icon: <SportsHandballIcon />, path: '/porteros' },
@@ -145,7 +136,7 @@ const App = () => {
         </Box>
       </Drawer>
 
-      <Box sx={{ height: showBottomNav ? "calc(100vh - 56px - 56px)" : "calc(100vh - 56px)", overflow: "hidden" }}>
+      <Box sx={{ height: "calc(100vh - 56px)", overflow: "hidden" }}>
         <Routes>
           <Route path="" element={<HistoricMatchesList matches={matches} />} />
           <Route path="/resumen-temporada" element={<SeasonSummaryPage />} />
@@ -164,39 +155,6 @@ const App = () => {
           </Route>
         </Routes>
       </Box>
-      {showBottomNav && (
-        <BottomNavigation
-          showLabels
-          value={currentTabValue}
-          onChange={(event, newValue) => {
-            setCurrentTabValue(newValue);
-            switch (newValue) {
-              case 0:
-                navigate("/");
-                break;
-              case 1:
-                navigate("/jugadores");
-                break;
-              case 2:
-                navigate("/porteros");
-                break;
-              default:
-                navigate("/");
-                break;
-            }
-          }}
-        >
-          <BottomNavigationAction label="Partidos" icon={<ScoreboardIcon />} />
-          <BottomNavigationAction
-            label="Jugadores"
-            icon={<SportsSoccerIcon />}
-          />
-          <BottomNavigationAction
-            label="Porteros"
-            icon={<SportsHandballIcon />}
-          />
-        </BottomNavigation>
-      )}
       <ToastContainer position="top-right" />
     </Box>
   );
