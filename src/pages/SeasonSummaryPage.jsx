@@ -326,20 +326,25 @@ const SeasonSummaryPage = () => {
             </Grid2>
 
             {/* Top Goleadores Table */}
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h5" fontWeight="bold" mb={2}>
+            <Box sx={{ mb: { xs: 3, md: 4 } }}>
+              <Typography 
+                variant="h5" 
+                fontWeight="bold" 
+                mb={2}
+                sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}
+              >
                 ⚽ Top 10 Goleadores
               </Typography>
-              <TableContainer component={Paper}>
-                <Table>
+              <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+                <Table size={{ xs: 'small', sm: 'medium' }}>
                   <TableHead>
                     <TableRow sx={{ bgcolor: "primary.main" }}>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }}>Pos</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }}>Jugador</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }} align="center">Goles</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }} align="center">Partidos</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }} align="center">Promedio</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }} align="center">Asistencias</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>Pos</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>Jugador</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' } }} align="center">Goles</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' }, display: { xs: 'none', sm: 'table-cell' } }} align="center">Partidos</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' } }} align="center">Prom.</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' }, display: { xs: 'none', sm: 'table-cell' } }} align="center">Asist.</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -351,21 +356,21 @@ const SeasonSummaryPage = () => {
                           "&:hover": { bgcolor: "grey.100" },
                         }}
                       >
-                        <TableCell>
+                        <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                           {index === 0 && "🥇"}
                           {index === 1 && "🥈"}
                           {index === 2 && "🥉"}
                           {index > 2 && index + 1}
                         </TableCell>
-                        <TableCell fontWeight={index < 3 ? "bold" : "normal"}>
+                        <TableCell fontWeight={index < 3 ? "bold" : "normal"} sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                           {player.name}
                         </TableCell>
-                        <TableCell align="center" fontWeight="bold">
+                        <TableCell align="center" fontWeight="bold" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                           {player.goals}
                         </TableCell>
-                        <TableCell align="center">{player.matches}</TableCell>
-                        <TableCell align="center">{player.goalsPerMatch}</TableCell>
-                        <TableCell align="center">{player.assists}</TableCell>
+                        <TableCell align="center" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, display: { xs: 'none', sm: 'table-cell' } }}>{player.matches}</TableCell>
+                        <TableCell align="center" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>{player.goalsPerMatch}</TableCell>
+                        <TableCell align="center" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, display: { xs: 'none', sm: 'table-cell' } }}>{player.assists}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -374,20 +379,25 @@ const SeasonSummaryPage = () => {
             </Box>
 
             {/* Top Asistencias */}
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h5" fontWeight="bold" mb={2}>
+            <Box sx={{ mb: { xs: 3, md: 4 } }}>
+              <Typography 
+                variant="h5" 
+                fontWeight="bold" 
+                mb={2}
+                sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}
+              >
                 👟 Top 10 Asistencias
               </Typography>
-              <TableContainer component={Paper}>
-                <Table>
+              <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+                <Table size={{ xs: 'small', sm: 'medium' }}>
                   <TableHead>
                     <TableRow sx={{ bgcolor: "info.main" }}>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }}>Pos</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }}>Jugador</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }} align="center">Asistencias</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }} align="center">Partidos</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }} align="center">Promedio</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }} align="center">Goles</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>Pos</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>Jugador</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' } }} align="center">Asist.</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' }, display: { xs: 'none', sm: 'table-cell' } }} align="center">Partidos</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' } }} align="center">Prom.</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' }, display: { xs: 'none', sm: 'table-cell' } }} align="center">Goles</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -402,21 +412,21 @@ const SeasonSummaryPage = () => {
                             "&:hover": { bgcolor: "grey.100" },
                           }}
                         >
-                          <TableCell>
+                          <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                             {index === 0 && "🥇"}
                             {index === 1 && "🥈"}
                             {index === 2 && "🥉"}
                             {index > 2 && index + 1}
                           </TableCell>
-                          <TableCell fontWeight={index < 3 ? "bold" : "normal"}>
+                          <TableCell fontWeight={index < 3 ? "bold" : "normal"} sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                             {player.name}
                           </TableCell>
-                          <TableCell align="center" fontWeight="bold">
+                          <TableCell align="center" fontWeight="bold" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                             {player.assists}
                           </TableCell>
-                          <TableCell align="center">{player.matches}</TableCell>
-                          <TableCell align="center">{player.assistsPerMatch}</TableCell>
-                          <TableCell align="center">{player.goals}</TableCell>
+                          <TableCell align="center" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, display: { xs: 'none', sm: 'table-cell' } }}>{player.matches}</TableCell>
+                          <TableCell align="center" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>{player.assistsPerMatch}</TableCell>
+                          <TableCell align="center" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, display: { xs: 'none', sm: 'table-cell' } }}>{player.goals}</TableCell>
                         </TableRow>
                       ))}
                   </TableBody>
@@ -425,21 +435,26 @@ const SeasonSummaryPage = () => {
             </Box>
 
             {/* Tabla de Porteros */}
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h5" fontWeight="bold" mb={2}>
+            <Box sx={{ mb: { xs: 3, md: 4 } }}>
+              <Typography 
+                variant="h5" 
+                fontWeight="bold" 
+                mb={2}
+                sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}
+              >
                 🧤 Estadísticas de Porteros
               </Typography>
-              <TableContainer component={Paper}>
-                <Table>
+              <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+                <Table size={{ xs: 'small', sm: 'medium' }}>
                   <TableHead>
                     <TableRow sx={{ bgcolor: "success.main" }}>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }}>Portero</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }} align="center">Partidos</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }} align="center">Goles Recibidos</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }} align="center">Promedio</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }} align="center">Vallas Invictas</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }} align="center">% Vallas</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }} align="center">Victorias</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>Portero</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' }, display: { xs: 'none', sm: 'table-cell' } }} align="center">Partidos</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' }, display: { xs: 'none', md: 'table-cell' } }} align="center">Goles Rec.</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' } }} align="center">Prom.</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' } }} align="center">Vallas</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' }, display: { xs: 'none', sm: 'table-cell' } }} align="center">% Vallas</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' }, display: { xs: 'none', md: 'table-cell' } }} align="center">Victorias</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -451,15 +466,15 @@ const SeasonSummaryPage = () => {
                           "&:hover": { bgcolor: "grey.100" },
                         }}
                       >
-                        <TableCell fontWeight="bold">{gk.name}</TableCell>
-                        <TableCell align="center">{gk.matches}</TableCell>
-                        <TableCell align="center">{gk.goalsReceived}</TableCell>
-                        <TableCell align="center" fontWeight="bold">
+                        <TableCell fontWeight="bold" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>{gk.name}</TableCell>
+                        <TableCell align="center" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, display: { xs: 'none', sm: 'table-cell' } }}>{gk.matches}</TableCell>
+                        <TableCell align="center" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, display: { xs: 'none', md: 'table-cell' } }}>{gk.goalsReceived}</TableCell>
+                        <TableCell align="center" fontWeight="bold" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                           {gk.goalsReceivedPerMatch}
                         </TableCell>
-                        <TableCell align="center">{gk.cleanSheets}</TableCell>
-                        <TableCell align="center">{gk.cleanSheetRate}%</TableCell>
-                        <TableCell align="center">{gk.won}</TableCell>
+                        <TableCell align="center" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>{gk.cleanSheets}</TableCell>
+                        <TableCell align="center" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, display: { xs: 'none', sm: 'table-cell' } }}>{gk.cleanSheetRate}%</TableCell>
+                        <TableCell align="center" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, display: { xs: 'none', md: 'table-cell' } }}>{gk.won}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -469,20 +484,25 @@ const SeasonSummaryPage = () => {
 
             {/* Mejores % Victorias */}
             <Box>
-              <Typography variant="h5" fontWeight="bold" mb={2}>
+              <Typography 
+                variant="h5" 
+                fontWeight="bold" 
+                mb={2}
+                sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}
+              >
                 🏆 Mejores % de Victorias (Mín. 3 partidos)
               </Typography>
-              <TableContainer component={Paper}>
-                <Table>
+              <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+                <Table size={{ xs: 'small', sm: 'medium' }}>
                   <TableHead>
                     <TableRow sx={{ bgcolor: "warning.main" }}>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }}>Pos</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }}>Jugador</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }} align="center">Victorias</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }} align="center">Empates</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }} align="center">Derrotas</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }} align="center">Partidos</TableCell>
-                      <TableCell sx={{ color: "white", fontWeight: "bold" }} align="center">% Victorias</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>Pos</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>Jugador</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' } }} align="center">Vict.</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' }, display: { xs: 'none', sm: 'table-cell' } }} align="center">Emp.</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' }, display: { xs: 'none', sm: 'table-cell' } }} align="center">Derr.</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' }, display: { xs: 'none', md: 'table-cell' } }} align="center">Partidos</TableCell>
+                      <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' } }} align="center">% Vict.</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -498,20 +518,20 @@ const SeasonSummaryPage = () => {
                             "&:hover": { bgcolor: "grey.100" },
                           }}
                         >
-                          <TableCell>
+                          <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                             {index === 0 && "🥇"}
                             {index === 1 && "🥈"}
                             {index === 2 && "🥉"}
                             {index > 2 && index + 1}
                           </TableCell>
-                          <TableCell fontWeight={index < 3 ? "bold" : "normal"}>
+                          <TableCell fontWeight={index < 3 ? "bold" : "normal"} sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                             {player.name}
                           </TableCell>
-                          <TableCell align="center">{player.won}</TableCell>
-                          <TableCell align="center">{player.draw}</TableCell>
-                          <TableCell align="center">{player.lost}</TableCell>
-                          <TableCell align="center">{player.matches}</TableCell>
-                          <TableCell align="center" fontWeight="bold" color="success.main">
+                          <TableCell align="center" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>{player.won}</TableCell>
+                          <TableCell align="center" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, display: { xs: 'none', sm: 'table-cell' } }}>{player.draw}</TableCell>
+                          <TableCell align="center" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, display: { xs: 'none', sm: 'table-cell' } }}>{player.lost}</TableCell>
+                          <TableCell align="center" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, display: { xs: 'none', md: 'table-cell' } }}>{player.matches}</TableCell>
+                          <TableCell align="center" fontWeight="bold" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                             {player.winRate}%
                           </TableCell>
                         </TableRow>
