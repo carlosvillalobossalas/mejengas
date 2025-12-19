@@ -1,15 +1,18 @@
 import { ExpandLess, ExpandMore, SportsSoccer } from "@mui/icons-material";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import {
   Box,
   Collapse,
   Grid2,
   IconButton,
-  List,
   ListItemButton,
-  ListItemText,
   Tooltip,
   Typography,
+  Card,
+  Chip,
+  Divider,
 } from "@mui/material";
 import { useState } from "react";
 import AssistIcon from "/assets/shoe.png";
@@ -30,179 +33,314 @@ const HistoricMatchesList = ({ matches = [] }) => {
     const message = formatMatchSummary(match);
     shareToWhatsApp(message);
   };
+
   return (
     <Grid2
       container
       flexDirection="column"
-      sx={{ height: "100%", overflow: "hidden" }}
+      sx={{ height: "100%", overflow: "hidden", bgcolor: "grey.50" }}
     >
+      {/* Header */}
       <Box
         sx={{
-          paddingY: 2,
-          marginRight: 7,
+          py: 2,
+          px: 2,
+          bgcolor: "primary.main",
+          color: "white",
         }}
       >
-        <Typography variant="body2" textAlign={"center"}>Total: {matches.length}</Typography>
+        <Typography variant="h6" textAlign="center" fontWeight="bold">
+          ⚽ Histórico de Partidos
+        </Typography>
+        <Typography variant="caption" textAlign="center" display="block">
+          Total: {matches.length} partidos
+        </Typography>
       </Box>
-      <Box sx={{ flex: 1, overflowY: "auto" }}>
-        <List
+
+      <Box sx={{ flex: 1, overflowY: "auto", p: { xs: 1, sm: 2 } }}>
+        <Box
           sx={{
-            width: "100%",
-            bgcolor: "background.paper",
-            padding: 0,
-            margin: 0,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
           }}
         >
           {matches.map((match, index) => (
-            <div key={index}>
+            <Card
+              key={index}
+              elevation={2}
+              sx={{
+                overflow: "hidden",
+                transition: "all 0.3s",
+                "&:hover": {
+                  elevation: 4,
+                  transform: "translateY(-2px)",
+                },
+              }}
+            >
               <ListItemButton
                 onClick={() => handleClick(index)}
                 sx={{
-                  bgcolor: index % 2 === 0 ? "grey.100" : "grey.50",
+                  bgcolor: "white",
+                  py: 2,
+                  "&:hover": {
+                    bgcolor: "grey.50",
+                  },
                 }}
               >
-                <ListItemText
-                  primary={
-                    <span
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <strong>Equipo 1</strong>
-                      <span
-                      >{`${match.goalsTeam1} - ${match.goalsTeam2}`}</span>
-                      <strong>Equipo 2</strong>
-                    </span>
-                  }
-                  secondary={match.date.toDate().toISOString().split("T")[0]}
-                />
-                <Box sx={{ marginLeft: 2 }}>
+                <Box sx={{ width: "100%", display: "flex", flexDirection: "column", gap: 1 }}>
+                  {/* Fecha */}
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                    <CalendarTodayIcon sx={{ fontSize: "1rem", color: "text.secondary" }} />
+                    <Typography variant="caption" color="text.secondary">
+                      {match.date.toDate().toLocaleDateString("es-ES", {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </Typography>
+                  </Box>
+
+                  {/* Resultado */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: 2,
+                    }}
+                  >
+                    <Box sx={{ flex: 1, textAlign: "center" }}>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        Equipo 1
+                      </Typography>
+                      <Chip
+                        label={match.goalsTeam1}
+                        color={match.goalsTeam1 > match.goalsTeam2 ? "success" : match.goalsTeam1 < match.goalsTeam2 ? "error" : "default"}
+                        sx={{ fontWeight: "bold", fontSize: "1.2rem", height: 40, width: 50 }}
+                      />
+                    </Box>
+
+                    <Box sx={{ textAlign: "center" }}>
+                      <Typography variant="h6" color="text.secondary" fontWeight="bold">
+                        VS
+                      </Typography>
+                    </Box>
+
+                    <Box sx={{ flex: 1, textAlign: "center" }}>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        Equipo 2
+                      </Typography>
+                      <Chip
+                        label={match.goalsTeam2}
+                        color={match.goalsTeam2 > match.goalsTeam1 ? "success" : match.goalsTeam2 < match.goalsTeam1 ? "error" : "default"}
+                        sx={{ fontWeight: "bold", fontSize: "1.2rem", height: 40, width: 50 }}
+                      />
+                    </Box>
+                  </Box>
+
+                  {/* Indicador de resultado */}
+                  <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
+                    {match.goalsTeam1 > match.goalsTeam2 ? (
+                      <Chip
+                        icon={<EmojiEventsIcon />}
+                        label="Victoria Equipo 1"
+                        color="success"
+                        size="small"
+                        variant="outlined"
+                      />
+                    ) : match.goalsTeam2 > match.goalsTeam1 ? (
+                      <Chip
+                        icon={<EmojiEventsIcon />}
+                        label="Victoria Equipo 2"
+                        color="success"
+                        size="small"
+                        variant="outlined"
+                      />
+                    ) : (
+                      <Chip label="Empate" color="warning" size="small" variant="outlined" />
+                    )}
+                  </Box>
+                </Box>
+
+                <Box sx={{ ml: 2 }}>
                   {openItems[index] ? <ExpandLess /> : <ExpandMore />}
                 </Box>
               </ListItemButton>
+
               <Collapse in={openItems[index]} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding>
-                  {match.players1.map((player1, index) => {
-                    const player2 = match.players2[index];
+                <Divider />
+                <Box sx={{ bgcolor: "grey.50", p: 2 }}>
+                  {/* Título de secciones */}
+                  <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+                    <Typography variant="subtitle2" color="primary" fontWeight="bold">
+                      Equipo 1
+                    </Typography>
+                    <Typography variant="subtitle2" color="primary" fontWeight="bold">
+                      Equipo 2
+                    </Typography>
+                  </Box>
+
+                  {/* Jugadores */}
+                  {match.players1.map((player1, playerIndex) => {
+                    const player2 = match.players2[playerIndex];
                     return (
                       <Box
                         key={player1.id}
                         sx={{
                           display: "flex",
                           justifyContent: "space-between",
-                          padding: "8px 16px",
-                          bgcolor: index % 2 === 0 ? "grey.100" : "grey.50",
+                          alignItems: "center",
+                          py: 1.5,
+                          px: 2,
+                          mb: 1,
+                          bgcolor: "white",
+                          borderRadius: 1,
+                          boxShadow: 1,
                         }}
                       >
-                        <ListItemText
-                          primary={
-                            <span
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                              }}
-                            >
-                              <span style={{ marginLeft: 8 }}>
-                                {(player1.isGK ? "GK " : "") + player1.name}
-                              </span>
-                              {player1.isGK ? (
-                                <></>
-                              ) : (
-                                <>
-                                  {player1.goals > 0 ? (
-                                    <>
-                                      <SportsSoccer style={{ marginLeft: 4 }} />
-                                      x{player1.goals}
-                                    </>
-                                  ) : null}
-                                  {player1.assists > 0 ? (
-                                    <>
-                                      <img
-                                        src={AssistIcon}
-                                        style={{ marginLeft: 4 }}
-                                      />
-                                      x{player1.assists}
-                                    </>
-                                  ) : null}
-                                </>
+                        {/* Equipo 1 */}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1,
+                            flex: 1,
+                          }}
+                        >
+                          {player1.isGK && (
+                            <Chip
+                              label="GK"
+                              size="small"
+                              color="info"
+                              sx={{ height: 20, fontSize: "0.7rem" }}
+                            />
+                          )}
+                          <Typography variant="body2" fontWeight={player1.isGK ? "bold" : "normal"}>
+                            {player1.name}
+                          </Typography>
+                          {!player1.isGK && (
+                            <Box sx={{ display: "flex", gap: 0.5, ml: 1 }}>
+                              {player1.goals > 0 && (
+                                <Chip
+                                  icon={<SportsSoccer sx={{ fontSize: "0.9rem !important" }} />}
+                                  label={player1.goals}
+                                  size="small"
+                                  color="success"
+                                  sx={{ height: 22 }}
+                                />
                               )}
-                            </span>
-                          }
-                          sx={{ flex: 1 }}
-                        />
-                        <ListItemText
-                          primary={
-                            <span
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "flex-end",
-                              }}
-                            >
-                              {player2.goals > 0 ? (
-                                <>
-                                  <SportsSoccer style={{ marginLeft: 4 }} />x
-                                  {player2.goals}
-                                </>
-                              ) : null}
-                              {player2.assists > 0 ? (
-                                <>
-                                  <img
-                                    src={AssistIcon}
-                                    style={{ marginLeft: 4 }}
-                                  />
-                                  x{player2.assists}
-                                </>
-                              ) : null}
-                              <span style={{ marginLeft: 8 }}>
-                                {(player2.isGK ? "GK " : "") + player2.name}
-                              </span>
-                            </span>
-                          }
-                          sx={{ flex: 1, textAlign: "right" }}
-                        />
+                              {player1.assists > 0 && (
+                                <Chip
+                                  icon={
+                                    <img
+                                      src={AssistIcon}
+                                      style={{ width: 12, height: 12, marginLeft: 4 }}
+                                    />
+                                  }
+                                  label={player1.assists}
+                                  size="small"
+                                  color="info"
+                                  sx={{ height: 22 }}
+                                />
+                              )}
+                            </Box>
+                          )}
+                        </Box>
+
+                        {/* Separador */}
+                        <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
+
+                        {/* Equipo 2 */}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-end",
+                            gap: 1,
+                            flex: 1,
+                          }}
+                        >
+                          {!player2.isGK && (
+                            <Box sx={{ display: "flex", gap: 0.5, mr: 1 }}>
+                              {player2.goals > 0 && (
+                                <Chip
+                                  icon={<SportsSoccer sx={{ fontSize: "0.9rem !important" }} />}
+                                  label={player2.goals}
+                                  size="small"
+                                  color="success"
+                                  sx={{ height: 22 }}
+                                />
+                              )}
+                              {player2.assists > 0 && (
+                                <Chip
+                                  icon={
+                                    <img
+                                      src={AssistIcon}
+                                      style={{ width: 12, height: 12, marginLeft: 4 }}
+                                    />
+                                  }
+                                  label={player2.assists}
+                                  size="small"
+                                  color="info"
+                                  sx={{ height: 22 }}
+                                />
+                              )}
+                            </Box>
+                          )}
+                          <Typography
+                            variant="body2"
+                            fontWeight={player2.isGK ? "bold" : "normal"}
+                            textAlign="right"
+                          >
+                            {player2.name}
+                          </Typography>
+                          {player2.isGK && (
+                            <Chip
+                              label="GK"
+                              size="small"
+                              color="info"
+                              sx={{ height: 20, fontSize: "0.7rem" }}
+                            />
+                          )}
+                        </Box>
                       </Box>
                     );
                   })}
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "center",
-                      padding: "12px 16px",
-                      bgcolor: "grey.200",
-                      borderTop: "1px solid",
-                      borderColor: "grey.300",
-                    }}
-                  >
-                    <Tooltip title="Compartir en WhatsApp">
+
+                  {/* Botón WhatsApp */}
+                  <Divider sx={{ my: 2 }} />
+                  <Box sx={{ display: "flex", justifyContent: "center" }}>
+                    <Tooltip title="Compartir resumen en WhatsApp">
                       <IconButton
                         onClick={(e) => handleShareWhatsApp(match, e)}
-                        disableRipple
                         sx={{
                           color: "#25D366",
-                          borderRadius: 1,
+                          bgcolor: "rgba(37, 211, 102, 0.08)",
+                          borderRadius: 2,
+                          px: 3,
+                          py: 1,
                           "&:hover": {
-                            backgroundColor: "rgba(37, 211, 102, 0.08)",
+                            bgcolor: "rgba(37, 211, 102, 0.15)",
                           },
                         }}
                       >
                         <WhatsAppIcon />
                         <Typography
                           variant="body2"
-                          sx={{ marginLeft: 1, fontWeight: 500 }}
+                          sx={{ ml: 1, fontWeight: 600, color: "#25D366" }}
                         >
                           Compartir resumen
                         </Typography>
                       </IconButton>
                     </Tooltip>
                   </Box>
-                </List>
+                </Box>
               </Collapse>
-            </div>
+            </Card>
           ))}
-        </List>
+        </Box>
       </Box>
     </Grid2>
   );
