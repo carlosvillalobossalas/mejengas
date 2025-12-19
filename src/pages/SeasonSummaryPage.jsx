@@ -336,7 +336,7 @@ const SeasonSummaryPage = () => {
                 ⚽ Top 10 Goleadores
               </Typography>
               <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
-                <Table size={{ xs: 'small', sm: 'medium' }}>
+                <Table size="small">
                   <TableHead>
                     <TableRow sx={{ bgcolor: "primary.main" }}>
                       <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>Pos</TableCell>
@@ -389,7 +389,7 @@ const SeasonSummaryPage = () => {
                 👟 Top 10 Asistencias
               </Typography>
               <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
-                <Table size={{ xs: 'small', sm: 'medium' }}>
+                <Table size="small">
                   <TableHead>
                     <TableRow sx={{ bgcolor: "info.main" }}>
                       <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>Pos</TableCell>
@@ -445,7 +445,7 @@ const SeasonSummaryPage = () => {
                 🧤 Estadísticas de Porteros
               </Typography>
               <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
-                <Table size={{ xs: 'small', sm: 'medium' }}>
+                <Table size="small">
                   <TableHead>
                     <TableRow sx={{ bgcolor: "success.main" }}>
                       <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>Portero</TableCell>
@@ -493,7 +493,7 @@ const SeasonSummaryPage = () => {
                 🏆 Mejores % de Victorias (Mín. 3 partidos)
               </Typography>
               <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
-                <Table size={{ xs: 'small', sm: 'medium' }}>
+                <Table size="small">
                   <TableHead>
                     <TableRow sx={{ bgcolor: "warning.main" }}>
                       <TableCell sx={{ color: "white", fontWeight: "bold", fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>Pos</TableCell>
