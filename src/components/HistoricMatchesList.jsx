@@ -172,6 +172,40 @@ const HistoricMatchesList = ({ matches = [] }) => {
               <Collapse in={openItems[index]} timeout="auto" unmountOnExit>
                 <Divider />
                 <Box sx={{ bgcolor: "grey.50", p: 2 }}>
+                  {/* VOD de Twitch */}
+                  {match.twitchVodId && (
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="subtitle2" color="primary" fontWeight="bold" gutterBottom>
+                        📺 Revive el partido
+                      </Typography>
+                      <Box
+                        sx={{
+                          position: "relative",
+                          width: "100%",
+                          paddingTop: "56.25%", // Aspect ratio 16:9
+                          bgcolor: "black",
+                          borderRadius: 2,
+                          overflow: "hidden",
+                          boxShadow: 2,
+                        }}
+                      >
+                        <iframe
+                          src={`https://player.twitch.tv/?video=${match.twitchVodId}&parent=${window.location.hostname}&autoplay=false`}
+                          allowFullScreen
+                          title="Twitch VOD Player"
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                            border: "none",
+                          }}
+                        />
+                      </Box>
+                    </Box>
+                  )}
+
                   {/* Título de secciones */}
                   <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
                     <Typography variant="subtitle2" color="primary" fontWeight="bold">
