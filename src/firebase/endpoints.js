@@ -9,8 +9,10 @@ import {
   query,
   setDoc,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
+import { calculateSeasonStats, filterMatchesByYear, getMatchYear } from "../utils/seasonStats";
 
 export const addNewPlayer = async (name) => {
   try {
@@ -204,7 +206,129 @@ export const saveNewMatch = async (data, players) => {
     });
 
     await Promise.all(players2Promises);
+
+    // Recalcular y actualizar el resumen de la temporada
+    const matchYear = getMatchYear(match);
+    await updateSeasonSummary(matchYear);
   } catch (error) {
+    throw new Error(error);
+  }
+};
+
+// Obtener resumen de una temporada específica
+export const getSeasonSummary = async (year, callback) => {
+  try {
+    const summaryDocRef = doc(db, "Resumenes", year.toString());
+    
+    const unsubscribe = onSnapshot(summaryDocRef, (docSnap) => {
+      if (docSnap.exists()) {
+        callback({ id: docSnap.id, ...docSnap.data() });
+      } else {
+        callback(null);
+      }
+    });
+
+    return unsubscribe;
+  } catch (error) {
+    console.error("Error en getSeasonSummary:", error);
+    callback(null);
+    return () => {}; // Retornar función vacía en caso de error
+  }
+};
+
+// Obtener todos los resúmenes disponibles
+export const getAllSeasonSummaries = async (callback) => {
+  try {
+    const summariesCollectionRef = collection(db, "Resumenes");
+    
+    const unsubscribe = onSnapshot(summariesCollectionRef, (snapshot) => {
+      const summaries = snapshot.docs.map((doc) => ({
+        year: doc.id,
+        ...doc.data(),
+      }));
+      callback(summaries.sort((a, b) => b.year - a.year));
+    });
+
+    return unsubscribe;
+  } catch (error) {
+    console.error("Error en getAllSeasonSummaries:", error);
+    callback([]);
+    return () => {}; // Retornar función vacía en caso de error
+  }
+};
+
+// Actualizar el resumen de una temporada específica
+export const updateSeasonSummary = async (year) => {
+  try {
+    // Obtener todos los partidos del año
+    const matchCollectionRef = collection(db, "Matches");
+    const matchesSnapshot = await getDocs(matchCollectionRef);
+    const allMatches = matchesSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    // Filtrar partidos por año
+    const yearMatches = filterMatchesByYear(allMatches, year);
+
+    if (yearMatches.length === 0) {
+      console.log(`No hay partidos para el año ${year}`);
+      return;
+    }
+
+    // Calcular estadísticas
+    const stats = calculateSeasonStats(yearMatches);
+
+    if (!stats) {
+      console.log(`No se pudieron calcular estadísticas para ${year}`);
+      return;
+    }
+
+    // Guardar en la colección Resumenes
+    const summaryDocRef = doc(db, "Resumenes", year.toString());
+    await setDoc(summaryDocRef, {
+      year: year,
+      lastUpdated: new Date(),
+      ...stats,
+    });
+
+    console.log(`Resumen de temporada ${year} actualizado correctamente`);
+  } catch (error) {
+    console.error("Error actualizando resumen de temporada:", error);
+    throw new Error(error);
+  }
+};
+
+// Recalcular todos los resúmenes de temporadas
+export const recalculateAllSeasonSummaries = async () => {
+  try {
+    // Obtener todos los partidos
+    const matchCollectionRef = collection(db, "Matches");
+    const matchesSnapshot = await getDocs(matchCollectionRef);
+    const allMatches = matchesSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    // Agrupar partidos por año
+    const matchesByYear = {};
+    allMatches.forEach((match) => {
+      const year = getMatchYear(match);
+      if (!matchesByYear[year]) {
+        matchesByYear[year] = [];
+      }
+      matchesByYear[year].push(match);
+    });
+
+    // Recalcular cada año
+    const promises = Object.keys(matchesByYear).map((year) => 
+      updateSeasonSummary(parseInt(year))
+    );
+
+    await Promise.all(promises);
+    console.log("Todos los resúmenes de temporada han sido recalculados");
+  } catch (error) {
+    console.error("Error recalculando resúmenes:", error);
     throw new Error(error);
   }
 };

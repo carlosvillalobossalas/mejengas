@@ -38,13 +38,10 @@ const HistoricMatchesList = ({ matches = [] }) => {
     >
       <Box
         sx={{
-          paddingY: 1,
-          marginRight: 4,
+          paddingY: 2,
+          marginRight: 7,
         }}
       >
-        <Typography variant="h6" textAlign={"center"} fontWeight={"bold"}>
-          Mejengas
-        </Typography>
         <Typography variant="body2" textAlign={"center"}>Total: {matches.length}</Typography>
       </Box>
       <Box sx={{ flex: 1, overflowY: "auto" }}>
