@@ -11,15 +11,22 @@ import {
   Toolbar,
   Typography,
   Divider,
+  Avatar,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import HistoryIcon from "@mui/icons-material/History";
+import LogoutIcon from "@mui/icons-material/Logout";
+import LoginIcon from "@mui/icons-material/Login";
 import { getAllGKs, getAllMatches, getAllPlayers } from "./firebase/endpoints";
 import { GoalkeepersTablePage } from "./pages/GoalkeepersTablePage";
 import { PlayersTablePage } from "./pages/PlayersTablePage";
-import { Route, Routes, useNavigate } from "react-router";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { signOut } from "firebase/auth";
+import { auth } from "./firebaseConfig";
+import LoginPage from "./pages/LoginPage";
 import { useEffect, useState } from "react";
 import AddNewPlayerButton from "./components/AddNewPlayerButton";
 import HistoricMatchesList from "./components/HistoricMatchesList";
@@ -34,6 +41,17 @@ const App = () => {
   const [goalkeepers, setGoalkeepers] = useState([]);
   const [matches, setMatches] = useState([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [user] = useAuthState(auth);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate("/login");
+      setDrawerOpen(false);
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
+  };
 
   const toggleDrawer = (open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -109,8 +127,6 @@ const App = () => {
         <Box
           sx={{ width: 250 }}
           role="presentation"
-          onClick={toggleDrawer(false)}
-          onKeyDown={toggleDrawer(false)}
         >
           <Box sx={{ p: 2, bgcolor: 'primary.main', color: 'white' }}>
             <Typography variant="h6" fontWeight="bold">
@@ -121,7 +137,25 @@ const App = () => {
             </Typography>
           </Box>
           <Divider />
-          <List>
+          {user && (
+            <>
+              <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Avatar src={user.photoURL} alt={user.displayName || user.email}>
+                  {(user.displayName || user.email)?.[0]?.toUpperCase()}
+                </Avatar>
+                <Box sx={{ flex: 1, overflow: 'hidden' }}>
+                  <Typography variant="body2" fontWeight="bold" noWrap>
+                    {user.displayName || 'Usuario'}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" noWrap>
+                    {user.email}
+                  </Typography>
+                </Box>
+              </Box>
+              <Divider />
+            </>
+          )}
+          <List onClick={toggleDrawer(false)} onKeyDown={toggleDrawer(false)}>
             {menuItems.map((item) => (
               <ListItem key={item.text} disablePadding>
                 <ListItemButton onClick={() => handleMenuClick(item.path)}>
@@ -133,21 +167,38 @@ const App = () => {
               </ListItem>
             ))}
           </List>
+          <Divider />
+          <List>
+            {user ? (
+              <ListItem disablePadding>
+                <ListItemButton onClick={handleLogout}>
+                  <ListItemIcon>
+                    <LogoutIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Cerrar Sesión" />
+                </ListItemButton>
+              </ListItem>
+            ) : (
+              <ListItem disablePadding>
+                <ListItemButton onClick={() => { navigate('/login'); setDrawerOpen(false); }}>
+                  <ListItemIcon>
+                    <LoginIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Iniciar Sesión" />
+                </ListItemButton>
+              </ListItem>
+            )}
+          </List>
         </Box>
       </Drawer>
 
       <Box sx={{ height: "calc(100vh - 56px)", overflow: "hidden" }}>
         <Routes>
+          <Route path="/login" element={<LoginPage />} />
           <Route path="" element={<HistoricMatchesList matches={matches} />} />
           <Route path="/resumen-temporada" element={<SeasonSummaryPage />} />
-          <Route
-            path="/jugadores"
-            element={<PlayersTablePage players={players} />}
-          />
-          <Route
-            path="/porteros"
-            element={<GoalkeepersTablePage goalkeepers={goalkeepers} />}
-          />
+          <Route path="/jugadores" element={<PlayersTablePage players={players} />} />
+          <Route path="/porteros" element={<GoalkeepersTablePage goalkeepers={goalkeepers} />} />
           <Route path="admin/:admin">
             <Route path="" element={<NewMatch players={players} />}>
               <Route path="" element={<AddNewPlayerButton />} />
