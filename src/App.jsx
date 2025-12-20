@@ -19,6 +19,7 @@ import HistoryIcon from "@mui/icons-material/History";
 import LogoutIcon from "@mui/icons-material/Logout";
 import LoginIcon from "@mui/icons-material/Login";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { getAllGKs, getAllMatches, getAllPlayers } from "./firebase/endpoints";
 import { GoalkeepersTablePage } from "./pages/GoalkeepersTablePage";
 import { PlayersTablePage } from "./pages/PlayersTablePage";
@@ -185,6 +186,14 @@ const App = () => {
             <>
               <List onClick={toggleDrawer(false)} onKeyDown={toggleDrawer(false)}>
                 <ListItem disablePadding>
+                  <ListItemButton onClick={() => handleMenuClick('/admin/nuevo-partido')}>
+                    <ListItemIcon>
+                      <AddCircleIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Registrar Partido" />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
                   <ListItemButton onClick={() => handleMenuClick('/admin/usuarios')}>
                     <ListItemIcon>
                       <ManageAccountsIcon />
@@ -232,11 +241,16 @@ const App = () => {
               <UserManagementPage />
             </AdminRoute>
           } />
-          <Route path="admin/:admin">
-            <Route path="" element={<NewMatch players={players} />}>
-              <Route path="" element={<AddNewPlayerButton />} />
-            </Route>
-          </Route>
+          <Route path="/admin/nuevo-partido" element={
+            <AdminRoute>
+              <NewMatch players={players} />
+            </AdminRoute>
+          } />
+          <Route path="/admin/nuevo-partido/agregar-jugador" element={
+            <AdminRoute>
+              <AddNewPlayerButton />
+            </AdminRoute>
+          } />
         </Routes>
       </Box>
       <ToastContainer position="top-right" />

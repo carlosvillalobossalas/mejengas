@@ -20,30 +20,6 @@ import { db } from "../firebaseConfig";
 export const PlayersTablePage = ({ players }) => {
   const [orderBy, setOrderBy] = useState("goals");
   const [order, setOrder] = useState("desc");
-  const [users, setUsers] = useState({});
-
-  useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        const usersSnapshot = await getDocs(collection(db, "users"));
-        const usersMap = {};
-        usersSnapshot.docs.forEach((doc) => {
-          usersMap[doc.id] = doc.data();
-        });
-        setUsers(usersMap);
-      } catch (error) {
-        console.error("Error loading users:", error);
-      }
-    };
-    loadUsers();
-  }, []);
-
-  const getPlayerDisplayName = (player) => {
-    if (player.userId && users[player.userId]?.displayName) {
-      return users[player.userId].displayName;
-    }
-    return player.name;
-  };
 
   const handleSort = (property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -317,7 +293,7 @@ export const PlayersTablePage = ({ players }) => {
                         whiteSpace: "nowrap",
                       }}
                     >
-                      {getPlayerDisplayName(player)}
+                      {player.name}
                     </TableCell>
                     <TableCell
                       align="center"

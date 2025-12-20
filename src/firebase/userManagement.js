@@ -1,4 +1,4 @@
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
 /**
@@ -24,15 +24,35 @@ export const createOrUpdateUser = async (user) => {
     });
   } else {
     // Actualizar datos básicos si cambiaron
-    await setDoc(
-      userRef,
-      {
-        displayName: user.displayName || null,
-        photoURL: user.photoURL || null,
-        updatedAt: serverTimestamp(),
-      },
-      { merge: true }
-    );
+    const userData = userDoc.data();
+    const updates = {
+      displayName: user.displayName || null,
+      photoURL: user.photoURL || null,
+      updatedAt: serverTimestamp(),
+    };
+
+    await setDoc(userRef, updates, { merge: true });
+
+    // Si el usuario está enlazado a un jugador y el displayName cambió, actualizar el jugador
+    if (userData.playerId && user.displayName && userData.displayName !== user.displayName) {
+      await syncDisplayNameToPlayer(user.uid, userData.playerId, user.displayName);
+    }
+  }
+};
+
+/**
+ * Sincroniza el displayName del usuario con el nombre del jugador enlazado
+ */
+export const syncDisplayNameToPlayer = async (userId, playerId, displayName) => {
+  if (!playerId || !displayName) return;
+
+  try {
+    const playerRef = doc(db, "Players", playerId);
+    await updateDoc(playerRef, {
+      name: displayName,
+    });
+  } catch (error) {
+    console.error("Error syncing displayName to player:", error);
   }
 };
 

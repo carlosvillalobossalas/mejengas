@@ -13,7 +13,6 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router";
 import { Outlet } from "react-router";
 import { getAllPlayers, saveNewMatch } from "../firebase/endpoints";
 import dayjs from "dayjs";
@@ -32,7 +31,6 @@ const initialState = {
 };
 
 const NewMatch = ({ players = [] }) => {
-  const { admin } = useParams();
   const [isSaving, setIsSaving] = useState(false);
   const [tabIndex, setTabIndex] = useState("1");
   const [newMatchForm, setNewMatchForm] = useState(initialState);
@@ -448,7 +446,7 @@ const NewMatch = ({ players = [] }) => {
               }
             />
             <Button
-              disabled={admin === "false" || isSaving}
+              disabled={isSaving}
               variant="contained"
               onClick={handleSave}
             >

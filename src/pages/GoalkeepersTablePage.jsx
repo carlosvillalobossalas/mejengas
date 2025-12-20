@@ -15,37 +15,11 @@ import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 import ShieldIcon from "@mui/icons-material/Shield";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import Stadium from "@mui/icons-material/Stadium";
-import { useState, useEffect } from "react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebaseConfig";
+import { useState } from "react";
 
 export const GoalkeepersTablePage = ({ goalkeepers }) => {
   const [orderBy, setOrderBy] = useState("cleanSheet");
   const [order, setOrder] = useState("desc");
-  const [users, setUsers] = useState({});
-
-  useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        const usersSnapshot = await getDocs(collection(db, "users"));
-        const usersMap = {};
-        usersSnapshot.docs.forEach((doc) => {
-          usersMap[doc.id] = doc.data();
-        });
-        setUsers(usersMap);
-      } catch (error) {
-        console.error("Error loading users:", error);
-      }
-    };
-    loadUsers();
-  }, []);
-
-  const getGoalkeeperDisplayName = (gk) => {
-    if (gk.userId && users[gk.userId]?.displayName) {
-      return users[gk.userId].displayName;
-    }
-    return gk.name;
-  };
 
   const handleSort = (property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -339,7 +313,7 @@ export const GoalkeepersTablePage = ({ goalkeepers }) => {
                         whiteSpace: "nowrap",
                       }}
                     >
-                      {getGoalkeeperDisplayName(gk)}
+                      {gk.name}
                     </TableCell>
                     <TableCell
                       align="center"
