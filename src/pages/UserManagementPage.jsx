@@ -170,14 +170,6 @@ const UserManagementPage = () => {
         </Typography>
       </Box>
 
-      <Alert severity="info" sx={{ mb: 3 }}>
-        <Typography variant="body2">
-          <strong>Nota:</strong> Para ver todos los usuarios de Firebase Auth, necesitas
-          implementar una Cloud Function. Por ahora solo se muestran usuarios registrados en
-          Firestore.
-        </Typography>
-      </Alert>
-
       <Grid2 container spacing={3}>
         {/* Columna de usuarios autenticados */}
         <Grid2 size={{ xs: 12, md: 6 }}>
