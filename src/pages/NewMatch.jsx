@@ -88,11 +88,11 @@ function NewMatch(props) {
   return (
     <Box
       sx={{
-        height: "100vh",
+        height: "100dvh",
         display: "flex",
         flexDirection: "column",
         bgcolor: "grey.50",
-        overflow: "hidden",
+        overflow: "auto",
       }}
     >
       {/* Header */}
@@ -132,7 +132,7 @@ function NewMatch(props) {
         {/* Team 1 Panel */}
         <TabPanel value="1" sx={{ p: { xs: 2, sm: 3 }, flex: 1, overflow: "auto", minHeight: 0 }}>
           {/* ...equipo 1 code... */}
-          <Box sx={{ maxWidth: 600, mx: "auto" }}>
+          <Box sx={{ maxWidth: 600, mx: "auto", pb: 4 }}>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
               <Box component="span" sx={{ width: 30, textAlign: "center", fontWeight: "bold" }}>P?</Box>
               <Box component="span" sx={{ flex: 1 }}>Jugador</Box>
@@ -215,7 +215,7 @@ function NewMatch(props) {
                       return { ...prev, players1: updatedPlayers };
                     })
                   }
-                  InputProps={{ inputProps: { min: 0, style: { textAlign: "center" } } }}
+                  slotProps={{ input: { min: 0, style: { textAlign: "center" } } }}
                 />
                 <TextField
                   type="number"
@@ -233,7 +233,7 @@ function NewMatch(props) {
                       return { ...prev, players1: updatedPlayers };
                     })
                   }
-                  InputProps={{ inputProps: { min: 0, style: { textAlign: "center" } } }}
+                  slotProps={{ input: { min: 0, style: { textAlign: "center" } } }}
                 />
               </Box>
             ))}
@@ -243,7 +243,7 @@ function NewMatch(props) {
         {/* Team 2 Panel */}
         <TabPanel value="2" sx={{ p: { xs: 2, sm: 3 }, flex: 1, overflow: "auto", minHeight: 0 }}>
           {/* ...equipo 2 code... */}
-          <Box sx={{ maxWidth: 600, mx: "auto" }}>
+          <Box sx={{ maxWidth: 600, mx: "auto", pb: 4 }}>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
               <Box component="span" sx={{ width: 30, textAlign: "center", fontWeight: "bold" }}>P?</Box>
               <Box component="span" sx={{ flex: 1 }}>Jugador</Box>
@@ -326,7 +326,7 @@ function NewMatch(props) {
                       return { ...prev, players2: updatedPlayers };
                     })
                   }
-                  InputProps={{ inputProps: { min: 0, style: { textAlign: "center" } } }}
+                  slotProps={{ input: { min: 0, style: { textAlign: "center" } } }}
                 />
                 <TextField
                   type="number"
@@ -344,7 +344,7 @@ function NewMatch(props) {
                       return { ...prev, players2: updatedPlayers };
                     })
                   }
-                  InputProps={{ inputProps: { min: 0, style: { textAlign: "center" } } }}
+                  slotProps={{ input: { min: 0, style: { textAlign: "center" } } }}
                 />
               </Box>
             ))}
