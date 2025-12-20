@@ -115,161 +115,182 @@ const LoginPage = () => {
       sx={{
         minHeight: "100vh",
         display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        bgcolor: "grey.50",
-        p: { xs: 2, sm: 3 },
+        flexDirection: "column",
+        bgcolor: "primary.main",
       }}
     >
-      <Card
+      {/* Header con logo */}
+      <Box
         sx={{
-          maxWidth: { xs: "100%", sm: 450 },
-          width: "100%",
-          p: { xs: 3, sm: 4 },
-          boxShadow: 3,
-          m: { xs: 1, sm: 0 },
+          pt: { xs: 4, sm: 6 },
+          pb: { xs: 3, sm: 4 },
+          textAlign: "center",
         }}
       >
-        <Typography 
-          variant="h4" 
-          textAlign="center" 
-          fontWeight="bold" 
-          gutterBottom
-          sx={{ fontSize: { xs: "1.5rem", sm: "2.125rem" }, mb: 2 }}
+        <Typography
+          variant="h3"
+          fontWeight="bold"
+          color="white"
+          sx={{ fontSize: { xs: "2rem", sm: "3rem" } }}
         >
           ⚽ Mejengas
         </Typography>
+      </Box>
 
-        <Tabs
-          value={tabValue}
-          onChange={handleTabChange}
-          centered
-          sx={{ mb: 2 }}
-          variant="fullWidth"
+      {/* Contenedor del formulario */}
+      <Box
+        sx={{
+          flex: 1,
+          bgcolor: "white",
+          borderTopLeftRadius: { xs: 24, sm: 32 },
+          borderTopRightRadius: { xs: 24, sm: 32 },
+          p: { xs: 3, sm: 4 },
+          overflow: "auto",
+        }}
+      >
+        <Box
+          sx={{
+            maxWidth: 400,
+            mx: "auto",
+            width: "100%",
+          }}
         >
-          <Tab 
-            label="Iniciar Sesión" 
-            sx={{ 
-              fontSize: { xs: "0.75rem", sm: "0.875rem" },
-              minHeight: { xs: 40, sm: 48 },
-              px: { xs: 1, sm: 2 },
-            }} 
-          />
-          <Tab 
-            label="Registrarse" 
-            sx={{ 
-              fontSize: { xs: "0.75rem", sm: "0.875rem" },
-              minHeight: { xs: 40, sm: 48 },
-              px: { xs: 1, sm: 2 },
-            }} 
-          />
-        </Tabs>
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-
-        <Box component="form" onSubmit={handleEmailPasswordAuth}>
-          <TextField
-            label="Correo electrónico"
-            type="email"
-            fullWidth
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            sx={{ mb: 2 }}
-            disabled={loading}
-            size="medium"
-          />
-
-          <TextField
-            label="Contraseña"
-            type={showPassword ? "text" : "password"}
-            fullWidth
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            sx={{ mb: 2 }}
-            disabled={loading}
-            size="medium"
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowPassword(!showPassword)}
-                    edge="end"
-                    size="small"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
+            variant="fullWidth"
+            sx={{
+              mb: 3,
+              "& .MuiTabs-indicator": {
+                height: 3,
+              },
             }}
-          />
+          >
+            <Tab
+              label="Iniciar Sesión"
+              sx={{
+                fontSize: { xs: "0.875rem", sm: "1rem" },
+                fontWeight: 600,
+                textTransform: "none",
+              }}
+            />
+            <Tab
+              label="Registrarse"
+              sx={{
+                fontSize: { xs: "0.875rem", sm: "1rem" },
+                fontWeight: 600,
+                textTransform: "none",
+              }}
+            />
+          </Tabs>
 
-          {tabValue === 1 && (
+          {error && (
+            <Alert severity="error" sx={{ mb: 2, fontSize: { xs: "0.875rem", sm: "1rem" } }}>
+              {error}
+            </Alert>
+          )}
+
+          <Box component="form" onSubmit={handleEmailPasswordAuth}>
             <TextField
-              label="Confirmar contraseña"
+              label="Correo electrónico"
+              type="email"
+              fullWidth
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              sx={{ mb: 2 }}
+              disabled={loading}
+              variant="outlined"
+            />
+
+            <TextField
+              label="Contraseña"
               type={showPassword ? "text" : "password"}
               fullWidth
               required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               sx={{ mb: 2 }}
               disabled={loading}
-              size="medium"
+              variant="outlined"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
-          )}
+
+            {tabValue === 1 && (
+              <TextField
+                label="Confirmar contraseña"
+                type={showPassword ? "text" : "password"}
+                fullWidth
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                sx={{ mb: 2 }}
+                disabled={loading}
+                variant="outlined"
+              />
+            )}
+
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              disabled={loading}
+              sx={{
+                py: 1.5,
+                fontSize: { xs: "0.9rem", sm: "1rem" },
+                fontWeight: 600,
+                textTransform: "none",
+                borderRadius: 2,
+                mb: 2,
+              }}
+            >
+              {loading
+                ? "Cargando..."
+                : tabValue === 0
+                ? "Iniciar Sesión"
+                : "Crear Cuenta"}
+            </Button>
+          </Box>
+
+          <Divider sx={{ my: 3 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}>
+              o continuar con
+            </Typography>
+          </Divider>
 
           <Button
-            type="submit"
-            variant="contained"
+            variant="outlined"
             fullWidth
-            size="large"
+            startIcon={<GoogleIcon />}
+            onClick={handleGoogleSignIn}
             disabled={loading}
-            sx={{ 
-              mb: 2,
-              py: { xs: 1.5, sm: 1.75 },
-              fontSize: { xs: "0.875rem", sm: "1rem" },
+            sx={{
+              py: 1.5,
+              fontSize: { xs: "0.9rem", sm: "1rem" },
+              fontWeight: 600,
+              textTransform: "none",
+              borderRadius: 2,
+              borderWidth: 2,
+              "&:hover": {
+                borderWidth: 2,
+              },
             }}
           >
-            {loading
-              ? "Cargando..."
-              : tabValue === 0
-              ? "Iniciar Sesión"
-              : "Registrarse"}
+            Google
           </Button>
         </Box>
-
-        <Divider sx={{ my: 2 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: "0.75rem", sm: "0.875rem" } }}>
-            o continuar con
-          </Typography>
-        </Divider>
-
-        <Button
-          variant="outlined"
-          fullWidth
-          size="large"
-          startIcon={<GoogleIcon />}
-          onClick={handleGoogleSignIn}
-          disabled={loading}
-          sx={{
-            borderColor: "#4285f4",
-            color: "#4285f4",
-            py: { xs: 1.5, sm: 1.75 },
-            fontSize: { xs: "0.875rem", sm: "1rem" },
-            "&:hover": {
-              borderColor: "#357ae8",
-              bgcolor: "rgba(66, 133, 244, 0.04)",
-            },
-          }}
-        >
-          Continuar con Google
-        </Button>
-      </Card>
+      </Box>
     </Box>
   );
 };
