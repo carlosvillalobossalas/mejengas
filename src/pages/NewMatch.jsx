@@ -88,375 +88,386 @@ const NewMatch = ({ players = [] }) => {
   }, [newMatchForm]);
 
   return (
-    <>
-      <Grid2 container flexGrow={1} direction="column">
-        <Grid2
-          container
-          flexGrow={1}
-          alignItems="center"
-          justifyContent="center"
-          marginTop={2}
-          direction="column"
-        >
-          <Box
+    <Box
+      sx={{
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        bgcolor: "grey.50",
+        overflow: "hidden",
+      }}
+    >
+      {/* Header */}
+      <Box
+        sx={{
+          bgcolor: "success.main",
+          color: "white",
+          p: 2,
+          textAlign: "center",
+          flexShrink: 0,
+        }}
+      >
+        <Typography variant="h5" fontWeight="bold" sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}>
+          ⚽ Registrar Partido
+        </Typography>
+      </Box>
+
+      {/* Tabs */}
+      <TabContext value={tabIndex}>
+        <Box sx={{ bgcolor: "white", borderBottom: 1, borderColor: "divider", flexShrink: 0 }}>
+          <TabList
+            onChange={handleTabChange}
+            variant="fullWidth"
             sx={{
-              width: "100%",
-              typography: "body1",
-              marginTop: 2,
+              "& .MuiTab-root": {
+                fontSize: { xs: "0.875rem", sm: "1rem" },
+                fontWeight: 600,
+                py: 1.5,
+              },
             }}
           >
-            <TabContext value={tabIndex}>
-              <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                <TabList
-                  onChange={handleTabChange}
-                  aria-label="lab API tabs example"
-                  variant="fullWidth"
-                >
-                  <Tab label="Equipo 1" value="1" />
-                  <Tab label="Equipo 2" value="2" />
-                </TabList>
+            <Tab label="Equipo 1 🔵" value="1" />
+            <Tab label="Equipo 2 🔴" value="2" />
+          </TabList>
+        </Box>
+
+        {/* Team 1 Panel */}
+        <TabPanel value="1" sx={{ p: { xs: 2, sm: 3 }, flex: 1, overflow: "auto", minHeight: 0 }}>
+          <Box sx={{ maxWidth: 600, mx: "auto" }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
+              <Box component="span" sx={{ width: 30, textAlign: "center", fontWeight: "bold" }}>P?</Box>
+              <Box component="span" sx={{ flex: 1 }}>Jugador</Box>
+              <Box component="span" sx={{ width: 60, textAlign: "center" }}>Goles</Box>
+              <Box component="span" sx={{ width: 60, textAlign: "center" }}>Asist.</Box>
+            </Typography>
+
+            {[0, 1, 2, 3, 4, 5, 6].map((value, index) => (
+              <Box
+                key={value}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  mb: 2,
+                  bgcolor: "white",
+                  p: 1,
+                  borderRadius: 2,
+                  boxShadow: 1,
+                }}
+              >
+                <Checkbox
+                  size="small"
+                  disabled={!newMatchForm?.players1[value]?.id}
+                  checked={newMatchForm?.players1[value]?.isGK ?? false}
+                  onChange={({ target }) => {
+                    setNewMatchForm((prev) => {
+                      const updatedPlayers = [...prev.players1];
+                      updatedPlayers[value] = {
+                        ...updatedPlayers[value],
+                        isGK: target.checked,
+                      };
+                      return { ...prev, players1: updatedPlayers };
+                    });
+                  }}
+                  sx={{ p: 0.5 }}
+                />
+
+                <FormControl sx={{ flex: 1, minWidth: 120 }} size="small">
+                  <InputLabel>{`J${value + 1}`}</InputLabel>
+                  <Select
+                    value={newMatchForm?.players1[value]?.id ?? ""}
+                    label={`J${value + 1}`}
+                    disabled={newMatchForm.players1.length < index}
+                    onChange={({ target }) =>
+                      setNewMatchForm((prev) => {
+                        const updatedPlayers = [...prev.players1];
+                        updatedPlayers[value] = {
+                          id: target.value,
+                          goals: 0,
+                          assists: 0,
+                          isGK: false,
+                        };
+                        return { ...prev, players1: updatedPlayers };
+                      })
+                    }
+                  >
+                    {players.map((player) => (
+                      <MenuItem
+                        disabled={handleShouldBeDisabled(player.id)}
+                        key={player.id}
+                        value={player.id}
+                      >
+                        {player.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <TextField
+                  type="number"
+                  size="small"
+                  sx={{ width: 60 }}
+                  disabled={!newMatchForm?.players1[value]?.id}
+                  value={newMatchForm?.players1[value]?.goals ?? 0}
+                  onChange={({ target }) =>
+                    setNewMatchForm((prev) => {
+                      const updatedPlayers = [...prev.players1];
+                      updatedPlayers[value] = {
+                        ...updatedPlayers[value],
+                        goals: parseInt(target.value) || 0,
+                      };
+                      return { ...prev, players1: updatedPlayers };
+                    })
+                  }
+                  InputProps={{ inputProps: { min: 0, style: { textAlign: "center" } } }}
+                />
+
+                <TextField
+                  type="number"
+                  size="small"
+                  sx={{ width: 60 }}
+                  disabled={!newMatchForm?.players1[value]?.id}
+                  value={newMatchForm?.players1[value]?.assists ?? 0}
+                  onChange={({ target }) =>
+                    setNewMatchForm((prev) => {
+                      const updatedPlayers = [...prev.players1];
+                      updatedPlayers[value] = {
+                        ...updatedPlayers[value],
+                        assists: parseInt(target.value) || 0,
+                      };
+                      return { ...prev, players1: updatedPlayers };
+                    })
+                  }
+                  InputProps={{ inputProps: { min: 0, style: { textAlign: "center" } } }}
+                />
               </Box>
-              <TabPanel
-                value="1"
-                sx={{ padding: 0, paddingRight: 1, marginTop: 1 }}
-              >
-                <Grid2
-                  container
-                  sx={{
-                    width: "100%",
-                    margin: 0,
-                    padding: 0,
-                  }}
-                  direction="column"
-                  spacing={2}
-                >
-                  <Typography sx={{ paddingLeft: 1 }}>P?</Typography>
-
-                  {[0, 1, 2, 3, 4, 5, 6].map((value, index) => {
-                    return (
-                      <Grid2
-                        key={value}
-                        container
-                        direction="row"
-                        // flexGrow={1}
-                        sx={{ width: "100%" }}
-                        alignItems="center"
-                        justifyContent="center"
-                      >
-                        <Checkbox
-                          size="small"
-                          sx={{
-                            marginRight: 0,
-                            paddingRight: 0.5,
-                            paddingLeft: 0.5,
-                          }}
-                          disabled={
-                            newMatchForm?.players1[value]?.isGK === undefined
-                          }
-                          checked={newMatchForm?.players1[value]?.isGK ?? false}
-                          onChange={({ target }) => {
-                            setNewMatchForm((prev) => {
-                              const updatedPlayers = [...prev.players1];
-                              updatedPlayers[value] = {
-                                ...updatedPlayers[value],
-                                isGK: target.checked,
-                              };
-                              return {
-                                ...prev,
-                                players1: updatedPlayers,
-                              };
-                            });
-                          }}
-                        />
-                        <FormControl sx={{ flexGrow: 1 }}>
-                          <InputLabel id={`player${value}`}>{`Jugador #${
-                            value + 1
-                          }`}</InputLabel>
-                          <Select
-                            labelId={`player${value}`}
-                            value={newMatchForm?.players1[value]?.id ?? ""}
-                            label={`Jugador #${value + 1}`}
-                            sx={{ width: "100%", maxWidth: 150 }}
-                            disabled={newMatchForm.players1.length < index}
-                            onChange={({ target }) =>
-                              setNewMatchForm((prev) => {
-                                const updatedPlayers = [...prev.players1];
-                                updatedPlayers[value] = {
-                                  id: target.value,
-                                  goals: 0,
-                                  assists: 0,
-                                  isGK: false,
-                                };
-                                return {
-                                  ...prev,
-                                  players1: updatedPlayers,
-                                };
-                              })
-                            }
-                          >
-                            {players.map((player) => {
-                              const disable = handleShouldBeDisabled(player.id);
-                              return (
-                                <MenuItem
-                                  disabled={disable}
-                                  key={player.id}
-                                  value={player.id}
-                                >
-                                  {player.name}
-                                </MenuItem>
-                              );
-                            })}
-                          </Select>
-                        </FormControl>
-                        <TextField
-                          label="Goles"
-                          type="number"
-                          sx={{ width: "20%" }}
-                          disabled={!newMatchForm?.players1[value]?.id}
-                          value={newMatchForm?.players1[value]?.goals ?? 0}
-                          onChange={({ target }) =>
-                            setNewMatchForm((prev) => {
-                              const updatedPlayers = [...prev.players1];
-                              updatedPlayers[value] = {
-                                ...updatedPlayers[value],
-                                goals: parseInt(target.value),
-                              };
-                              return {
-                                ...prev,
-                                players1: updatedPlayers,
-                              };
-                            })
-                          }
-                        />
-                        <TextField
-                          label="Asistencias"
-                          type="number"
-                          sx={{ width: "20%" }}
-                          disabled={!newMatchForm?.players1[value]?.id}
-                          value={newMatchForm?.players1[value]?.assists ?? 0}
-                          onChange={({ target }) =>
-                            setNewMatchForm((prev) => {
-                              const updatedPlayers = [...prev.players1];
-                              updatedPlayers[value] = {
-                                ...updatedPlayers[value],
-                                assists: parseInt(target.value),
-                              };
-                              return {
-                                ...prev,
-                                players1: updatedPlayers,
-                              };
-                            })
-                          }
-                        />
-                      </Grid2>
-                    );
-                  })}
-                </Grid2>
-              </TabPanel>
-              <TabPanel
-                value="2"
-                sx={{ padding: 0, paddingRight: 1, marginTop: 1 }}
-              >
-                <Grid2
-                  container
-                  sx={{
-                    width: "100%",
-                    margin: 0,
-                    padding: 0,
-                  }}
-                  direction="column"
-                  spacing={2}
-                >
-                  <Typography sx={{ paddingLeft: 1 }}>P?</Typography>
-                  {[0, 1, 2, 3, 4, 5, 6].map((value, index) => {
-                    return (
-                      <Grid2
-                        key={value}
-                        container
-                        direction="row"
-                        sx={{ width: "100%" }}
-                        alignItems="center"
-                        justifyContent="center"
-                      >
-                        <Checkbox
-                          size="small"
-                          sx={{
-                            marginRight: 0,
-                            paddingRight: 0.5,
-                            paddingLeft: 0.5,
-                          }}
-                          disabled={
-                            newMatchForm?.players2[value]?.isGK === undefined
-                          }
-                          checked={newMatchForm?.players2[value]?.isGK ?? false}
-                          onChange={({ target }) => {
-                            setNewMatchForm((prev) => {
-                              const updatedPlayers = [...prev.players2];
-                              updatedPlayers[value] = {
-                                ...updatedPlayers[value],
-                                isGK: target.checked,
-                              };
-                              return {
-                                ...prev,
-                                players2: updatedPlayers,
-                              };
-                            });
-                          }}
-                        />
-                        <FormControl sx={{ flexGrow: 1 }}>
-                          <InputLabel id={`player${value}`}>{`Jugador #${
-                            value + 1
-                          }`}</InputLabel>
-                          <Select
-                            value={newMatchForm?.players2[value]?.id ?? ""}
-                            label={`Jugador #${value + 1}`}
-                            labelId={`player${value}`}
-                            disabled={newMatchForm.players2.length < index}
-                            sx={{ width: "100%", maxWidth: 150 }}
-                            onChange={({ target }) =>
-                              setNewMatchForm((prev) => {
-                                const updatedPlayers = [...prev.players2];
-                                updatedPlayers[value] = {
-                                  id: target.value,
-                                  goals: 0,
-                                  assists: 0,
-                                  isGK: false,
-                                };
-                                return {
-                                  ...prev,
-                                  players2: updatedPlayers,
-                                };
-                              })
-                            }
-                          >
-                            {players.map((player) => {
-                              const disable = handleShouldBeDisabled(player.id);
-                              return (
-                                <MenuItem
-                                  disabled={disable}
-                                  key={player.id}
-                                  value={player.id}
-                                >
-                                  {player.name}
-                                </MenuItem>
-                              );
-                            })}
-                          </Select>
-                        </FormControl>
-                        <TextField
-                          label="Goles"
-                          type="number"
-                          disabled={!newMatchForm?.players2[value]?.id}
-                          sx={{ width: "20%" }}
-                          value={newMatchForm?.players2[value]?.goals ?? 0}
-                          onChange={({ target }) =>
-                            setNewMatchForm((prev) => {
-                              const updatedPlayers = [...prev.players2];
-                              updatedPlayers[value] = {
-                                ...updatedPlayers[value],
-                                goals: parseInt(target.value),
-                              };
-                              return {
-                                ...prev,
-                                players2: updatedPlayers,
-                              };
-                            })
-                          }
-                        />
-                        <TextField
-                          label="Asistencias"
-                          type="number"
-                          disabled={!newMatchForm?.players2[value]?.id}
-                          sx={{ width: "20%" }}
-                          value={newMatchForm?.players2[value]?.assists ?? 0}
-                          onChange={({ target }) =>
-                            setNewMatchForm((prev) => {
-                              const updatedPlayers = [...prev.players2];
-                              updatedPlayers[value] = {
-                                ...updatedPlayers[value],
-                                assists: parseInt(target.value),
-                              };
-                              return {
-                                ...prev,
-                                players2: updatedPlayers,
-                              };
-                            })
-                          }
-                        />
-                      </Grid2>
-                    );
-                  })}
-                </Grid2>
-              </TabPanel>
-            </TabContext>
-            <Divider sx={{ marginTop: 1 }} />
+            ))}
           </Box>
-          <Grid2
-            container
-            direction="row"
-            alignItems="center"
-            justifyContent="space-around"
-            marginTop={2}
+        </TabPanel>
+
+        {/* Team 2 Panel */}
+        <TabPanel value="2" sx={{ p: { xs: 2, sm: 3 }, flex: 1, overflow: "auto", minHeight: 0 }}>
+          <Box sx={{ maxWidth: 600, mx: "auto" }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
+              <Box component="span" sx={{ width: 30, textAlign: "center", fontWeight: "bold" }}>P?</Box>
+              <Box component="span" sx={{ flex: 1 }}>Jugador</Box>
+              <Box component="span" sx={{ width: 60, textAlign: "center" }}>Goles</Box>
+              <Box component="span" sx={{ width: 60, textAlign: "center" }}>Asist.</Box>
+            </Typography>
+
+            {[0, 1, 2, 3, 4, 5, 6].map((value, index) => (
+              <Box
+                key={value}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  mb: 2,
+                  bgcolor: "white",
+                  p: 1,
+                  borderRadius: 2,
+                  boxShadow: 1,
+                }}
+              >
+                <Checkbox
+                  size="small"
+                  disabled={!newMatchForm?.players2[value]?.id}
+                  checked={newMatchForm?.players2[value]?.isGK ?? false}
+                  onChange={({ target }) => {
+                    setNewMatchForm((prev) => {
+                      const updatedPlayers = [...prev.players2];
+                      updatedPlayers[value] = {
+                        ...updatedPlayers[value],
+                        isGK: target.checked,
+                      };
+                      return { ...prev, players2: updatedPlayers };
+                    });
+                  }}
+                  sx={{ p: 0.5 }}
+                />
+
+                <FormControl sx={{ flex: 1, minWidth: 120 }} size="small">
+                  <InputLabel>{`J${value + 1}`}</InputLabel>
+                  <Select
+                    value={newMatchForm?.players2[value]?.id ?? ""}
+                    label={`J${value + 1}`}
+                    disabled={newMatchForm.players2.length < index}
+                    onChange={({ target }) =>
+                      setNewMatchForm((prev) => {
+                        const updatedPlayers = [...prev.players2];
+                        updatedPlayers[value] = {
+                          id: target.value,
+                          goals: 0,
+                          assists: 0,
+                          isGK: false,
+                        };
+                        return { ...prev, players2: updatedPlayers };
+                      })
+                    }
+                  >
+                    {players.map((player) => (
+                      <MenuItem
+                        disabled={handleShouldBeDisabled(player.id)}
+                        key={player.id}
+                        value={player.id}
+                      >
+                        {player.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <TextField
+                  type="number"
+                  size="small"
+                  sx={{ width: 60 }}
+                  disabled={!newMatchForm?.players2[value]?.id}
+                  value={newMatchForm?.players2[value]?.goals ?? 0}
+                  onChange={({ target }) =>
+                    setNewMatchForm((prev) => {
+                      const updatedPlayers = [...prev.players2];
+                      updatedPlayers[value] = {
+                        ...updatedPlayers[value],
+                        goals: parseInt(target.value) || 0,
+                      };
+                      return { ...prev, players2: updatedPlayers };
+                    })
+                  }
+                  InputProps={{ inputProps: { min: 0, style: { textAlign: "center" } } }}
+                />
+
+                <TextField
+                  type="number"
+                  size="small"
+                  sx={{ width: 60 }}
+                  disabled={!newMatchForm?.players2[value]?.id}
+                  value={newMatchForm?.players2[value]?.assists ?? 0}
+                  onChange={({ target }) =>
+                    setNewMatchForm((prev) => {
+                      const updatedPlayers = [...prev.players2];
+                      updatedPlayers[value] = {
+                        ...updatedPlayers[value],
+                        assists: parseInt(target.value) || 0,
+                      };
+                      return { ...prev, players2: updatedPlayers };
+                    })
+                  }
+                  InputProps={{ inputProps: { min: 0, style: { textAlign: "center" } } }}
+                />
+              </Box>
+            ))}
+          </Box>
+        </TabPanel>
+      </TabContext>
+
+      {/* Footer compacto y responsivo */}
+      <Box
+        sx={{
+          bgcolor: "white",
+          borderTop: 1,
+          borderColor: "divider",
+          p: { xs: 1, sm: 2 },
+          boxShadow: 3,
+          flexShrink: 0,
+          height: {xs: 220, sm: 120}
+        }}
+      >
+        <Box
+          sx={{
+            maxWidth: 900,
+            mx: "auto",
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            alignItems: { xs: "stretch", md: "center" },
+            gap: { xs: 1, md: 2 },
+            width: "100%",
+          }}
+        >
+          {/* Marcador */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flex: { xs: "none", md: 1 },
+              minWidth: 0,
+              gap: 1,
+              mb: { xs: 1, md: 0 },
+            }}
           >
-            <Typography>Marcador</Typography>
-            <TextField
-              sx={{ width: "35%" }}
-              disabled={true}
-              label="Equipo 1"
-              value={
-                newMatchForm.players1.reduce(
-                  (acc, value) => {
-                    if (value.goals === "") return acc;
-                    return parseInt(acc ?? 0) + (parseInt(value?.goals) ?? 0);
-                  },
-
-                  0
-                ) ?? 0
-              }
-              onChange={() => {}}
-            />
-            <TextField
-              sx={{ width: "35%" }}
-              disabled={true}
-              label="Equipo 2"
-              value={
-                newMatchForm.players2.reduce((acc, value) => {
+            <Box sx={{ textAlign: "center" }}>
+              <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: { xs: "0.7rem", sm: "0.8rem" } }}>
+                Equipo 1
+              </Typography>
+              <Typography variant="h4" fontWeight="bold" color="primary" sx={{ fontSize: { xs: "1.1rem", sm: "2rem" }, lineHeight: 1.1 }}>
+                {newMatchForm.players1.reduce((acc, value) => {
                   if (value.goals === "") return acc;
-
+                  return parseInt(acc ?? 0) + (parseInt(value?.goals) ?? 0);
+                }, 0) ?? 0}
+              </Typography>
+            </Box>
+            <Typography variant="h5" color="text.secondary" sx={{ fontSize: { xs: "1.1rem", sm: "1.5rem" }, mx: 1 }}>
+              -
+            </Typography>
+            <Box sx={{ textAlign: "center" }}>
+              <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: { xs: "0.7rem", sm: "0.8rem" } }}>
+                Equipo 2
+              </Typography>
+              <Typography variant="h4" fontWeight="bold" color="error" sx={{ fontSize: { xs: "1.1rem", sm: "2rem" }, lineHeight: 1.1 }}>
+                {newMatchForm.players2.reduce((acc, value) => {
+                  if (value.goals === "") return acc;
                   return parseInt(acc ?? 0) + parseInt(value?.goals ?? 0);
-                }, 0) ?? 0
-              }
-              onChange={() => {}}
-            />
-          </Grid2>
-          <Grid2
-            marginTop={2}
-            marginBottom={10}
-            direction="row"
-            alignItems="center"
-            flexGrow={1}
-            spacing={2}
-            container
+                }, 0) ?? 0}
+              </Typography>
+            </Box>
+          </Box>
+          {/* Fecha y botón */}
+          <Box
+            sx={{
+              display: "flex",
+              flex: 2,
+              flexDirection: { xs: "column", sm: "row" },
+              gap: 1,
+              alignItems: "center",
+              minWidth: 0,
+            }}
           >
             <DatePicker
-              label="Fecha"
+              label="Fecha del partido"
               value={newMatchForm.date}
               onChange={(value) =>
                 setNewMatchForm((prev) => ({ ...prev, date: value }))
               }
+              sx={{ flex: 1, minWidth: 0 }}
+              slotProps={{
+                textField: {
+                  size: "small",
+                },
+              }}
             />
             <Button
               disabled={isSaving}
               variant="contained"
+              size="medium"
               onClick={handleSave}
+              sx={{
+                px: 2,
+                py: 1,
+                fontSize: { xs: "0.9rem", sm: "1rem" },
+                fontWeight: 600,
+                textTransform: "none",
+                minWidth: { xs: "100%", sm: 120 },
+                width: { xs: "100%", sm: "auto" },
+                mt: { xs: 1, sm: 0 },
+              }}
             >
-              Guardar
+              {isSaving ? "Guardando..." : "Guardar"}
             </Button>
-          </Grid2>
-        </Grid2>
-      </Grid2>
+          </Box>
+        </Box>
+      </Box>
       <Outlet />
-    </>
+    </Box>
   );
 };
 
