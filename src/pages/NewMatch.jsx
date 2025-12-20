@@ -2,9 +2,7 @@ import {
   Box,
   Button,
   Checkbox,
-  Divider,
   FormControl,
-  Grid2,
   InputLabel,
   MenuItem,
   Select,
@@ -12,7 +10,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Outlet } from "react-router";
 import { getAllPlayers, saveNewMatch } from "../firebase/endpoints";
 import dayjs from "dayjs";
@@ -22,70 +20,70 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import { toast } from "react-toastify";
 
+const emptyPlayers = Array(7).fill({ id: '', goals: 0, assists: 0, isGK: false });
 const initialState = {
   date: dayjs(new Date()),
-  players1: [],
-  players2: [],
+  players1: emptyPlayers.map((p) => ({ ...p })),
+  players2: emptyPlayers.map((p) => ({ ...p })),
   goalsTeam1: 0,
   goalsTeam2: 0,
 };
 
-const NewMatch = ({ players = [] }) => {
-  const [isSaving, setIsSaving] = useState(false);
-  const [tabIndex, setTabIndex] = useState("1");
+// ...existing code...
+
+function NewMatch(props) {
+  // Estado y hooks principales
+  const [players, setPlayers] = useState([]);
   const [newMatchForm, setNewMatchForm] = useState(initialState);
+  const [tabIndex, setTabIndex] = useState("1");
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleSave = async () => {
-    //check double gks
-    if (newMatchForm.players1.filter((p) => p.isGK).length > 1) {
-      toast.error("Equipo 1 tiene mas de un portero");
-      return;
-    } else if (newMatchForm.players2.filter((p) => p.isGK).length > 1) {
-      toast.error("Equipo 2 tiene mas de un portero");
-      return;
-    } else if (newMatchForm.players1.length !== 7) {
-      toast.error("A Equipo 1 le faltan jugadores");
-      return;
-    } else if (newMatchForm.players2.length !== 7) {
-      toast.error("A Equipo 2 le faltan jugadores");
-      return;
-    }
-    setIsSaving(true);
-    const newMatchData = {
-      ...newMatchForm,
-      players1: newMatchForm.players1.map((player) => ({
-        ...player,
-        name: players.find((p) => p.id === player.id).name,
-      })),
-      players2: newMatchForm.players2.map((player) => ({
-        ...player,
-        name: players.find((p) => p.id === player.id).name,
-      })),
-    };
-    await saveNewMatch(newMatchData, players);
-    setIsSaving(false);
-    setNewMatchForm(initialState);
-    toast.success("Partido registrado");
-  };
+  useEffect(() => {
+    getAllPlayers(setPlayers)
+  }, []);
 
+  // Cambiar de tab
   const handleTabChange = (event, newValue) => {
     setTabIndex(newValue);
   };
 
+  // Deshabilitar jugadores ya seleccionados en ambos equipos
   const handleShouldBeDisabled = (playerId) => {
-    const players1 = newMatchForm?.players1.map((player) => player.id);
-    const players2 = newMatchForm?.players2.map((player) => player.id);
-
-    return players1.includes(playerId) || players2.includes(playerId);
+    return (
+      newMatchForm.players1.some((p) => p?.id === playerId) ||
+      newMatchForm.players2.some((p) => p?.id === playerId)
+    );
   };
 
-  useEffect(() => {
-    console.log(players);
-  }, [players]);
-
-  useEffect(() => {
-    console.log(newMatchForm);
-  }, [newMatchForm]);
+  // Guardar partido
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      // Validaciones básicas
+      const team1Valid = newMatchForm.players1.filter((p) => p?.id).length >= 1;
+      const team2Valid = newMatchForm.players2.filter((p) => p?.id).length >= 1;
+      if (!team1Valid || !team2Valid) {
+        toast.error("Ambos equipos deben tener al menos un jugador.");
+        setIsSaving(false);
+        return;
+      }
+      await saveNewMatch({
+        ...newMatchForm,
+        date: newMatchForm.date ? newMatchForm.date.toISOString() : null,
+      });
+      toast.success("Partido guardado correctamente");
+      setNewMatchForm({
+        ...initialState,
+        players1: emptyPlayers.map((p) => ({ ...p })),
+        players2: emptyPlayers.map((p) => ({ ...p })),
+      });
+      setTabIndex("1");
+    } catch (e) {
+      toast.error("Error al guardar el partido");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <Box
@@ -112,7 +110,6 @@ const NewMatch = ({ players = [] }) => {
         </Typography>
       </Box>
 
-      {/* Tabs */}
       <TabContext value={tabIndex}>
         <Box sx={{ bgcolor: "white", borderBottom: 1, borderColor: "divider", flexShrink: 0 }}>
           <TabList
@@ -128,11 +125,13 @@ const NewMatch = ({ players = [] }) => {
           >
             <Tab label="Equipo 1 🔵" value="1" />
             <Tab label="Equipo 2 🔴" value="2" />
+            <Tab label="Resumen y Guardar" value="3" />
           </TabList>
         </Box>
 
         {/* Team 1 Panel */}
         <TabPanel value="1" sx={{ p: { xs: 2, sm: 3 }, flex: 1, overflow: "auto", minHeight: 0 }}>
+          {/* ...equipo 1 code... */}
           <Box sx={{ maxWidth: 600, mx: "auto" }}>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
               <Box component="span" sx={{ width: 30, textAlign: "center", fontWeight: "bold" }}>P?</Box>
@@ -140,8 +139,7 @@ const NewMatch = ({ players = [] }) => {
               <Box component="span" sx={{ width: 60, textAlign: "center" }}>Goles</Box>
               <Box component="span" sx={{ width: 60, textAlign: "center" }}>Asist.</Box>
             </Typography>
-
-            {[0, 1, 2, 3, 4, 5, 6].map((value, index) => (
+            {(Array.isArray(newMatchForm.players1) ? newMatchForm.players1 : emptyPlayers).map((player, value) => (
               <Box
                 key={value}
                 sx={{
@@ -157,8 +155,8 @@ const NewMatch = ({ players = [] }) => {
               >
                 <Checkbox
                   size="small"
-                  disabled={!newMatchForm?.players1[value]?.id}
-                  checked={newMatchForm?.players1[value]?.isGK ?? false}
+                  disabled={!player?.id}
+                  checked={player?.isGK ?? false}
                   onChange={({ target }) => {
                     setNewMatchForm((prev) => {
                       const updatedPlayers = [...prev.players1];
@@ -171,13 +169,12 @@ const NewMatch = ({ players = [] }) => {
                   }}
                   sx={{ p: 0.5 }}
                 />
-
                 <FormControl sx={{ flex: 1, minWidth: 120 }} size="small">
                   <InputLabel>{`J${value + 1}`}</InputLabel>
                   <Select
-                    value={newMatchForm?.players1[value]?.id ?? ""}
+                    value={player?.id ?? ""}
                     label={`J${value + 1}`}
-                    disabled={newMatchForm.players1.length < index}
+                    disabled={newMatchForm.players1.length < value}
                     onChange={({ target }) =>
                       setNewMatchForm((prev) => {
                         const updatedPlayers = [...prev.players1];
@@ -191,7 +188,7 @@ const NewMatch = ({ players = [] }) => {
                       })
                     }
                   >
-                    {players.map((player) => (
+                    {players?.map((player) => (
                       <MenuItem
                         disabled={handleShouldBeDisabled(player.id)}
                         key={player.id}
@@ -202,13 +199,12 @@ const NewMatch = ({ players = [] }) => {
                     ))}
                   </Select>
                 </FormControl>
-
                 <TextField
                   type="number"
                   size="small"
                   sx={{ width: 60 }}
-                  disabled={!newMatchForm?.players1[value]?.id}
-                  value={newMatchForm?.players1[value]?.goals ?? 0}
+                  disabled={!player?.id}
+                  value={player?.goals ?? 0}
                   onChange={({ target }) =>
                     setNewMatchForm((prev) => {
                       const updatedPlayers = [...prev.players1];
@@ -221,13 +217,12 @@ const NewMatch = ({ players = [] }) => {
                   }
                   InputProps={{ inputProps: { min: 0, style: { textAlign: "center" } } }}
                 />
-
                 <TextField
                   type="number"
                   size="small"
                   sx={{ width: 60 }}
-                  disabled={!newMatchForm?.players1[value]?.id}
-                  value={newMatchForm?.players1[value]?.assists ?? 0}
+                  disabled={!player?.id}
+                  value={player?.assists ?? 0}
                   onChange={({ target }) =>
                     setNewMatchForm((prev) => {
                       const updatedPlayers = [...prev.players1];
@@ -247,6 +242,7 @@ const NewMatch = ({ players = [] }) => {
 
         {/* Team 2 Panel */}
         <TabPanel value="2" sx={{ p: { xs: 2, sm: 3 }, flex: 1, overflow: "auto", minHeight: 0 }}>
+          {/* ...equipo 2 code... */}
           <Box sx={{ maxWidth: 600, mx: "auto" }}>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
               <Box component="span" sx={{ width: 30, textAlign: "center", fontWeight: "bold" }}>P?</Box>
@@ -254,8 +250,7 @@ const NewMatch = ({ players = [] }) => {
               <Box component="span" sx={{ width: 60, textAlign: "center" }}>Goles</Box>
               <Box component="span" sx={{ width: 60, textAlign: "center" }}>Asist.</Box>
             </Typography>
-
-            {[0, 1, 2, 3, 4, 5, 6].map((value, index) => (
+            {(Array.isArray(newMatchForm.players2) ? newMatchForm.players2 : emptyPlayers).map((player, value) => (
               <Box
                 key={value}
                 sx={{
@@ -271,8 +266,8 @@ const NewMatch = ({ players = [] }) => {
               >
                 <Checkbox
                   size="small"
-                  disabled={!newMatchForm?.players2[value]?.id}
-                  checked={newMatchForm?.players2[value]?.isGK ?? false}
+                  disabled={!player?.id}
+                  checked={player?.isGK ?? false}
                   onChange={({ target }) => {
                     setNewMatchForm((prev) => {
                       const updatedPlayers = [...prev.players2];
@@ -285,13 +280,12 @@ const NewMatch = ({ players = [] }) => {
                   }}
                   sx={{ p: 0.5 }}
                 />
-
                 <FormControl sx={{ flex: 1, minWidth: 120 }} size="small">
                   <InputLabel>{`J${value + 1}`}</InputLabel>
                   <Select
-                    value={newMatchForm?.players2[value]?.id ?? ""}
+                    value={player?.id ?? ""}
                     label={`J${value + 1}`}
-                    disabled={newMatchForm.players2.length < index}
+                    disabled={newMatchForm.players2.length < value}
                     onChange={({ target }) =>
                       setNewMatchForm((prev) => {
                         const updatedPlayers = [...prev.players2];
@@ -305,7 +299,7 @@ const NewMatch = ({ players = [] }) => {
                       })
                     }
                   >
-                    {players.map((player) => (
+                    {players?.map((player) => (
                       <MenuItem
                         disabled={handleShouldBeDisabled(player.id)}
                         key={player.id}
@@ -316,13 +310,12 @@ const NewMatch = ({ players = [] }) => {
                     ))}
                   </Select>
                 </FormControl>
-
                 <TextField
                   type="number"
                   size="small"
                   sx={{ width: 60 }}
-                  disabled={!newMatchForm?.players2[value]?.id}
-                  value={newMatchForm?.players2[value]?.goals ?? 0}
+                  disabled={!player?.id}
+                  value={player?.goals ?? 0}
                   onChange={({ target }) =>
                     setNewMatchForm((prev) => {
                       const updatedPlayers = [...prev.players2];
@@ -335,13 +328,12 @@ const NewMatch = ({ players = [] }) => {
                   }
                   InputProps={{ inputProps: { min: 0, style: { textAlign: "center" } } }}
                 />
-
                 <TextField
                   type="number"
                   size="small"
                   sx={{ width: 60 }}
-                  disabled={!newMatchForm?.players2[value]?.id}
-                  value={newMatchForm?.players2[value]?.assists ?? 0}
+                  disabled={!player?.id}
+                  value={player?.assists ?? 0}
                   onChange={({ target }) =>
                     setNewMatchForm((prev) => {
                       const updatedPlayers = [...prev.players2];
@@ -358,117 +350,85 @@ const NewMatch = ({ players = [] }) => {
             ))}
           </Box>
         </TabPanel>
-      </TabContext>
 
-      {/* Footer compacto y responsivo */}
-      <Box
-        sx={{
-          bgcolor: "white",
-          borderTop: 1,
-          borderColor: "divider",
-          p: { xs: 1, sm: 2 },
-          boxShadow: 3,
-          flexShrink: 0,
-          height: {xs: 220, sm: 120}
-        }}
-      >
-        <Box
-          sx={{
-            maxWidth: 900,
-            mx: "auto",
-            display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            alignItems: { xs: "stretch", md: "center" },
-            gap: { xs: 1, md: 2 },
-            width: "100%",
-          }}
-        >
-          {/* Marcador */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flex: { xs: "none", md: 1 },
-              minWidth: 0,
-              gap: 1,
-              mb: { xs: 1, md: 0 },
-            }}
-          >
-            <Box sx={{ textAlign: "center" }}>
-              <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: { xs: "0.7rem", sm: "0.8rem" } }}>
-                Equipo 1
+        {/* Resumen y Guardar Panel */}
+        <TabPanel value="3" sx={{ p: { xs: 2, sm: 3 }, flex: 1, minHeight: 0, overflow: "auto" }}>
+          <Box sx={{ maxWidth: 600, mx: "auto", display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+            {/* Marcador */}
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2 }}>
+              <Box sx={{ textAlign: "center" }}>
+                <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: { xs: "0.8rem", sm: "0.9rem" } }}>
+                  Equipo 1
+                </Typography>
+                <Typography variant="h3" fontWeight="bold" color="primary" sx={{ fontSize: { xs: "2rem", sm: "3rem" }, lineHeight: 1.1 }}>
+                  {(Array.isArray(newMatchForm.players1)
+                    ? newMatchForm.players1
+                    : emptyPlayers
+                  ).reduce((acc, value) => {
+                    if (value.goals === "") return acc;
+                    return parseInt(acc ?? 0) + (parseInt(value?.goals) ?? 0);
+                  }, 0) ?? 0}
+                </Typography>
+              </Box>
+              <Typography variant="h4" color="text.secondary" sx={{ fontSize: { xs: "1.5rem", sm: "2.5rem" }, mx: 2 }}>
+                -
               </Typography>
-              <Typography variant="h4" fontWeight="bold" color="primary" sx={{ fontSize: { xs: "1.1rem", sm: "2rem" }, lineHeight: 1.1 }}>
-                {newMatchForm.players1.reduce((acc, value) => {
-                  if (value.goals === "") return acc;
-                  return parseInt(acc ?? 0) + (parseInt(value?.goals) ?? 0);
-                }, 0) ?? 0}
-              </Typography>
+              <Box sx={{ textAlign: "center" }}>
+                <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: { xs: "0.8rem", sm: "0.9rem" } }}>
+                  Equipo 2
+                </Typography>
+                <Typography variant="h3" fontWeight="bold" color="error" sx={{ fontSize: { xs: "2rem", sm: "3rem" }, lineHeight: 1.1 }}>
+                  {(Array.isArray(newMatchForm.players2)
+                    ? newMatchForm.players2
+                    : emptyPlayers
+                  ).reduce((acc, value) => {
+                    if (value.goals === "") return acc;
+                    return parseInt(acc ?? 0) + parseInt(value?.goals ?? 0);
+                  }, 0) ?? 0}
+                </Typography>
+              </Box>
             </Box>
-            <Typography variant="h5" color="text.secondary" sx={{ fontSize: { xs: "1.1rem", sm: "1.5rem" }, mx: 1 }}>
-              -
-            </Typography>
-            <Box sx={{ textAlign: "center" }}>
-              <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: { xs: "0.7rem", sm: "0.8rem" } }}>
-                Equipo 2
-              </Typography>
-              <Typography variant="h4" fontWeight="bold" color="error" sx={{ fontSize: { xs: "1.1rem", sm: "2rem" }, lineHeight: 1.1 }}>
-                {newMatchForm.players2.reduce((acc, value) => {
-                  if (value.goals === "") return acc;
-                  return parseInt(acc ?? 0) + parseInt(value?.goals ?? 0);
-                }, 0) ?? 0}
-              </Typography>
+            {/* Fecha y botón */}
+            <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2, width: "100%", alignItems: "center" }}>
+              <DatePicker
+                label="Fecha del partido"
+                value={newMatchForm.date}
+                onChange={(value) =>
+                  setNewMatchForm((prev) => ({ ...prev, date: value }))
+                }
+                sx={{ flex: 1, minWidth: 0 }}
+                slotProps={{
+                  textField: {
+                    size: "small",
+                  },
+                }}
+              />
+              <Button
+                disabled={isSaving}
+                variant="contained"
+                size="large"
+                onClick={handleSave}
+                sx={{
+                  px: 4,
+                  py: 1.5,
+                  fontSize: { xs: "1rem", sm: "1.2rem" },
+                  fontWeight: 600,
+                  textTransform: "none",
+                  minWidth: { xs: "100%", sm: 140 },
+                  width: { xs: "100%", sm: "auto" },
+                  mt: { xs: 1, sm: 0 },
+                }}
+              >
+                {isSaving ? "Guardando..." : "Guardar"}
+              </Button>
             </Box>
           </Box>
-          {/* Fecha y botón */}
-          <Box
-            sx={{
-              display: "flex",
-              flex: 2,
-              flexDirection: { xs: "column", sm: "row" },
-              gap: 1,
-              alignItems: "center",
-              minWidth: 0,
-            }}
-          >
-            <DatePicker
-              label="Fecha del partido"
-              value={newMatchForm.date}
-              onChange={(value) =>
-                setNewMatchForm((prev) => ({ ...prev, date: value }))
-              }
-              sx={{ flex: 1, minWidth: 0 }}
-              slotProps={{
-                textField: {
-                  size: "small",
-                },
-              }}
-            />
-            <Button
-              disabled={isSaving}
-              variant="contained"
-              size="medium"
-              onClick={handleSave}
-              sx={{
-                px: 2,
-                py: 1,
-                fontSize: { xs: "0.9rem", sm: "1rem" },
-                fontWeight: 600,
-                textTransform: "none",
-                minWidth: { xs: "100%", sm: 120 },
-                width: { xs: "100%", sm: "auto" },
-                mt: { xs: 1, sm: 0 },
-              }}
-            >
-              {isSaving ? "Guardando..." : "Guardar"}
-            </Button>
-          </Box>
-        </Box>
-      </Box>
+        </TabPanel>
+      </TabContext>
       <Outlet />
+
     </Box>
   );
-};
+}
 
 export default NewMatch;
