@@ -18,6 +18,7 @@ import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import HistoryIcon from "@mui/icons-material/History";
 import LogoutIcon from "@mui/icons-material/Logout";
 import LoginIcon from "@mui/icons-material/Login";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import { getAllGKs, getAllMatches, getAllPlayers } from "./firebase/endpoints";
 import { GoalkeepersTablePage } from "./pages/GoalkeepersTablePage";
 import { PlayersTablePage } from "./pages/PlayersTablePage";
@@ -27,6 +28,10 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { signOut } from "firebase/auth";
 import { auth } from "./firebaseConfig";
 import LoginPage from "./pages/LoginPage";
+import AdminRoute from "./components/AdminRoute";
+import UserManagementPage from "./pages/UserManagementPage";
+import { useAdmin } from "./hooks/useAdmin";
+import { createOrUpdateUser } from "./firebase/userManagement";
 import { useEffect, useState } from "react";
 import AddNewPlayerButton from "./components/AddNewPlayerButton";
 import HistoricMatchesList from "./components/HistoricMatchesList";
@@ -42,6 +47,14 @@ const App = () => {
   const [matches, setMatches] = useState([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [user] = useAuthState(auth);
+  const { isAdmin } = useAdmin(user);
+
+  // Crear/actualizar documento de usuario en Firestore al autenticarse
+  useEffect(() => {
+    if (user) {
+      createOrUpdateUser(user);
+    }
+  }, [user]);
 
   const handleLogout = async () => {
     try {
@@ -168,6 +181,21 @@ const App = () => {
             ))}
           </List>
           <Divider />
+          {isAdmin && (
+            <>
+              <List onClick={toggleDrawer(false)} onKeyDown={toggleDrawer(false)}>
+                <ListItem disablePadding>
+                  <ListItemButton onClick={() => handleMenuClick('/admin/usuarios')}>
+                    <ListItemIcon>
+                      <ManageAccountsIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Gestión de Usuarios" />
+                  </ListItemButton>
+                </ListItem>
+              </List>
+              <Divider />
+            </>
+          )}
           <List>
             {user ? (
               <ListItem disablePadding>
@@ -199,6 +227,11 @@ const App = () => {
           <Route path="/resumen-temporada" element={<SeasonSummaryPage />} />
           <Route path="/jugadores" element={<PlayersTablePage players={players} />} />
           <Route path="/porteros" element={<GoalkeepersTablePage goalkeepers={goalkeepers} />} />
+          <Route path="/admin/usuarios" element={
+            <AdminRoute>
+              <UserManagementPage />
+            </AdminRoute>
+          } />
           <Route path="admin/:admin">
             <Route path="" element={<NewMatch players={players} />}>
               <Route path="" element={<AddNewPlayerButton />} />

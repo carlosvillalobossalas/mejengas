@@ -22,6 +22,7 @@ import {
 } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
+import { createOrUpdateUser } from "../firebase/userManagement";
 
 const LoginPage = () => {
   const [tabValue, setTabValue] = useState(0);
@@ -44,11 +45,11 @@ const LoginPage = () => {
     e.preventDefault();
     setError("");
     setLoading(true);
-
     try {
       if (tabValue === 0) {
         // Iniciar sesión
-        await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        await createOrUpdateUser(userCredential.user);
         navigate("/");
       } else {
         // Registrarse
@@ -62,7 +63,8 @@ const LoginPage = () => {
           setLoading(false);
           return;
         }
-        await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await createOrUpdateUser(userCredential.user);
         navigate("/");
       }
     } catch (err) {
@@ -96,10 +98,10 @@ const LoginPage = () => {
   const handleGoogleSignIn = async () => {
     setError("");
     setLoading(true);
-
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const userCredential = await signInWithPopup(auth, provider);
+      await createOrUpdateUser(userCredential.user);
       navigate("/");
     } catch (err) {
       setError("Error al iniciar sesión con Google");
