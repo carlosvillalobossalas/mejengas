@@ -113,23 +113,30 @@ const LoginPage = () => {
   return (
     <Box
       sx={{
-        height: "100vh",
+        minHeight: "100vh",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
         bgcolor: "grey.50",
-        p: 2,
+        p: { xs: 2, sm: 3 },
       }}
     >
       <Card
         sx={{
-          maxWidth: 450,
+          maxWidth: { xs: "100%", sm: 450 },
           width: "100%",
-          p: 4,
+          p: { xs: 3, sm: 4 },
           boxShadow: 3,
+          m: { xs: 1, sm: 0 },
         }}
       >
-        <Typography variant="h4" textAlign="center" fontWeight="bold" gutterBottom>
+        <Typography 
+          variant="h4" 
+          textAlign="center" 
+          fontWeight="bold" 
+          gutterBottom
+          sx={{ fontSize: { xs: "1.5rem", sm: "2.125rem" }, mb: 2 }}
+        >
           ⚽ Mejengas
         </Typography>
 
@@ -137,10 +144,25 @@ const LoginPage = () => {
           value={tabValue}
           onChange={handleTabChange}
           centered
-          sx={{ mb: 3 }}
+          sx={{ mb: 2 }}
+          variant="fullWidth"
         >
-          <Tab label="Iniciar Sesión" />
-          <Tab label="Registrarse" />
+          <Tab 
+            label="Iniciar Sesión" 
+            sx={{ 
+              fontSize: { xs: "0.75rem", sm: "0.875rem" },
+              minHeight: { xs: 40, sm: 48 },
+              px: { xs: 1, sm: 2 },
+            }} 
+          />
+          <Tab 
+            label="Registrarse" 
+            sx={{ 
+              fontSize: { xs: "0.75rem", sm: "0.875rem" },
+              minHeight: { xs: 40, sm: 48 },
+              px: { xs: 1, sm: 2 },
+            }} 
+          />
         </Tabs>
 
         {error && (
@@ -159,6 +181,7 @@ const LoginPage = () => {
             onChange={(e) => setEmail(e.target.value)}
             sx={{ mb: 2 }}
             disabled={loading}
+            size="medium"
           />
 
           <TextField
@@ -170,12 +193,14 @@ const LoginPage = () => {
             onChange={(e) => setPassword(e.target.value)}
             sx={{ mb: 2 }}
             disabled={loading}
+            size="medium"
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
                     onClick={() => setShowPassword(!showPassword)}
                     edge="end"
+                    size="small"
                   >
                     {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
@@ -194,6 +219,7 @@ const LoginPage = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
               sx={{ mb: 2 }}
               disabled={loading}
+              size="medium"
             />
           )}
 
@@ -203,7 +229,11 @@ const LoginPage = () => {
             fullWidth
             size="large"
             disabled={loading}
-            sx={{ mb: 2 }}
+            sx={{ 
+              mb: 2,
+              py: { xs: 1.5, sm: 1.75 },
+              fontSize: { xs: "0.875rem", sm: "1rem" },
+            }}
           >
             {loading
               ? "Cargando..."
@@ -214,7 +244,7 @@ const LoginPage = () => {
         </Box>
 
         <Divider sx={{ my: 2 }}>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: "0.75rem", sm: "0.875rem" } }}>
             o continuar con
           </Typography>
         </Divider>
@@ -229,6 +259,8 @@ const LoginPage = () => {
           sx={{
             borderColor: "#4285f4",
             color: "#4285f4",
+            py: { xs: 1.5, sm: 1.75 },
+            fontSize: { xs: "0.875rem", sm: "1rem" },
             "&:hover": {
               borderColor: "#357ae8",
               bgcolor: "rgba(66, 133, 244, 0.04)",
