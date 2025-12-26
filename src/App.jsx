@@ -23,6 +23,7 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { getAllGKs, getAllMatches, getAllPlayers } from "./firebase/endpoints";
 import { GoalkeepersTablePage } from "./pages/GoalkeepersTablePage";
 import { PlayersTablePage } from "./pages/PlayersTablePage";
+import BalonDeOro from "./pages/BalonDeOro";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -79,6 +80,7 @@ const App = () => {
     { text: 'Resumen de Temporada', icon: <EmojiEventsIcon />, path: '/resumen-temporada' },
     { text: 'Jugadores', icon: <SportsSoccerIcon />, path: '/jugadores' },
     { text: 'Porteros', icon: <SportsHandballIcon />, path: '/porteros' },
+    { text: 'Balón de Oro', icon: <EmojiEventsIcon />, path: '/balon-de-oro' },
   ];
 
   const handleMenuClick = (path) => {
@@ -249,6 +251,11 @@ const App = () => {
           <Route path="/admin/nuevo-partido/agregar-jugador" element={
             <AdminRoute>
               <AddNewPlayerButton />
+            </AdminRoute>
+          } />
+          <Route path="/balon-de-oro" element={
+            <AdminRoute>
+              <BalonDeOro />
             </AdminRoute>
           } />
         </Routes>
