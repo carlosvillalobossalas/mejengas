@@ -24,6 +24,7 @@ import { getAllGKs, getAllMatches, getAllPlayers } from "./firebase/endpoints";
 import { GoalkeepersTablePage } from "./pages/GoalkeepersTablePage";
 import { PlayersTablePage } from "./pages/PlayersTablePage";
 import BalonDeOro from "./pages/BalonDeOro";
+import BallonDeOroResults from "./pages/BallonDeOroResults";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -256,6 +257,11 @@ const App = () => {
           <Route path="/balon-de-oro" element={
             <AdminRoute>
               <BalonDeOro />
+            </AdminRoute>
+          } />
+          <Route path="/balon-de-oro/resultados" element={
+            <AdminRoute>
+              <BallonDeOroResults />
             </AdminRoute>
           } />
         </Routes>

@@ -340,9 +340,11 @@ export const saveBallonDeOroVotes = async (userId, votes) => {
     const voteData = {
       userId,
       year,
-      oro: votes.oro,
-      plata: votes.plata,
-      bronce: votes.bronce,
+      primero: votes.primero,
+      segundo: votes.segundo,
+      tercero: votes.tercero,
+      cuarto: votes.cuarto,
+      quinto: votes.quinto,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -382,6 +384,59 @@ export const checkIfUserVoted = async (userId) => {
     };
   } catch (error) {
     console.error("Error verificando voto:", error);
+    throw new Error(error);
+  }
+};
+
+// Obtener todos los votos del año actual y calcular resultados con sistema de puntos
+export const getBallonDeOroResults = async () => {
+  try {
+    const year = new Date().getFullYear();
+    const votesRef = collection(db, "BallonDeOroVotes");
+    const q = query(votesRef, where("year", "==", year));
+    const snapshot = await getDocs(q);
+
+    // Sistema de puntuación: Primero = 6, Segundo = 4, Tercero = 3, Cuarto = 2, Quinto = 1
+    const pointsSystem = {
+      primero: 6,
+      segundo: 4,
+      tercero: 3,
+      cuarto: 2,
+      quinto: 1,
+    };
+
+    const playerPoints = {};
+    const allVotes = snapshot.docs.map((doc) => doc.data());
+
+    allVotes.forEach((vote) => {
+      // Sumar puntos por primero (6 puntos)
+      if (vote.primero) {
+        playerPoints[vote.primero] = (playerPoints[vote.primero] || 0) + pointsSystem.primero;
+      }
+      // Sumar puntos por segundo (4 puntos)
+      if (vote.segundo) {
+        playerPoints[vote.segundo] = (playerPoints[vote.segundo] || 0) + pointsSystem.segundo;
+      }
+      // Sumar puntos por tercero (3 puntos)
+      if (vote.tercero) {
+        playerPoints[vote.tercero] = (playerPoints[vote.tercero] || 0) + pointsSystem.tercero;
+      }
+      // Sumar puntos por cuarto (2 puntos)
+      if (vote.cuarto) {
+        playerPoints[vote.cuarto] = (playerPoints[vote.cuarto] || 0) + pointsSystem.cuarto;
+      }
+      // Sumar puntos por quinto (1 punto)
+      if (vote.quinto) {
+        playerPoints[vote.quinto] = (playerPoints[vote.quinto] || 0) + pointsSystem.quinto;
+      }
+    });
+
+    return {
+      totalVotes: allVotes.length,
+      playerPoints,
+    };
+  } catch (error) {
+    console.error("Error obteniendo resultados:", error);
     throw new Error(error);
   }
 };

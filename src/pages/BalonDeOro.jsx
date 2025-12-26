@@ -4,16 +4,18 @@ import { getAllPlayers, saveBallonDeOroVotes, checkIfUserVoted } from "../fireba
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebaseConfig";
 import { useRegisterCompleted } from "../hooks/useRegisterCompleted";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 
 function BalonDeOro() {
     const [players, setPlayers] = useState([]);
-    const [votes, setVotes] = useState({ oro: '', plata: '', bronce: '' });
+    const [votes, setVotes] = useState({ primero: '', segundo: '', tercero: '', cuarto: '', quinto: '' });
     const [user] = useAuthState(auth)
     const { registerCompleted } = useRegisterCompleted(user)
     const [loading, setLoading] = useState(false);
     const [hasVoted, setHasVoted] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         getAllPlayers((allPlayers) => {
@@ -34,9 +36,11 @@ function BalonDeOro() {
                     setHasVoted(result.hasVoted);
                     if (result.vote) {
                         setVotes({
-                            oro: result.vote.oro || '',
-                            plata: result.vote.plata || '',
-                            bronce: result.vote.bronce || '',
+                            primero: result.vote.primero || '',
+                            segundo: result.vote.segundo || '',
+                            tercero: result.vote.tercero || '',
+                            cuarto: result.vote.cuarto || '',
+                            quinto: result.vote.quinto || '',
                         });
                     }
                 } catch (error) {
@@ -100,62 +104,95 @@ function BalonDeOro() {
                     </Typography>
                     <Box sx={{ p: 2, bgcolor: "success.50", borderRadius: 1 }}>
                         <Typography variant="h6" fontWeight="bold" mb={1}>Tu votación:</Typography>
-                        <Typography variant="body1" display="block">🥇 Oro: {players.find(p => p.id === votes.oro)?.name || '-'}</Typography>
-                        <Typography variant="body1" display="block">🥈 Plata: {players.find(p => p.id === votes.plata)?.name || '-'}</Typography>
-                        <Typography variant="body1" display="block">🥉 Bronce: {players.find(p => p.id === votes.bronce)?.name || '-'}</Typography>
+                        <Typography variant="body1" display="block">🥇 Primer lugar: {players.find(p => p.id === votes.primero)?.name || '-'}</Typography>
+                        <Typography variant="body1" display="block">🥈 Segundo lugar: {players.find(p => p.id === votes.segundo)?.name || '-'}</Typography>
+                        <Typography variant="body1" display="block">🥉 Tercer lugar: {players.find(p => p.id === votes.tercero)?.name || '-'}</Typography>
+                        <Typography variant="body1" display="block">4️⃣ Cuarto lugar: {players.find(p => p.id === votes.cuarto)?.name || '-'}</Typography>
+                        <Typography variant="body1" display="block">5️⃣ Quinto lugar: {players.find(p => p.id === votes.quinto)?.name || '-'}</Typography>
                     </Box>
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        fullWidth
+                        onClick={() => navigate("/balon-de-oro/resultados")}
+                    >
+                        Ver Resultados
+                    </Button>
                 </Paper>
             </Box>
         )
     }
 
     return (
-        <Box sx={{ p: 2, minHeight: "100vh", bgcolor: "grey.50", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Paper sx={{ p: { xs: 2, sm: 4 }, maxWidth: 400, width: "100%", display: "flex", flexDirection: "column", gap: 3 }} elevation={3}>
+        <Box sx={{ p: 2, minHeight: "90vh", bgcolor: "grey.50", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Paper sx={{ p: { xs: 2, sm: 4 }, maxWidth: 400, width: "100%", display: "flex", flexDirection: "column", gap: 2 }} elevation={3}>
                 <Typography variant="h4" color="primary" fontWeight={700} align="center" mb={1}>
                     Balón de Oro
                 </Typography>
                 <Typography variant="h6" align="center" color="text.secondary">
                     Año 2025
                 </Typography>
-                <Typography variant="h6" align="center" color="text.secondary">
-                    Elige tu podio: selecciona un jugador diferente para cada medalla.
-                </Typography>
                 <FormControl fullWidth sx={{ mt: 2 }}>
-                    <InputLabel id="oro-label">Balón de Oro</InputLabel>
+                    <InputLabel id="primero-label">Primer Lugar</InputLabel>
                     <Select
-                        labelId="oro-label"
-                        value={votes.oro}
-                        label="Balón de Oro"
-                        onChange={handleChange('oro')}
+                        labelId="primero-label"
+                        value={votes.primero}
+                        label="Primer Lugar"
+                        onChange={handleChange('primero')}
                     >
-                        {getOptions([votes.plata, votes.bronce]).map((player) => (
+                        {getOptions([votes.segundo, votes.tercero, votes.cuarto, votes.quinto]).map((player) => (
                             <MenuItem key={player.id} value={player.id}>{player.name}</MenuItem>
                         ))}
                     </Select>
                 </FormControl>
                 <FormControl fullWidth>
-                    <InputLabel id="plata-label">Balón de Plata</InputLabel>
+                    <InputLabel id="segundo-label">Segundo Lugar</InputLabel>
                     <Select
-                        labelId="plata-label"
-                        value={votes.plata}
-                        label="Balón de Plata"
-                        onChange={handleChange('plata')}
+                        labelId="segundo-label"
+                        value={votes.segundo}
+                        label="Segundo Lugar"
+                        onChange={handleChange('segundo')}
                     >
-                        {getOptions([votes.oro, votes.bronce]).map((player) => (
+                        {getOptions([votes.primero, votes.tercero, votes.cuarto, votes.quinto]).map((player) => (
                             <MenuItem key={player.id} value={player.id}>{player.name}</MenuItem>
                         ))}
                     </Select>
                 </FormControl>
                 <FormControl fullWidth>
-                    <InputLabel id="bronce-label">Balón de Bronce</InputLabel>
+                    <InputLabel id="tercero-label">Tercer Lugar</InputLabel>
                     <Select
-                        labelId="bronce-label"
-                        value={votes.bronce}
-                        label="Balón de Bronce"
-                        onChange={handleChange('bronce')}
+                        labelId="tercero-label"
+                        value={votes.tercero}
+                        label="Tercer Lugar"
+                        onChange={handleChange('tercero')}
                     >
-                        {getOptions([votes.oro, votes.plata]).map((player) => (
+                        {getOptions([votes.primero, votes.segundo, votes.cuarto, votes.quinto]).map((player) => (
+                            <MenuItem key={player.id} value={player.id}>{player.name}</MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+                <FormControl fullWidth>
+                    <InputLabel id="cuarto-label">Cuarto Lugar</InputLabel>
+                    <Select
+                        labelId="cuarto-label"
+                        value={votes.cuarto}
+                        label="Cuarto Lugar"
+                        onChange={handleChange('cuarto')}
+                    >
+                        {getOptions([votes.primero, votes.segundo, votes.tercero, votes.quinto]).map((player) => (
+                            <MenuItem key={player.id} value={player.id}>{player.name}</MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+                <FormControl fullWidth>
+                    <InputLabel id="quinto-label">Quinto Lugar</InputLabel>
+                    <Select
+                        labelId="quinto-label"
+                        value={votes.quinto}
+                        label="Quinto Lugar"
+                        onChange={handleChange('quinto')}
+                    >
+                        {getOptions([votes.primero, votes.segundo, votes.tercero, votes.cuarto]).map((player) => (
                             <MenuItem key={player.id} value={player.id}>{player.name}</MenuItem>
                         ))}
                     </Select>
@@ -165,10 +202,19 @@ function BalonDeOro() {
                     color="primary"
                     size="large"
                     sx={{ mt: 2, fontWeight: 700 }}
-                    disabled={!votes.oro || !votes.plata || !votes.bronce || loading}
+                    disabled={!votes.primero || !votes.segundo || !votes.tercero || !votes.cuarto || !votes.quinto || loading}
                     onClick={handleSubmit}
                 >
                     {loading ? <CircularProgress size={24} /> : 'Enviar Votos'}
+                </Button>
+                <Button
+                    variant="outlined"
+                    color="primary"
+                    size="large"
+                    sx={{ mt: 1, fontWeight: 700 }}
+                    onClick={() => navigate("/balon-de-oro/resultados")}
+                >
+                    Ver Resultados
                 </Button>
             </Paper>
         </Box>
