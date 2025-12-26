@@ -332,3 +332,56 @@ export const recalculateAllSeasonSummaries = async () => {
     throw new Error(error);
   }
 };
+
+// Guardar votos del Balón de Oro
+export const saveBallonDeOroVotes = async (userId, votes) => {
+  try {
+    const year = new Date().getFullYear();
+    const voteData = {
+      userId,
+      year,
+      oro: votes.oro,
+      plata: votes.plata,
+      bronce: votes.bronce,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    // Verificar si el usuario ya votó este año
+    const votesRef = collection(db, "BallonDeOroVotes");
+    const q = query(votesRef, where("userId", "==", userId), where("year", "==", year));
+    const snapshot = await getDocs(q);
+
+    if (!snapshot.empty) {
+      // Actualizar voto existente
+      const voteId = snapshot.docs[0].id;
+      await updateDoc(doc(db, "BallonDeOroVotes", voteId), voteData);
+      return { success: true, message: "Voto actualizado correctamente", isUpdate: true };
+    } else {
+      // Crear nuevo voto
+      await addDoc(votesRef, voteData);
+      return { success: true, message: "Voto guardado correctamente", isUpdate: false };
+    }
+  } catch (error) {
+    console.error("Error guardando votos:", error);
+    throw new Error(error);
+  }
+};
+
+// Verificar si el usuario ya votó este año
+export const checkIfUserVoted = async (userId) => {
+  try {
+    const year = new Date().getFullYear();
+    const votesRef = collection(db, "BallonDeOroVotes");
+    const q = query(votesRef, where("userId", "==", userId), where("year", "==", year));
+    const snapshot = await getDocs(q);
+    
+    return {
+      hasVoted: !snapshot.empty,
+      vote: snapshot.empty ? null : snapshot.docs[0].data(),
+    };
+  } catch (error) {
+    console.error("Error verificando voto:", error);
+    throw new Error(error);
+  }
+};
