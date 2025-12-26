@@ -38,8 +38,14 @@ function BallonDeOroResults() {
     fetchResults();
   }, []);
 
-  const getPlayerName = (playerId) =>
-    players.find((p) => p.id === playerId)?.name || "Desconocido";
+  const getPlayerName = (playerId) => {
+    const player = players.find((p) => p.id === playerId);
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(player?.name);
+    if (!isEmail && player?.name) {
+      return player.name;
+    }
+    return player?.originalName || player?.name || "Desconocido";
+  };
 
   const getMedalColor = (position) => {
     switch (position) {
@@ -118,7 +124,7 @@ function BallonDeOroResults() {
 
         {/* 🥇🥈🥉 PODIO */}
         <Box mb={5}>
-          <Grid2 container spacing={2} alignItems="flex-end" justifyContent="center">
+          <Grid2 container spacing={1} alignItems="flex-end" justifyContent="center">
             {silver && (
               <Grid2 xs={12} md={3}>
                 <Card sx={{ bgcolor: getMedalColor(1), height: 180 }}>

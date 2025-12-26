@@ -77,6 +77,14 @@ function BalonDeOro() {
     // Filtrar opciones para que no se repitan
     const getOptions = (excludeIds = []) => players.filter((p) => !excludeIds.includes(p.id));
 
+    const getPlayerDisplay = (player) => {
+        const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(player?.name);
+        if (!isEmail && player?.name) {
+            return player.name;
+        }
+        return player?.originalName || player?.name || 'Sin nombre';
+    };
+
     if (!registerCompleted) {
         return (
             <Box sx={{ p: 2, minHeight: "80vh", bgcolor: "grey.50", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -104,11 +112,11 @@ function BalonDeOro() {
                     </Typography>
                     <Box sx={{ p: 2, bgcolor: "success.50", borderRadius: 1 }}>
                         <Typography variant="h6" fontWeight="bold" mb={1}>Tu votación:</Typography>
-                        <Typography variant="body1" display="block">🥇 Primer lugar: {players.find(p => p.id === votes.primero)?.name || '-'}</Typography>
-                        <Typography variant="body1" display="block">🥈 Segundo lugar: {players.find(p => p.id === votes.segundo)?.name || '-'}</Typography>
-                        <Typography variant="body1" display="block">🥉 Tercer lugar: {players.find(p => p.id === votes.tercero)?.name || '-'}</Typography>
-                        <Typography variant="body1" display="block">4️⃣ Cuarto lugar: {players.find(p => p.id === votes.cuarto)?.name || '-'}</Typography>
-                        <Typography variant="body1" display="block">5️⃣ Quinto lugar: {players.find(p => p.id === votes.quinto)?.name || '-'}</Typography>
+                        <Typography variant="body1" display="block">🥇 Primer lugar: {getPlayerDisplay(players.find(p => p.id === votes.primero)) || '-'}</Typography>
+                        <Typography variant="body1" display="block">🥈 Segundo lugar: {getPlayerDisplay(players.find(p => p.id === votes.segundo)) || '-'}</Typography>
+                        <Typography variant="body1" display="block">🥉 Tercer lugar: {getPlayerDisplay(players.find(p => p.id === votes.tercero)) || '-'}</Typography>
+                        <Typography variant="body1" display="block">4️⃣ Cuarto lugar: {getPlayerDisplay(players.find(p => p.id === votes.cuarto)) || '-'}</Typography>
+                        <Typography variant="body1" display="block">5️⃣ Quinto lugar: {getPlayerDisplay(players.find(p => p.id === votes.quinto)) || '-'}</Typography>
                     </Box>
                     <Button
                         variant="outlined"
@@ -141,7 +149,7 @@ function BalonDeOro() {
                         onChange={handleChange('primero')}
                     >
                         {getOptions([votes.segundo, votes.tercero, votes.cuarto, votes.quinto]).map((player) => (
-                            <MenuItem key={player.id} value={player.id}>{player.name}</MenuItem>
+                            <MenuItem key={player.id} value={player.id}>{getPlayerDisplay(player)}</MenuItem>
                         ))}
                     </Select>
                 </FormControl>
@@ -153,9 +161,11 @@ function BalonDeOro() {
                         label="Segundo Lugar"
                         onChange={handleChange('segundo')}
                     >
-                        {getOptions([votes.primero, votes.tercero, votes.cuarto, votes.quinto]).map((player) => (
-                            <MenuItem key={player.id} value={player.id}>{player.name}</MenuItem>
-                        ))}
+                        {getOptions([votes.primero, votes.tercero, votes.cuarto, votes.quinto]).map((player) => {
+                            return (
+                                <MenuItem key={player.id} value={player.id}>{getPlayerDisplay(player)}</MenuItem>
+                            )
+                        })}
                     </Select>
                 </FormControl>
                 <FormControl fullWidth>
@@ -167,7 +177,7 @@ function BalonDeOro() {
                         onChange={handleChange('tercero')}
                     >
                         {getOptions([votes.primero, votes.segundo, votes.cuarto, votes.quinto]).map((player) => (
-                            <MenuItem key={player.id} value={player.id}>{player.name}</MenuItem>
+                            <MenuItem key={player.id} value={player.id}>{getPlayerDisplay(player)}</MenuItem>
                         ))}
                     </Select>
                 </FormControl>
@@ -180,7 +190,7 @@ function BalonDeOro() {
                         onChange={handleChange('cuarto')}
                     >
                         {getOptions([votes.primero, votes.segundo, votes.tercero, votes.quinto]).map((player) => (
-                            <MenuItem key={player.id} value={player.id}>{player.name}</MenuItem>
+                            <MenuItem key={player.id} value={player.id}>{getPlayerDisplay(player)}</MenuItem>
                         ))}
                     </Select>
                 </FormControl>
@@ -193,7 +203,7 @@ function BalonDeOro() {
                         onChange={handleChange('quinto')}
                     >
                         {getOptions([votes.primero, votes.segundo, votes.tercero, votes.cuarto]).map((player) => (
-                            <MenuItem key={player.id} value={player.id}>{player.name}</MenuItem>
+                            <MenuItem key={player.id} value={player.id}>{getPlayerDisplay(player)}</MenuItem>
                         ))}
                     </Select>
                 </FormControl>
