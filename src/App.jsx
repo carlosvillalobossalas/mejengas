@@ -12,6 +12,7 @@ import {
   Typography,
   Divider,
   Avatar,
+  CircularProgress,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
@@ -25,7 +26,7 @@ import { GoalkeepersTablePage } from "./pages/GoalkeepersTablePage";
 import { PlayersTablePage } from "./pages/PlayersTablePage";
 import BalonDeOro from "./pages/BalonDeOro";
 import BallonDeOroResults from "./pages/BallonDeOroResults";
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { Route, Routes, useNavigate, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { signOut } from "firebase/auth";
@@ -49,8 +50,20 @@ const App = () => {
   const [goalkeepers, setGoalkeepers] = useState([]);
   const [matches, setMatches] = useState([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [user] = useAuthState(auth);
+  const [user, loadingAuth] = useAuthState(auth);
   const { isAdmin } = useAdmin(user);
+
+  // Ruta protegida solo por autenticación
+  const AuthRoute = ({ children }) => {
+    if (loadingAuth) {
+      return (
+        <Box sx={{ height: "calc(100vh - 56px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <CircularProgress />
+        </Box>
+      );
+    }
+    return user ? children : <Navigate to="/login" replace />;
+  };
 
   // Crear/actualizar documento de usuario en Firestore al autenticarse
   useEffect(() => {
@@ -255,14 +268,14 @@ const App = () => {
             </AdminRoute>
           } />
           <Route path="/balon-de-oro" element={
-            <AdminRoute>
+            <AuthRoute>
               <BalonDeOro />
-            </AdminRoute>
+            </AuthRoute>
           } />
           <Route path="/balon-de-oro/resultados" element={
-            <AdminRoute>
+            <AuthRoute>
               <BallonDeOroResults />
-            </AdminRoute>
+            </AuthRoute>
           } />
         </Routes>
       </Box>

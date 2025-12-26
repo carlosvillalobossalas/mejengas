@@ -88,20 +88,7 @@ function BalonDeOro() {
     // Validar si puede ver resultados (31 de diciembre a las 18:00)
     const canViewResults = new Date() >= new Date(2025, 11, 31, 18, 0, 0);
 
-    if (!registerCompleted) {
-        return (
-            <Box sx={{ p: 2, minHeight: "80vh", bgcolor: "grey.50", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Paper sx={{ p: { xs: 2, sm: 4 }, maxWidth: 400, width: "100%", display: "flex", flexDirection: "column", gap: 3 }} elevation={3}>
-                    <Typography variant="h4" color="error" fontWeight={700} align="center" mb={1}>
-                        Registro Incompleto
-                    </Typography>
-                    <Typography variant="h6" align="center" color="text.secondary">
-                        Espera o avisa al comité para completar tu registro.
-                    </Typography>
-                </Paper>
-            </Box>
-        )
-    }
+  
 
     if (hasVoted) {
         return (
@@ -155,6 +142,20 @@ function BalonDeOro() {
                         Ver Resultados
                     </Button>
                 </Box>
+            </Box>
+        )
+    }
+      if (!registerCompleted) {
+        return (
+            <Box sx={{ p: 2, minHeight: "80vh", bgcolor: "grey.50", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Paper sx={{ p: { xs: 2, sm: 4 }, maxWidth: 400, width: "100%", display: "flex", flexDirection: "column", gap: 3 }} elevation={3}>
+                    <Typography variant="h4" color="error" fontWeight={700} align="center" mb={1}>
+                        Registro Incompleto
+                    </Typography>
+                    <Typography variant="h6" align="center" color="text.secondary">
+                        Espera o avisa al comité para completar tu registro.
+                    </Typography>
+                </Paper>
             </Box>
         )
     }
