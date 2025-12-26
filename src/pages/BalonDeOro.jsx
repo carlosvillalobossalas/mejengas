@@ -138,8 +138,8 @@ function BalonDeOro() {
 
     if (!canViewResults === false) {
         return (
-            <Box sx={{ p: 2, minHeight: "80vh", bgcolor: "grey.50", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Paper sx={{ p: { xs: 2, sm: 4 }, maxWidth: 400, width: "100%", display: "flex", flexDirection: "column", gap: 3 }} elevation={3}>
+            <Box sx={{ bgcolor: "grey.50", minHeight: "100vh", overflow: "auto", p: 2, display: "flex", justifyContent: "center" }}>
+                <Box sx={{ p: { xs: 2, sm: 4 }, maxWidth: 400, width: "100%", display: "flex", flexDirection: "column", gap: 3, boxShadow: 3, borderRadius: 2 }}>
                     <Typography variant="h4" color="error" fontWeight={700} align="center" mb={1}>
                         🔒 Votación Cerrada
                     </Typography>
@@ -154,14 +154,14 @@ function BalonDeOro() {
                     >
                         Ver Resultados
                     </Button>
-                </Paper>
+                </Box>
             </Box>
         )
     }
 
     return (
-        <Box sx={{ p: 2, minHeight: "90vh", bgcolor: "grey.50", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Paper sx={{ p: { xs: 2, sm: 4 }, maxWidth: 400, width: "100%", display: "flex", flexDirection: "column", gap: 2 }} elevation={3}>
+        <Box sx={{ bgcolor: "grey.50", minHeight: "100vh", overflow: "auto", p: 2, display: "flex", justifyContent: "center" }}>
+            <Box sx={{ maxWidth: 400, width: "100%", display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
                 <Typography variant="h4" color="primary" fontWeight={700} align="center" mb={1}>
                     Balón de Oro
                 </Typography>
@@ -256,7 +256,7 @@ function BalonDeOro() {
                         Ver Resultados
                     </Button>
                 )}
-            </Paper>
+            </Box>
         </Box>
     );
 }
