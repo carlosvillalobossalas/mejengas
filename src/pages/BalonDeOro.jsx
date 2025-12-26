@@ -85,6 +85,9 @@ function BalonDeOro() {
         return player?.originalName || player?.name || 'Sin nombre';
     };
 
+    // Validar si puede ver resultados (31 de diciembre a las 18:00)
+    const canViewResults = new Date() >= new Date(2025, 11, 31, 18, 0, 0);
+
     if (!registerCompleted) {
         return (
             <Box sx={{ p: 2, minHeight: "80vh", bgcolor: "grey.50", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -118,6 +121,31 @@ function BalonDeOro() {
                         <Typography variant="body1" display="block">4️⃣ Cuarto lugar: {getPlayerDisplay(players.find(p => p.id === votes.cuarto)) || '-'}</Typography>
                         <Typography variant="body1" display="block">5️⃣ Quinto lugar: {getPlayerDisplay(players.find(p => p.id === votes.quinto)) || '-'}</Typography>
                     </Box>
+                    {canViewResults && (
+                        <Button
+                            variant="outlined"
+                            color="primary"
+                            fullWidth
+                            onClick={() => navigate("/balon-de-oro/resultados")}
+                        >
+                            Ver Resultados
+                        </Button>
+                    )}
+                </Paper>
+            </Box>
+        )
+    }
+
+    if (!canViewResults === false) {
+        return (
+            <Box sx={{ p: 2, minHeight: "80vh", bgcolor: "grey.50", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Paper sx={{ p: { xs: 2, sm: 4 }, maxWidth: 400, width: "100%", display: "flex", flexDirection: "column", gap: 3 }} elevation={3}>
+                    <Typography variant="h4" color="error" fontWeight={700} align="center" mb={1}>
+                        🔒 Votación Cerrada
+                    </Typography>
+                    <Typography variant="h6" align="center" color="text.secondary">
+                        El período de votación para el Balón de Oro 2025 ha finalizado.
+                    </Typography>
                     <Button
                         variant="outlined"
                         color="primary"
@@ -217,15 +245,17 @@ function BalonDeOro() {
                 >
                     {loading ? <CircularProgress size={24} /> : 'Enviar Votos'}
                 </Button>
-                <Button
-                    variant="outlined"
-                    color="primary"
-                    size="large"
-                    sx={{ mt: 1, fontWeight: 700 }}
-                    onClick={() => navigate("/balon-de-oro/resultados")}
-                >
-                    Ver Resultados
-                </Button>
+                {canViewResults && (
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        size="large"
+                        sx={{ mt: 1, fontWeight: 700 }}
+                        onClick={() => navigate("/balon-de-oro/resultados")}
+                    >
+                        Ver Resultados
+                    </Button>
+                )}
             </Paper>
         </Box>
     );
