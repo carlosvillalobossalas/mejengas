@@ -4,14 +4,9 @@ import {
   Grid2,
   Card,
   Typography,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
   Avatar,
   Button,
   Chip,
-  Alert,
   CircularProgress,
   Dialog,
   DialogTitle,
@@ -117,7 +112,7 @@ const UserManagementPage = () => {
       // Obtener el nombre actual del jugador antes de desenlazar
       const playerDoc = await getDoc(doc(db, "Players", user.playerId));
       const playerData = playerDoc.data();
-      
+
       // Actualizar documento de usuario
       await updateDoc(doc(db, "users", user.id), {
         playerId: null,
@@ -177,50 +172,35 @@ const UserManagementPage = () => {
             <Typography variant="h6" fontWeight="bold" gutterBottom>
               Usuarios Autenticados
             </Typography>
-            <List>
-              {users.map((user) => (
-                <ListItem
-                  key={user.id}
-                  sx={{
-                    border: 1,
-                    borderColor: "divider",
-                    borderRadius: 1,
-                    mb: 1,
-                  }}
-                  secondaryAction={
-                    <Box sx={{ display: "flex", gap: 1 }}>
-                      {user.playerId ? (
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          color="error"
-                          startIcon={<LinkOffIcon />}
-                          onClick={() => handleUnlinkUser(user)}
-                        >
-                          Desenlazar
-                        </Button>
-                      ) : (
-                        <Button
-                          size="small"
-                          variant="contained"
-                          startIcon={<LinkIcon />}
-                          onClick={() => handleLinkUser(user)}
-                        >
-                          Enlazar
-                        </Button>
-                      )}
-                    </Box>
-                  }
-                >
-                  <ListItemAvatar>
-                    <Avatar src={user.photoURL}>
+            <Box>
+              {users.map((user) => {
+                // console.log(user)
+                return (
+                  <Box
+                    key={user.id}
+                    sx={{
+                      border: 1,
+                      borderColor: "divider",
+                      borderRadius: 1,
+                      mb: 1,
+                      p: 2,
+                      display: "flex",
+                      flexDirection: { xs: "column", md: "row" },
+                      alignItems: { xs: "flex-start", md: "center" },
+                      gap: { xs: 2, md: 2 },
+                    }}
+                  >
+                    {/* Avatar */}
+                    <Avatar src={user.photoURL} sx={{ flexShrink: 0 }}>
                       <PersonIcon />
                     </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        {user.displayName || user.email}
+
+                    {/* Contenido principal */}
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5, flexWrap: "wrap" }}>
+                        <Typography variant="body2" fontWeight="bold" noWrap>
+                          {user.displayName || user.email}
+                        </Typography>
                         {user.role === "admin" && (
                           <Chip
                             icon={<AdminPanelSettingsIcon />}
@@ -230,29 +210,52 @@ const UserManagementPage = () => {
                           />
                         )}
                       </Box>
-                    }
-                    secondary={
-                      <>
+                      <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>
                         {user.email}
-                        {user.playerId && (
-                          <Chip
-                            label={`Jugador: ${getPlayerName(user.playerId)}`}
-                            size="small"
-                            color="success"
-                            sx={{ ml: 1 }}
-                          />
-                        )}
-                      </>
-                    }
-                  />
-                </ListItem>
-              ))}
+                      </Typography>
+                      {user.playerId && (
+                        <Chip
+                          label={`Jugador: ${getPlayerName(user.playerId)}`}
+                          size="small"
+                          color="success"
+                        />
+                      )}
+                    </Box>
+
+                    {/* Botones */}
+                    <Box sx={{ display: "flex", gap: 1, width: { xs: "100%", md: "auto" } }}>
+                      {user.playerId ? (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          color="error"
+                          startIcon={<LinkOffIcon />}
+                          onClick={() => handleUnlinkUser(user)}
+                          sx={{ flex: { xs: 1, md: 0 } }}
+                        >
+                          Desenlazar
+                        </Button>
+                      ) : (
+                        <Button
+                          size="small"
+                          variant="contained"
+                          startIcon={<LinkIcon />}
+                          onClick={() => handleLinkUser(user)}
+                          sx={{ flex: { xs: 1, md: 0 } }}
+                        >
+                          Enlazar
+                        </Button>
+                      )}
+                    </Box>
+                  </Box>
+                )
+              })}
               {users.length === 0 && (
                 <Typography variant="body2" color="text.secondary" textAlign="center" py={2}>
                   No hay usuarios registrados
                 </Typography>
               )}
-            </List>
+            </Box>
           </Card>
         </Grid2>
 
@@ -262,36 +265,40 @@ const UserManagementPage = () => {
             <Typography variant="h6" fontWeight="bold" gutterBottom>
               Jugadores del Sistema
             </Typography>
-            <List>
+            <Box>
               {players.map((player) => (
-                <ListItem
+                <Box
                   key={player.id}
                   sx={{
                     border: 1,
                     borderColor: player.userId ? "success.main" : "divider",
                     borderRadius: 1,
                     mb: 1,
+                    p: 1.5,
                     bgcolor: player.userId ? "success.50" : "transparent",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
                   }}
                 >
-                  <ListItemAvatar>
-                    <Avatar>
-                      {player.name[0]?.toUpperCase()}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={player.name}
-                    secondary={
-                      player.userId ? (
+                  <Avatar sx={{ flexShrink: 0 }}>
+                    {player.name[0]?.toUpperCase()}
+                  </Avatar>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography variant="body2" fontWeight="bold" noWrap>
+                      {player.name}
+                    </Typography>
+                    <Box sx={{ mt: 0.5 }}>
+                      {player.userId ? (
                         <Chip label="Enlazado" size="small" color="success" />
                       ) : (
                         <Chip label="Sin enlazar" size="small" color="default" />
-                      )
-                    }
-                  />
-                </ListItem>
+                      )}
+                    </Box>
+                  </Box>
+                </Box>
               ))}
-            </List>
+            </Box>
           </Card>
         </Grid2>
       </Grid2>
