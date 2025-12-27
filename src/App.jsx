@@ -26,6 +26,7 @@ import { GoalkeepersTablePage } from "./pages/GoalkeepersTablePage";
 import { PlayersTablePage } from "./pages/PlayersTablePage";
 import BalonDeOro from "./pages/BalonDeOro";
 import BallonDeOroResults from "./pages/BallonDeOroResults";
+import MiPerfilPage from "./pages/MiPerfilPage";
 import { Route, Routes, useNavigate, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -169,7 +170,23 @@ const App = () => {
           <Divider />
           {user && (
             <>
-              <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box 
+                sx={{ 
+                  p: 2, 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 2,
+                  cursor: 'pointer',
+                  '&:hover': {
+                    bgcolor: 'grey.100',
+                  },
+                  transition: 'background-color 0.2s',
+                }}
+                onClick={() => {
+                  navigate('/mi-perfil');
+                  setDrawerOpen(false);
+                }}
+              >
                 <Avatar src={user.photoURL} alt={user.displayName || user.email}>
                   {(user.displayName || user.email)?.[0]?.toUpperCase()}
                 </Avatar>
@@ -275,6 +292,11 @@ const App = () => {
           <Route path="/balon-de-oro/resultados" element={
             <AuthRoute>
               <BallonDeOroResults />
+            </AuthRoute>
+          } />
+          <Route path="/mi-perfil" element={
+            <AuthRoute>
+              <MiPerfilPage />
             </AuthRoute>
           } />
         </Routes>

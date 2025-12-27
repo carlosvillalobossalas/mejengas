@@ -440,3 +440,39 @@ export const getBallonDeOroResults = async () => {
     throw new Error(error);
   }
 };
+
+// Obtener jugador por userId
+export const getPlayerByUserId = async (userId) => {
+  try {
+    const playersRef = collection(db, "Players");
+    const q = query(playersRef, where("userId", "==", userId));
+    const querySnapshot = await getDocs(q);
+    
+    if (!querySnapshot.empty) {
+      const doc = querySnapshot.docs[0];
+      return {
+        id: doc.id,
+        ...doc.data(),
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error("Error getting player by userId:", error);
+    throw new Error(error);
+  }
+};
+
+// Actualizar perfil del jugador
+export const updatePlayerProfile = async (playerId, updates) => {
+  try {
+    const playerRef = doc(db, "Players", playerId);
+    await updateDoc(playerRef, {
+      ...updates,
+      updatedAt: new Date(),
+    });
+    return true;
+  } catch (error) {
+    console.error("Error updating player profile:", error);
+    throw new Error(error);
+  }
+};
