@@ -11,6 +11,10 @@ import {
   InputAdornment,
   Tabs,
   Tab,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import GoogleIcon from "@mui/icons-material/Google";
@@ -19,6 +23,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
@@ -32,6 +37,10 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetSuccess, setResetSuccess] = useState(false);
+  const [resetError, setResetError] = useState("");
   const navigate = useNavigate();
 
   const handleTabChange = (event, newValue) => {
@@ -105,6 +114,40 @@ const LoginPage = () => {
       navigate("/");
     } catch (err) {
       setError("Error al iniciar sesión con Google");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    setResetError("");
+    setResetSuccess(false);
+    
+    if (!resetEmail) {
+      setResetError("Por favor ingresa tu correo electrónico");
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, resetEmail);
+      setResetSuccess(true);
+      setTimeout(() => {
+        setResetDialogOpen(false);
+        setResetEmail("");
+        setResetSuccess(false);
+      }, 3000);
+    } catch (err) {
+      switch (err.code) {
+        case "auth/invalid-email":
+          setResetError("Correo electrónico inválido");
+          break;
+        case "auth/user-not-found":
+          setResetError("No existe una cuenta con este correo");
+          break;
+        default:
+          setResetError("Error al enviar el correo. Intenta nuevamente.");
+      }
     } finally {
       setLoading(false);
     }
@@ -263,6 +306,27 @@ const LoginPage = () => {
             </Button>
           </Box>
 
+          {tabValue === 0 && (
+            <Box sx={{ textAlign: "center", mb: 2 }}>
+              <Button
+                variant="text"
+                onClick={() => {
+                  setResetDialogOpen(true);
+                  setResetError("");
+                  setResetSuccess(false);
+                }}
+                disabled={loading}
+                sx={{
+                  fontSize: { xs: "0.85rem", sm: "0.9rem" },
+                  textTransform: "none",
+                  color: "primary.main",
+                }}
+              >
+                ¿Olvidaste tu contraseña?
+              </Button>
+            </Box>
+          )}
+
           <Divider sx={{ my: 3 }}>
             <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}>
               o continuar con
@@ -291,6 +355,73 @@ const LoginPage = () => {
           </Button>
         </Box>
       </Box>
+
+      {/* Dialog para recuperar contraseña */}
+      <Dialog
+        open={resetDialogOpen}
+        onClose={() => {
+          if (!loading) {
+            setResetDialogOpen(false);
+            setResetEmail("");
+            setResetError("");
+            setResetSuccess(false);
+          }
+        }}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Recuperar Contraseña</DialogTitle>
+        <DialogContent>
+          {resetSuccess ? (
+            <Alert severity="success" sx={{ mt: 1 }}>
+              ¡Correo enviado! Revisa tu bandeja de entrada.
+            </Alert>
+          ) : (
+            <>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2, mt: 1 }}>
+                Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
+              </Typography>
+              {resetError && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {resetError}
+                </Alert>
+              )}
+              <TextField
+                label="Correo electrónico"
+                type="email"
+                fullWidth
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                disabled={loading}
+                autoFocus
+              />
+            </>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          {!resetSuccess && (
+            <>
+              <Button
+                onClick={() => {
+                  setResetDialogOpen(false);
+                  setResetEmail("");
+                  setResetError("");
+                }}
+                disabled={loading}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handlePasswordReset}
+                variant="contained"
+                disabled={loading}
+              >
+                {loading ? "Enviando..." : "Enviar"}
+              </Button>
+            </>
+          )}
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
