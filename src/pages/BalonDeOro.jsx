@@ -15,39 +15,52 @@ function BalonDeOro() {
     const { registerCompleted } = useRegisterCompleted(user)
     const [loading, setLoading] = useState(false);
     const [hasVoted, setHasVoted] = useState(false);
+    const [initialized, setInitialized] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
+        if (!user) return;
+        
+        let playersLoaded = false;
+        let voteChecked = false;
+
+        const checkInitialized = () => {
+            if (playersLoaded && voteChecked) {
+                setInitialized(true);
+            }
+        };
+
         getAllPlayers((allPlayers) => {
             setPlayers(
                 user?.uid
                     ? allPlayers.filter((player) => player?.userId !== user.uid)
                     : allPlayers
             );
+            playersLoaded = true;
+            checkInitialized();
         });
-    }, [user]);
 
-    // Verificar si el usuario ya votó
-    useEffect(() => {
         const checkVote = async () => {
-            if (user?.uid) {
-                try {
-                    const result = await checkIfUserVoted(user.uid);
-                    setHasVoted(result.hasVoted);
-                    if (result.vote) {
-                        setVotes({
-                            primero: result.vote.primero || '',
-                            segundo: result.vote.segundo || '',
-                            tercero: result.vote.tercero || '',
-                            cuarto: result.vote.cuarto || '',
-                            quinto: result.vote.quinto || '',
-                        });
-                    }
-                } catch (error) {
-                    console.error("Error checking vote:", error);
+            try {
+                const result = await checkIfUserVoted(user.uid);
+                setHasVoted(result.hasVoted);
+                if (result.vote) {
+                    setVotes({
+                        primero: result.vote.primero || '',
+                        segundo: result.vote.segundo || '',
+                        tercero: result.vote.tercero || '',
+                        cuarto: result.vote.cuarto || '',
+                        quinto: result.vote.quinto || '',
+                    });
                 }
+            } catch (error) {
+                console.error("Error checking vote:", error);
+            } finally {
+                voteChecked = true;
+                checkInitialized();
             }
         };
+
         checkVote();
     }, [user]);
 
@@ -88,7 +101,13 @@ function BalonDeOro() {
     // Validar si puede ver resultados (31 de diciembre a las 18:00)
     const canViewResults = new Date() >= new Date(2025, 11, 31, 18, 0, 0);
 
-  
+    if (!initialized) {
+        return (
+            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+                <CircularProgress />
+            </Box>
+        )
+    }
 
     if (hasVoted) {
         return (
@@ -123,7 +142,7 @@ function BalonDeOro() {
         )
     }
 
-    if (!canViewResults === false) {
+    if (!canViewResults && hasVoted) {
         return (
             <Box sx={{ bgcolor: "grey.50", minHeight: "100vh", overflow: "auto", p: 2, display: "flex", justifyContent: "center" }}>
                 <Box sx={{ p: { xs: 2, sm: 4 }, maxWidth: 400, width: "100%", display: "flex", flexDirection: "column", gap: 3, boxShadow: 3, borderRadius: 2 }}>
@@ -145,7 +164,7 @@ function BalonDeOro() {
             </Box>
         )
     }
-      if (!registerCompleted) {
+    if (!registerCompleted) {
         return (
             <Box sx={{ p: 2, minHeight: "80vh", bgcolor: "grey.50", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Paper sx={{ p: { xs: 2, sm: 4 }, maxWidth: 400, width: "100%", display: "flex", flexDirection: "column", gap: 3 }} elevation={3}>
