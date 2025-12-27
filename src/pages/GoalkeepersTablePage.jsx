@@ -10,6 +10,7 @@ import {
   TableRow,
   Paper,
   TableSortLabel,
+  Avatar,
 } from "@mui/material";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 import ShieldIcon from "@mui/icons-material/Shield";
@@ -312,10 +313,29 @@ export const GoalkeepersTablePage = ({ goalkeepers }) => {
                         fontSize: { xs: "0.7rem", sm: "0.875rem" },
                         px: { xs: 0.5, sm: 2 },
                         py: { xs: 0.5, sm: 1 },
-                        whiteSpace: "nowrap",
+                        maxWidth: { xs: 100, sm: 150 },
                       }}
                     >
-                       {getPlayerDisplay(gk)}
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <Avatar
+                          src={gk.photoURL}
+                          alt={getPlayerDisplay(gk)}
+                          sx={{ width: { xs: 24, sm: 32 }, height: { xs: 24, sm: 32 } }}
+                        >
+                          {getPlayerDisplay(gk)?.[0]?.toUpperCase()}
+                        </Avatar>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            fontSize: { xs: "0.7rem", sm: "0.875rem" },
+                          }}
+                        >
+                          {getPlayerDisplay(gk)}
+                        </Typography>
+                      </Box>
                     </TableCell>
                     <TableCell
                       align="center"
