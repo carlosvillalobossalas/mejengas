@@ -26,6 +26,14 @@ export const PlayersTablePage = ({ players }) => {
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
   };
+  
+  const getPlayerDisplay = (player) => {
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(player?.name);
+    if (!isEmail && player?.name) {
+      return player.name;
+    }
+    return player?.originalName || player?.name || 'Sin nombre';
+  };
 
   const sortedPlayers = [...players].sort((a, b) => {
     let aValue = a[orderBy];
@@ -293,7 +301,7 @@ export const PlayersTablePage = ({ players }) => {
                         whiteSpace: "nowrap",
                       }}
                     >
-                      {player.name}
+                      {getPlayerDisplay(player)}
                     </TableCell>
                     <TableCell
                       align="center"
@@ -321,7 +329,7 @@ export const PlayersTablePage = ({ players }) => {
                     </TableCell>
                     <TableCell
                       align="center"
-                      sx={{ 
+                      sx={{
                         fontSize: { xs: "0.7rem", sm: "0.875rem" },
                         px: { xs: 0.5, sm: 2 },
                         py: { xs: 0.5, sm: 1 },

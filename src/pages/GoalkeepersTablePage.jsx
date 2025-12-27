@@ -27,6 +27,14 @@ export const GoalkeepersTablePage = ({ goalkeepers }) => {
     setOrderBy(property);
   };
 
+  const getPlayerDisplay = (player) => {
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(player?.name);
+    if (!isEmail && player?.name) {
+      return player.name;
+    }
+    return player?.originalName || player?.name || 'Sin nombre';
+  };
+
   const sortedGoalkeepers = [...goalkeepers].sort((a, b) => {
     let aValue = a[orderBy];
     let bValue = b[orderBy];
@@ -313,7 +321,7 @@ export const GoalkeepersTablePage = ({ goalkeepers }) => {
                         whiteSpace: "nowrap",
                       }}
                     >
-                      {gk.name}
+                       {getPlayerDisplay(gk)}
                     </TableCell>
                     <TableCell
                       align="center"
@@ -353,7 +361,7 @@ export const GoalkeepersTablePage = ({ goalkeepers }) => {
                     </TableCell>
                     <TableCell
                       align="center"
-                      sx={{ 
+                      sx={{
                         fontSize: { xs: "0.7rem", sm: "0.875rem" },
                         px: { xs: 0.5, sm: 2 },
                         py: { xs: 0.5, sm: 1 },
