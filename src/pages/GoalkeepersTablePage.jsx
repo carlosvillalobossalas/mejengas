@@ -16,6 +16,7 @@ import ShieldIcon from "@mui/icons-material/Shield";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import Stadium from "@mui/icons-material/Stadium";
 import { useState } from "react";
+import { getPlayerDisplay } from "../utils/playersDisplayName";
 
 export const GoalkeepersTablePage = ({ goalkeepers }) => {
   const [orderBy, setOrderBy] = useState("cleanSheet");
@@ -27,13 +28,6 @@ export const GoalkeepersTablePage = ({ goalkeepers }) => {
     setOrderBy(property);
   };
 
-  const getPlayerDisplay = (player) => {
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(player?.name);
-    if (!isEmail && player?.name) {
-      return player.name;
-    }
-    return player?.originalName || player?.name || 'Sin nombre';
-  };
 
   const sortedGoalkeepers = [...goalkeepers].sort((a, b) => {
     let aValue = a[orderBy];

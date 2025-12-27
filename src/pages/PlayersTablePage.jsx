@@ -16,6 +16,7 @@ import AssistIcon from "/assets/shoe.png";
 import { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebaseConfig";
+import { getPlayerDisplay } from "../utils/playersDisplayName";
 
 export const PlayersTablePage = ({ players }) => {
   const [orderBy, setOrderBy] = useState("goals");
@@ -26,14 +27,7 @@ export const PlayersTablePage = ({ players }) => {
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
   };
-  
-  const getPlayerDisplay = (player) => {
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(player?.name);
-    if (!isEmail && player?.name) {
-      return player.name;
-    }
-    return player?.originalName || player?.name || 'Sin nombre';
-  };
+
 
   const sortedPlayers = [...players].sort((a, b) => {
     let aValue = a[orderBy];
