@@ -10,6 +10,7 @@ import {
   TableRow,
   Paper,
   TableSortLabel,
+  Avatar,
 } from "@mui/material";
 import { SportsSoccer, Stadium } from "@mui/icons-material";
 import AssistIcon from "/assets/shoe.png";
@@ -40,6 +41,9 @@ export const PlayersTablePage = ({ players }) => {
     } else if (orderBy === "assistsPerMatch") {
       aValue = a.matches > 0 ? a.assists / a.matches : 0;
       bValue = b.matches > 0 ? b.assists / b.matches : 0;
+    } else if (orderBy === "goalsAndAssists") {
+      aValue = a.goals + a.assists;
+      bValue = b.goals + b.assists;
     }
 
     if (orderBy === "name") {
@@ -193,6 +197,27 @@ export const PlayersTablePage = ({ players }) => {
                   }}
                 >
                   <TableSortLabel
+                    active={orderBy === "goalsAndAssists"}
+                    direction={orderBy === "goalsAndAssists" ? order : "asc"}
+                    onClick={() => handleSort("goalsAndAssists")}
+                    sx={{
+                      color: "white !important",
+                      "&:hover": { color: "white !important" },
+                      "& .MuiTableSortLabel-icon": { color: "white !important" },
+                    }}
+                  >
+                    G/A
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell
+                  align="center"
+                  sx={{
+                    color: "white",
+                    fontWeight: "bold",
+                    fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                  }}
+                >
+                  <TableSortLabel
                     active={orderBy === "matches"}
                     direction={orderBy === "matches" ? order : "asc"}
                     onClick={() => handleSort("matches")}
@@ -290,12 +315,31 @@ export const PlayersTablePage = ({ players }) => {
                       sx={{
                         fontWeight: index < 3 ? "bold" : "normal",
                         fontSize: { xs: "0.7rem", sm: "0.875rem" },
-                        px: { xs: 0.5, sm: 2 },
+                        px: { xs: 0, sm: 2 },
                         py: { xs: 0.5, sm: 1 },
-                        whiteSpace: "nowrap",
+                        maxWidth: { xs: 115, sm: 150 },
                       }}
                     >
-                      {getPlayerDisplay(player)}
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <Avatar
+                          src={player.photoURL}
+                          alt={getPlayerDisplay(player)}
+                          sx={{ width: { xs: 24, sm: 32 }, height: { xs: 24, sm: 32 } }}
+                        >
+                          {getPlayerDisplay(player)?.[0]?.toUpperCase()}
+                        </Avatar>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            fontSize: { xs: "0.7rem", sm: "0.875rem" },
+                          }}
+                        >
+                          {getPlayerDisplay(player)}
+                        </Typography>
+                      </Box>
                     </TableCell>
                     <TableCell
                       align="center"
@@ -320,6 +364,18 @@ export const PlayersTablePage = ({ players }) => {
                       }}
                     >
                       {player.assists}
+                    </TableCell>
+                    <TableCell
+                      align="center"
+                      sx={{
+                        fontWeight: "bold",
+                        color: "warning.main",
+                        fontSize: { xs: "0.7rem", sm: "0.875rem" },
+                        px: { xs: 0.5, sm: 2 },
+                        py: { xs: 0.5, sm: 1 },
+                      }}
+                    >
+                      {player.goals + player.assists}
                     </TableCell>
                     <TableCell
                       align="center"
