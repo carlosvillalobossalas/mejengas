@@ -101,7 +101,7 @@ function BallonDeOroResults() {
     const [gold, silver, bronze] = ranking;
 
     return (
-        <Box sx={{ bgcolor: "grey.50", height: "100dvh" }}>
+        <Box sx={{ bgcolor: "grey.50", height: "100dvh" }} overflow={'auto'}>
             <Typography
                 variant="h4"
                 align="center"
@@ -205,7 +205,7 @@ function BallonDeOroResults() {
                 📊 Ranking General
             </Typography>
 
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, px: 2, pb: 10, }} height={300} overflow={'auto'}>
+            <Grid2 container spacing={1} px={2} mb={10} flexDirection={'column'} overflow="auto">
                 {ranking.map((player, index) => (
                     <Box
                         key={player.playerId}
@@ -234,7 +234,7 @@ function BallonDeOroResults() {
                         />
                     </Box>
                 ))}
-            </Box>
+            </Grid2>
         </Box>
     );
 }
