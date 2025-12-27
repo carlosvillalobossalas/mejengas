@@ -12,7 +12,7 @@ import {
   TableSortLabel,
   Avatar,
 } from "@mui/material";
-import { SportsSoccer, Stadium } from "@mui/icons-material";
+import { SportsSoccer, Stadium, Stars } from "@mui/icons-material";
 import AssistIcon from "/assets/shoe.png";
 import { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
@@ -206,7 +206,17 @@ export const PlayersTablePage = ({ players }) => {
                       "& .MuiTableSortLabel-icon": { color: "white !important" },
                     }}
                   >
-                    G/A
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 0.5,
+                      }}
+                    >
+                      <Stars sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }} />
+                      <span>G/A</span>
+                    </Box>
                   </TableSortLabel>
                 </TableCell>
                 <TableCell
