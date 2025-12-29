@@ -88,10 +88,12 @@ const UserManagementPage = () => {
         updatedAt: new Date(),
       });
 
-      // Actualizar documento de jugador - incluye el displayName del usuario
+      // Actualizar documento de jugador - incluye el displayName y photoURL del usuario
       await updateDoc(doc(db, "Players", selectedPlayerId), {
         userId: selectedUser.id,
         name: selectedUser.displayName || selectedUser.email,
+        // Guardar la foto de perfil si viene de Google u otro proveedor
+        ...(selectedUser.photoURL && { photoURL: selectedUser.photoURL }),
         // Guardar el nombre original solo si no existe ya (para poder restaurarlo al desenlazar)
         ...((!playerData.originalName) && { originalName: playerData.name }),
       });
