@@ -28,7 +28,6 @@ const AddNewPlayerButton = () => {
   const [newPlayerForm, setNewPlayerForm] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
-  const { admin } = useParams();
   const saveNewPlayer = async () => {
     if (newPlayerForm.length > 0) {
       setIsSaving(true);
@@ -44,7 +43,6 @@ const AddNewPlayerButton = () => {
     }
   };
 
-  if (admin !== "true") return <></>;
   return (
     <>
       <Fab

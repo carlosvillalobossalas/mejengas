@@ -20,6 +20,7 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import { toast } from "react-toastify";
 import { getPlayerDisplay } from "../utils/playersDisplayName";
+import AddNewPlayerButton from "../components/AddNewPlayerButton";
 
 const emptyPlayers = Array(7).fill({ id: '', goals: 0, assists: 0, isGK: false });
 const initialState = {
@@ -426,8 +427,8 @@ function NewMatch(props) {
           </Box>
         </TabPanel>
       </TabContext>
+      <AddNewPlayerButton />
       <Outlet />
-
     </Box>
   );
 }

@@ -38,7 +38,6 @@ import UserManagementPage from "./pages/UserManagementPage";
 import { useAdmin } from "./hooks/useAdmin";
 import { createOrUpdateUser } from "./firebase/userManagement";
 import { useEffect, useState } from "react";
-import AddNewPlayerButton from "./components/AddNewPlayerButton";
 import HistoricMatchesList from "./components/HistoricMatchesList";
 import NewMatch from "./pages/NewMatch";
 import SportsHandballIcon from "@mui/icons-material/SportsHandball";
@@ -277,11 +276,6 @@ const App = () => {
           <Route path="/admin/nuevo-partido" element={
             <AdminRoute>
               <NewMatch players={players} />
-            </AdminRoute>
-          } />
-          <Route path="/admin/nuevo-partido/agregar-jugador" element={
-            <AdminRoute>
-              <AddNewPlayerButton />
             </AdminRoute>
           } />
           <Route path="/balon-de-oro" element={
