@@ -11,17 +11,59 @@ import {
   Paper,
   TableSortLabel,
   Avatar,
+  Tooltip,
+  Select,
+  MenuItem,
+  FormControl,
 } from "@mui/material";
-import { SportsSoccer, Stadium, Stars } from "@mui/icons-material";
+import { SportsSoccer, Stadium, Stars, Person, ShowChart, Analytics, CalendarMonth } from "@mui/icons-material";
 import AssistIcon from "/assets/shoe.png";
 import { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { getPlayerDisplay } from "../utils/playersDisplayName";
+import { calculateSeasonStats, filterMatchesByYear } from "../utils/seasonStats";
+import { getAllMatches } from "../firebase/endpoints";
+
+// Función para preparar stats de todos los años combinando con datos de jugadores
+const preparePlayerStatsAllYears = (matches, players) => {
+  const stats = {
+    historico: [],
+    2025: [],
+    2026: [],
+  };
+
+  // Histórico: usar directamente los players props
+  stats.historico = players;
+
+  // Para cada año, calcular stats y combinar con datos de jugadores
+  [2025, 2026].forEach(year => {
+    const filteredMatches = filterMatchesByYear(matches, year);
+    const seasonStats = calculateSeasonStats(filteredMatches);
+    
+    if (seasonStats?.allPlayerStats) {
+      // Combinar stats del año con datos completos del jugador
+      stats[year] = seasonStats.allPlayerStats.map(stat => {
+        const fullPlayer = players.find(p => p.id === stat.id);
+        return {
+          ...stat,
+          photoURL: fullPlayer?.photoURL,
+          originalName: fullPlayer?.originalName,
+          userId: fullPlayer?.userId,
+        };
+      });
+    }
+  });
+
+  return stats;
+};
 
 export const PlayersTablePage = ({ players }) => {
   const [orderBy, setOrderBy] = useState("goals");
   const [order, setOrder] = useState("desc");
+  const [selectedYear, setSelectedYear] = useState("2025");
+  const [allYearStats, setAllYearStats] = useState({ historico: [], 2025: [], 2026: [] });
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleSort = (property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -29,8 +71,20 @@ export const PlayersTablePage = ({ players }) => {
     setOrderBy(property);
   };
 
+  // Cargar matches y calcular stats una sola vez
+  useEffect(() => {
+    const unsubscribe = getAllMatches((matches) => {
+      const stats = preparePlayerStatsAllYears(matches, players);
+      setAllYearStats(stats);
+      setIsLoading(false);
+    });
+    return () => unsubscribe;
+  }, [players]);
 
-  const sortedPlayers = [...players].sort((a, b) => {
+  // Obtener los jugadores del año seleccionado
+  const currentYearPlayers = allYearStats[selectedYear] || [];
+
+  const sortedPlayers = [...currentYearPlayers].sort((a, b) => {
     let aValue = a[orderBy];
     let bValue = b[orderBy];
 
@@ -76,8 +130,45 @@ export const PlayersTablePage = ({ players }) => {
         <Typography variant="h6" textAlign="center" fontWeight="bold">
           ⚽ Jugadores
         </Typography>
-        <Typography variant="caption" textAlign="center" display="block">
-          Total: {players.length} jugadores
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 1, mt: 1 }}>
+          <FormControl size="small" sx={{ minWidth: { xs: 160, sm: 200 } }}>
+            <Select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              // startAdornment={<CalendarMonth sx={{ mr: 0.5, fontSize: "1.2rem" }} />}
+              
+              sx={{
+                bgcolor: "white",
+                borderRadius: 2,
+                fontWeight: 500,
+                "& .MuiSelect-select": {
+                  py: 0.75,
+                  px: 1.5,
+                  fontSize: { xs: "0.8rem", sm: "0.9rem" },
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                },
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "transparent",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "primary.light",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "primary.main",
+                  borderWidth: 2,
+                },
+              }}
+            >
+              <MenuItem value="historico" sx={{ fontWeight: 500 }}>Record Histórico</MenuItem>
+              <MenuItem value="2025" sx={{ fontWeight: 500 }}>2025</MenuItem>
+              <MenuItem value="2026" sx={{ fontWeight: 500 }}>2026</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+        <Typography variant="caption" textAlign="center" display="block" sx={{ mt: 1 }}>
+          Total: {currentYearPlayers.length} jugadores
         </Typography>
       </Box>
 
@@ -93,29 +184,33 @@ export const PlayersTablePage = ({ players }) => {
                     color: "white",
                     fontWeight: "bold",
                     fontSize: { xs: "0.7rem", sm: "0.875rem" },
-                    px: { xs: 0.5, sm: 2 },
+                    px: { xs: 0.5, sm: 1 },
                     py: { xs: 1, sm: 1.5 },
+                    width: { xs: 10, sm: 60 },
                   }}
                 >
-                  Pos
+                  <Tooltip title="Posición" arrow>
+                    <Typography sx={{ fontSize: { xs: "0.7rem", sm: "0.875rem" } }}>#</Typography>
+                  </Tooltip>
                 </TableCell>
                 <TableCell
                   sx={{
                     color: "white",
                     fontWeight: "bold",
                     fontSize: { xs: "0.7rem", sm: "0.875rem" },
-                    px: { xs: 0.5, sm: 2 },
+                    px: { xs: 0, sm: 1 },
                     py: { xs: 1, sm: 1.5 },
+                    width: { xs: 50, sm: 150 },
                   }}
                 >
                   <TableSortLabel
                     active={orderBy === "name"}
                     direction={orderBy === "name" ? order : "asc"}
                     onClick={() => handleSort("name")}
+                    hideSortIcon
                     sx={{
                       color: "white !important",
                       "&:hover": { color: "white !important" },
-                      "& .MuiTableSortLabel-icon": { color: "white !important" },
                     }}
                   >
                     Jugador
@@ -127,32 +222,25 @@ export const PlayersTablePage = ({ players }) => {
                     color: "white",
                     fontWeight: "bold",
                     fontSize: { xs: "0.7rem", sm: "0.875rem" },
-                    px: { xs: 0.5, sm: 2 },
+                    px: { xs: 0.1, sm: 0.2 },
                     py: { xs: 1, sm: 1.5 },
+                    width: { xs: 45, sm: 60 },
                   }}
                 >
-                  <TableSortLabel
-                    active={orderBy === "goals"}
-                    direction={orderBy === "goals" ? order : "asc"}
-                    onClick={() => handleSort("goals")}
-                    sx={{
-                      color: "white !important",
-                      "&:hover": { color: "white !important" },
-                      "& .MuiTableSortLabel-icon": { color: "white !important" },
-                    }}
-                  >
-                    <Box
+                  <Tooltip title="Goles" arrow>
+                    <TableSortLabel
+                      active={orderBy === "goals"}
+                      direction={orderBy === "goals" ? order : "asc"}
+                      onClick={() => handleSort("goals")}
+                      hideSortIcon
                       sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 0.5,
+                        color: "white !important",
+                        "&:hover": { color: "white !important" },
                       }}
                     >
                       <SportsSoccer sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }} />
-                      <span>Goles</span>
-                    </Box>
-                  </TableSortLabel>
+                    </TableSortLabel>
+                  </Tooltip>
                 </TableCell>
                 <TableCell
                   align="center"
@@ -160,33 +248,27 @@ export const PlayersTablePage = ({ players }) => {
                     color: "white",
                     fontWeight: "bold",
                     fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                    px: { xs: 0.1, sm: 0.2 },
+                    width: { xs: 45, sm: 60 },
                   }}
                 >
-                  <TableSortLabel
-                    active={orderBy === "assists"}
-                    direction={orderBy === "assists" ? order : "asc"}
-                    onClick={() => handleSort("assists")}
-                    sx={{
-                      color: "white !important",
-                      "&:hover": { color: "white !important" },
-                      "& .MuiTableSortLabel-icon": { color: "white !important" },
-                    }}
-                  >
-                    <Box
+                  <Tooltip title="Asistencias" arrow>
+                    <TableSortLabel
+                      active={orderBy === "assists"}
+                      direction={orderBy === "assists" ? order : "asc"}
+                      onClick={() => handleSort("assists")}
+                      hideSortIcon
                       sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 0.5,
+                        color: "white !important",
+                        "&:hover": { color: "white !important" },
                       }}
                     >
                       <img
                         src={AssistIcon}
-                        style={{ width: "16px" }}
+                        style={{ width: "20px", height: "20px" }}
                       />
-                      <span>Asist.</span>
-                    </Box>
-                  </TableSortLabel>
+                    </TableSortLabel>
+                  </Tooltip>
                 </TableCell>
                 <TableCell
                   align="center"
@@ -194,30 +276,24 @@ export const PlayersTablePage = ({ players }) => {
                     color: "white",
                     fontWeight: "bold",
                     fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                    px: { xs: 0.1, sm: 0.2 },
+                    width: { xs: 45, sm: 60 },
                   }}
                 >
-                  <TableSortLabel
-                    active={orderBy === "goalsAndAssists"}
-                    direction={orderBy === "goalsAndAssists" ? order : "asc"}
-                    onClick={() => handleSort("goalsAndAssists")}
-                    sx={{
-                      color: "white !important",
-                      "&:hover": { color: "white !important" },
-                      "& .MuiTableSortLabel-icon": { color: "white !important" },
-                    }}
-                  >
-                    <Box
+                  <Tooltip title="Goles + Asistencias" arrow>
+                    <TableSortLabel
+                      active={orderBy === "goalsAndAssists"}
+                      direction={orderBy === "goalsAndAssists" ? order : "asc"}
+                      onClick={() => handleSort("goalsAndAssists")}
+                      hideSortIcon
                       sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 0.5,
+                        color: "white !important",
+                        "&:hover": { color: "white !important" },
                       }}
                     >
                       <Stars sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }} />
-                      <span>G/A</span>
-                    </Box>
-                  </TableSortLabel>
+                    </TableSortLabel>
+                  </Tooltip>
                 </TableCell>
                 <TableCell
                   align="center"
@@ -225,30 +301,24 @@ export const PlayersTablePage = ({ players }) => {
                     color: "white",
                     fontWeight: "bold",
                     fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                    px: { xs: 0.1, sm: 0.2 },
+                    width: { xs: 45, sm: 60 },
                   }}
                 >
-                  <TableSortLabel
-                    active={orderBy === "matches"}
-                    direction={orderBy === "matches" ? order : "asc"}
-                    onClick={() => handleSort("matches")}
-                    sx={{
-                      color: "white !important",
-                      "&:hover": { color: "white !important" },
-                      "& .MuiTableSortLabel-icon": { color: "white !important" },
-                    }}
-                  >
-                    <Box
+                  <Tooltip title="Partidos Jugados" arrow>
+                    <TableSortLabel
+                      active={orderBy === "matches"}
+                      direction={orderBy === "matches" ? order : "asc"}
+                      onClick={() => handleSort("matches")}
+                      hideSortIcon
                       sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 0.5,
+                        color: "white !important",
+                        "&:hover": { color: "white !important" },
                       }}
                     >
                       <Stadium sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }} />
-                      <span>Partidos</span>
-                    </Box>
-                  </TableSortLabel>
+                    </TableSortLabel>
+                  </Tooltip>
                 </TableCell>
                 <TableCell
                   align="center"
@@ -256,20 +326,24 @@ export const PlayersTablePage = ({ players }) => {
                     color: "white",
                     fontWeight: "bold",
                     fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                    px: { xs: 0.1, sm: 0.2 },
+                    width: { xs: 50, sm: 65 },
                   }}
                 >
-                  <TableSortLabel
-                    active={orderBy === "goalsPerMatch"}
-                    direction={orderBy === "goalsPerMatch" ? order : "asc"}
-                    onClick={() => handleSort("goalsPerMatch")}
-                    sx={{
-                      color: "white !important",
-                      "&:hover": { color: "white !important" },
-                      "& .MuiTableSortLabel-icon": { color: "white !important" },
-                    }}
-                  >
-                    G/P
-                  </TableSortLabel>
+                  <Tooltip title="Goles por Partido" arrow>
+                    <TableSortLabel
+                      active={orderBy === "goalsPerMatch"}
+                      direction={orderBy === "goalsPerMatch" ? order : "asc"}
+                      onClick={() => handleSort("goalsPerMatch")}
+                      hideSortIcon
+                      sx={{
+                        color: "white !important",
+                        "&:hover": { color: "white !important" },
+                      }}
+                    >
+                      GxP
+                    </TableSortLabel>
+                  </Tooltip>
                 </TableCell>
                 <TableCell
                   align="center"
@@ -277,20 +351,24 @@ export const PlayersTablePage = ({ players }) => {
                     color: "white",
                     fontWeight: "bold",
                     fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                    px: { xs: 0.1, sm: 0.2 },
+                    width: { xs: 50, sm: 65 },
                   }}
                 >
-                  <TableSortLabel
-                    active={orderBy === "assistsPerMatch"}
-                    direction={orderBy === "assistsPerMatch" ? order : "asc"}
-                    onClick={() => handleSort("assistsPerMatch")}
-                    sx={{
-                      color: "white !important",
-                      "&:hover": { color: "white !important" },
-                      "& .MuiTableSortLabel-icon": { color: "white !important" },
-                    }}
-                  >
-                    A/P
-                  </TableSortLabel>
+                  <Tooltip title="Asistencias por Partido" arrow>
+                    <TableSortLabel
+                      active={orderBy === "assistsPerMatch"}
+                      direction={orderBy === "assistsPerMatch" ? order : "asc"}
+                      onClick={() => handleSort("assistsPerMatch")}
+                      hideSortIcon
+                      sx={{
+                        color: "white !important",
+                        "&:hover": { color: "white !important" },
+                      }}
+                    >
+                      AxP
+                    </TableSortLabel>
+                  </Tooltip>
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -317,6 +395,7 @@ export const PlayersTablePage = ({ players }) => {
                         fontSize: { xs: "0.7rem", sm: "0.875rem" },
                         px: { xs: 0.5, sm: 2 },
                         py: { xs: 0.5, sm: 1 },
+                        maxWidth: { xs: 10, sm: 60 },
                       }}
                     >
                       {index + 1}
@@ -327,7 +406,7 @@ export const PlayersTablePage = ({ players }) => {
                         fontSize: { xs: "0.7rem", sm: "0.875rem" },
                         px: { xs: 0, sm: 2 },
                         py: { xs: 0.5, sm: 1 },
-                        maxWidth: { xs: 115, sm: 150 },
+                        maxWidth: { xs: 70, sm: 150 },
                       }}
                     >
                       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -357,8 +436,9 @@ export const PlayersTablePage = ({ players }) => {
                         fontWeight: "bold",
                         color: "success.main",
                         fontSize: { xs: "0.7rem", sm: "0.875rem" },
-                        px: { xs: 0.5, sm: 2 },
+                        px: { xs: 0.1, sm: 0.2 },
                         py: { xs: 0.5, sm: 1 },
+                        width: { xs: 45, sm: 60 },
                       }}
                     >
                       {player.goals}
@@ -369,8 +449,9 @@ export const PlayersTablePage = ({ players }) => {
                         fontWeight: "bold",
                         color: "info.main",
                         fontSize: { xs: "0.7rem", sm: "0.875rem" },
-                        px: { xs: 0.5, sm: 2 },
+                        px: { xs: 0.1, sm: 0.2 },
                         py: { xs: 0.5, sm: 1 },
+                        width: { xs: 45, sm: 60 },
                       }}
                     >
                       {player.assists}
@@ -381,8 +462,9 @@ export const PlayersTablePage = ({ players }) => {
                         fontWeight: "bold",
                         color: "warning.main",
                         fontSize: { xs: "0.7rem", sm: "0.875rem" },
-                        px: { xs: 0.5, sm: 2 },
+                        px: { xs: 0.1, sm: 0.2 },
                         py: { xs: 0.5, sm: 1 },
+                        width: { xs: 45, sm: 60 },
                       }}
                     >
                       {player.goals + player.assists}
@@ -391,8 +473,9 @@ export const PlayersTablePage = ({ players }) => {
                       align="center"
                       sx={{
                         fontSize: { xs: "0.7rem", sm: "0.875rem" },
-                        px: { xs: 0.5, sm: 2 },
+                        px: { xs: 0.1, sm: 0.2 },
                         py: { xs: 0.5, sm: 1 },
+                        width: { xs: 45, sm: 60 },
                       }}
                     >
                       {player.matches}
@@ -401,8 +484,9 @@ export const PlayersTablePage = ({ players }) => {
                       align="center"
                       sx={{
                         fontSize: { xs: "0.7rem", sm: "0.875rem" },
-                        px: { xs: 0.5, sm: 2 },
+                        px: { xs: 0.1, sm: 0.2 },
                         py: { xs: 0.5, sm: 1 },
+                        width: { xs: 50, sm: 65 },
                       }}
                     >
                       {goalsPerMatch}
@@ -411,8 +495,9 @@ export const PlayersTablePage = ({ players }) => {
                       align="center"
                       sx={{
                         fontSize: { xs: "0.7rem", sm: "0.875rem" },
-                        px: { xs: 0.5, sm: 2 },
+                        px: { xs: 0.1, sm: 0.2 },
                         py: { xs: 0.5, sm: 1 },
+                        width: { xs: 50, sm: 65 },
                       }}
                     >
                       {assistsPerMatch}
