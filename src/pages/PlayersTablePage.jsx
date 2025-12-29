@@ -40,7 +40,7 @@ const preparePlayerStatsAllYears = (matches, players) => {
   [2025, 2026].forEach(year => {
     const filteredMatches = filterMatchesByYear(matches, year);
     const seasonStats = calculateSeasonStats(filteredMatches);
-    
+
     if (seasonStats?.allPlayerStats) {
       // Combinar stats del año con datos completos del jugador
       stats[year] = seasonStats.allPlayerStats.map(stat => {
@@ -135,8 +135,8 @@ export const PlayersTablePage = ({ players }) => {
             <Select
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
-              // startAdornment={<CalendarMonth sx={{ mr: 0.5, fontSize: "1.2rem" }} />}
-              
+              startAdornment={<CalendarMonth sx={{ fontSize: "1.2rem" }} />}
+
               sx={{
                 bgcolor: "white",
                 borderRadius: 2,
