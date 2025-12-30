@@ -47,6 +47,7 @@ const preparePlayerStatsAllYears = (matches, players) => {
         const fullPlayer = players.find(p => p.id === stat.id);
         return {
           ...stat,
+          name: fullPlayer?.name,
           photoURL: fullPlayer?.photoURL,
           originalName: fullPlayer?.originalName,
           userId: fullPlayer?.userId,
@@ -54,6 +55,7 @@ const preparePlayerStatsAllYears = (matches, players) => {
       });
     }
   });
+  console.log(stats)
 
   return stats;
 };
