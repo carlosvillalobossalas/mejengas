@@ -169,11 +169,11 @@ const App = () => {
           <Divider />
           {user && (
             <>
-              <Box 
-                sx={{ 
-                  p: 2, 
-                  display: 'flex', 
-                  alignItems: 'center', 
+              <Box
+                sx={{
+                  p: 2,
+                  display: 'flex',
+                  alignItems: 'center',
                   gap: 2,
                   cursor: 'pointer',
                   '&:hover': {
@@ -264,7 +264,7 @@ const App = () => {
       <Box sx={{ height: "calc(100vh - 56px)", overflow: "hidden" }}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="" element={<HistoricMatchesList matches={matches} />} />
+          <Route path="" element={<HistoricMatchesList matches={matches} players={players} />} />
           <Route path="/resumen-temporada" element={<SeasonSummaryPage />} />
           <Route path="/jugadores" element={<PlayersTablePage players={players} />} />
           <Route path="/porteros" element={<GoalkeepersTablePage goalkeepers={goalkeepers} />} />

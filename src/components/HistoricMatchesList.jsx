@@ -17,8 +17,9 @@ import {
 import { useState } from "react";
 import AssistIcon from "/assets/shoe.png";
 import { formatMatchSummary, shareToWhatsApp } from "../utils/whatsappShare";
+import { getPlayerDisplay } from "../utils/playersDisplayName";
 
-const HistoricMatchesList = ({ matches = [] }) => {
+const HistoricMatchesList = ({ matches = [], players = [] }) => {
   const [openItems, setOpenItems] = useState({});
 
   const handleClick = (index) => {
@@ -171,7 +172,7 @@ const HistoricMatchesList = ({ matches = [] }) => {
 
               <Collapse in={openItems[index]} timeout="auto" unmountOnExit>
                 <Divider />
-                <Box sx={{ bgcolor: "grey.50", p: 2 }}>
+                <Box sx={{ bgcolor: "grey.50", p: 1 }}>
                   {/* VOD de Twitch */}
                   {match.twitchVodId && (
                     <Box sx={{ mb: 3 }}>
@@ -219,6 +220,10 @@ const HistoricMatchesList = ({ matches = [] }) => {
                   {/* Jugadores */}
                   {match.players1.map((player1, playerIndex) => {
                     const player2 = match.players2[playerIndex];
+                    const player1Name = getPlayerDisplay(players.find((p) => p.id === player1.id)) || player1.name;
+                    const player2Name = getPlayerDisplay(players.find((p) => p.id === player2.id)) || player2.name;
+                    player1.name = player1Name;
+                    player2.name = player2Name;
                     return (
                       <Box
                         key={player1.id}
@@ -226,9 +231,9 @@ const HistoricMatchesList = ({ matches = [] }) => {
                           display: "flex",
                           justifyContent: "space-between",
                           alignItems: "center",
-                          py: 1.5,
-                          px: 2,
-                          mb: 1,
+                          py: 1,
+                          px: 0.5,
+                          mb: 0.5,
                           bgcolor: "white",
                           borderRadius: 1,
                           boxShadow: 1,
@@ -239,8 +244,9 @@ const HistoricMatchesList = ({ matches = [] }) => {
                           sx={{
                             display: "flex",
                             alignItems: "center",
-                            gap: 1,
+                            gap: 0.5,
                             flex: 1,
+                            minWidth: 0,
                           }}
                         >
                           {player1.isGK && (
@@ -248,14 +254,24 @@ const HistoricMatchesList = ({ matches = [] }) => {
                               label="GK"
                               size="small"
                               color="info"
-                              sx={{ height: 20, fontSize: "0.7rem" }}
+                              sx={{ height: 20, fontSize: "0.7rem", flexShrink: 0 }}
                             />
                           )}
-                          <Typography variant="body2" fontWeight={player1.isGK ? "bold" : "normal"}>
+                          <Typography 
+                            variant="body2" 
+                            fontWeight={player1.isGK ? "bold" : "normal"}
+                            sx={{
+                              width: 90,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              flexShrink: 0,
+                            }}
+                          >
                             {player1.name}
                           </Typography>
                           {!player1.isGK && (
-                            <Box sx={{ display: "flex", gap: 0.5, ml: 1 }}>
+                            <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
                               {player1.goals > 0 && (
                                 <Chip
                                   icon={<SportsSoccer sx={{ fontSize: "0.9rem !important" }} />}
@@ -284,7 +300,7 @@ const HistoricMatchesList = ({ matches = [] }) => {
                         </Box>
 
                         {/* Separador */}
-                        <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
+                        <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
 
                         {/* Equipo 2 */}
                         <Box
@@ -292,12 +308,13 @@ const HistoricMatchesList = ({ matches = [] }) => {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "flex-end",
-                            gap: 1,
+                            gap: 0.5,
                             flex: 1,
+                            minWidth: 0,
                           }}
                         >
                           {!player2.isGK && (
-                            <Box sx={{ display: "flex", gap: 0.5, mr: 1 }}>
+                            <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
                               {player2.goals > 0 && (
                                 <Chip
                                   icon={<SportsSoccer sx={{ fontSize: "0.9rem !important" }} />}
@@ -327,6 +344,13 @@ const HistoricMatchesList = ({ matches = [] }) => {
                             variant="body2"
                             fontWeight={player2.isGK ? "bold" : "normal"}
                             textAlign="right"
+                            sx={{
+                              width: 90,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              flexShrink: 0,
+                            }}
                           >
                             {player2.name}
                           </Typography>
@@ -335,7 +359,7 @@ const HistoricMatchesList = ({ matches = [] }) => {
                               label="GK"
                               size="small"
                               color="info"
-                              sx={{ height: 20, fontSize: "0.7rem" }}
+                              sx={{ height: 20, fontSize: "0.7rem", flexShrink: 0 }}
                             />
                           )}
                         </Box>
