@@ -217,7 +217,8 @@ const UserManagementPage = () => {
                       </Typography>
                       {user.playerId && (
                         <Chip
-                          label={`Jugador: ${getPlayerName(user.playerId)}`}
+                          // label={`Jugador: ${getPlayerName(user.playerId)}`}
+                          label={`Jugador: ${players.find(p => p.id === user.playerId)?.originalName}`}
                           size="small"
                           color="success"
                         />
@@ -288,7 +289,7 @@ const UserManagementPage = () => {
                   </Avatar>
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography variant="body2" fontWeight="bold" noWrap>
-                      {player.name}
+                      {player.originalName}
                     </Typography>
                     <Box sx={{ mt: 0.5 }}>
                       {player.userId ? (
