@@ -587,7 +587,6 @@ export const PlayersTablePage = ({ players }) => {
           sx={{
             position: "absolute",
             right: 10,
-            backgroundColor: 'red',
             bottom: 10,
             zIndex: 1000,
             width: 300,
