@@ -127,7 +127,7 @@ function BalonDeOro() {
                         <Typography variant="body1" display="block">4️⃣ Cuarto lugar: {getPlayerDisplay(players.find(p => p.id === votes.cuarto)) || '-'}</Typography>
                         <Typography variant="body1" display="block">5️⃣ Quinto lugar: {getPlayerDisplay(players.find(p => p.id === votes.quinto)) || '-'}</Typography>
                     </Box>
-                    {canViewResults && (
+                    {/* {canViewResults && (
                         <Button
                             variant="outlined"
                             color="primary"
@@ -136,7 +136,7 @@ function BalonDeOro() {
                         >
                             Ver Resultados
                         </Button>
-                    )}
+                    )} */}
                 </Paper>
             </Box>
         )
@@ -152,14 +152,14 @@ function BalonDeOro() {
                     <Typography variant="h6" align="center" color="text.secondary">
                         El período de votación para el Balón de Oro 2025 ha finalizado.
                     </Typography>
-                    <Button
+                    {/* <Button
                         variant="outlined"
                         color="primary"
                         fullWidth
                         onClick={() => navigate("/balon-de-oro/resultados")}
                     >
                         Ver Resultados
-                    </Button>
+                    </Button> */}
                 </Box>
             </Box>
         )
@@ -265,7 +265,7 @@ function BalonDeOro() {
                 >
                     {loading ? <CircularProgress size={24} /> : 'Enviar Votos'}
                 </Button>
-                {canViewResults && (
+                {/* {canViewResults && (
                     <Button
                         variant="outlined"
                         color="primary"
@@ -275,7 +275,7 @@ function BalonDeOro() {
                     >
                         Ver Resultados
                     </Button>
-                )}
+                )} */}
             </Box>
         </Box>
     );

@@ -389,9 +389,8 @@ export const checkIfUserVoted = async (userId) => {
 };
 
 // Obtener todos los votos del año actual y calcular resultados con sistema de puntos
-export const getBallonDeOroResults = async () => {
+export const getBallonDeOroResults = async (year) => {
   try {
-    const year = new Date().getFullYear();
     const votesRef = collection(db, "BallonDeOroVotes");
     const q = query(votesRef, where("year", "==", year));
     const snapshot = await getDocs(q);
@@ -434,6 +433,7 @@ export const getBallonDeOroResults = async () => {
     return {
       totalVotes: allVotes.length,
       playerPoints,
+      votes: allVotes,
     };
   } catch (error) {
     console.error("Error obteniendo resultados:", error);

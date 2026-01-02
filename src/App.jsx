@@ -94,7 +94,7 @@ const App = () => {
     { text: 'Resumen de Temporada', icon: <EmojiEventsIcon />, path: '/resumen-temporada' },
     { text: 'Jugadores', icon: <SportsSoccerIcon />, path: '/jugadores' },
     { text: 'Porteros', icon: <SportsHandballIcon />, path: '/porteros' },
-    { text: 'Balón de Oro', icon: <EmojiEventsIcon />, path: '/balon-de-oro' },
+    { text: 'Balón de Oro', icon: <EmojiEventsIcon />, path: '/balon-de-oro/resultados' },
   ];
 
   const handleMenuClick = (path) => {
