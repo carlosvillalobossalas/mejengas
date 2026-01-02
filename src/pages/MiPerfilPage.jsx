@@ -26,6 +26,7 @@ import { toast } from "react-toastify";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import { useNavigate, useParams } from "react-router-dom";
 import PlayerStatsCard from "../components/PlayerStatsCard";
+import { getPlayerDisplay } from "../utils/playersDisplayName";
 
 function MiPerfilPage() {
   const [user] = useAuthState(auth);
@@ -45,20 +46,26 @@ function MiPerfilPage() {
     const loadPlayerData = async () => {
       try {
         let player;
-        
+
         // Si hay playerId en la URL, cargar ese jugador (vista de solo lectura)
         if (playerId) {
           player = await getPlayerById(playerId);
-        } 
+        }
         // Si no hay playerId, cargar el jugador del usuario actual
         else if (user?.uid) {
           player = await getPlayerByUserId(user.uid);
         }
-        
+
         if (player) {
-          setPlayerData(player);
-          setDisplayName(player?.name || user?.displayName || "");
-          setPhotoPreview(player?.photoURL || user?.photoURL || "");
+          setPlayerData({...player, name: getPlayerDisplay(player) });
+          setDisplayName(getPlayerDisplay(player));
+
+          // Si estamos viendo otro perfil, NO usar la foto del usuario actual como fallback
+          if (playerId) {
+            setPhotoPreview(player?.photoURL || "");
+          } else {
+            setPhotoPreview(player?.photoURL || user?.photoURL || "");
+          }
 
           // Cargar premios
           const playerAwards = await getPlayerAwards(player.id);
@@ -74,7 +81,7 @@ function MiPerfilPage() {
         setLoadingData(false);
       }
     };
-    
+
     loadPlayerData();
   }, [user, playerId]);
 
@@ -165,81 +172,81 @@ function MiPerfilPage() {
           {isViewingOwnProfile ? (
             // Formulario editable para perfil propio
             <Box component="form" onSubmit={handleSubmit}>
-            {/* Foto de perfil */}
-            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mb: 2 }}>
-              <Box sx={{ position: "relative" }}>
-                <Avatar
-                  src={photoPreview}
-                  alt={displayName}
-                  sx={{ width: 100, height: 100, mb: 1 }}
-                >
-                  {displayName?.[0]?.toUpperCase()}
-                </Avatar>
-                <IconButton
-                  component="label"
-                  sx={{
-                    position: "absolute",
-                    bottom: 5,
-                    right: -5,
-                    bgcolor: "primary.main",
-                    color: "white",
-                    "&:hover": { bgcolor: "primary.dark" },
-                  }}
-                >
-                  <PhotoCameraIcon fontSize="small" />
-                  <input
-                    type="file"
-                    hidden
-                    accept="image/*"
-                    onChange={handlePhotoChange}
-                    disabled={loading}
-                  />
-                </IconButton>
+              {/* Foto de perfil */}
+              <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mb: 2 }}>
+                <Box sx={{ position: "relative" }}>
+                  <Avatar
+                    src={photoPreview}
+                    alt={displayName}
+                    sx={{ width: 100, height: 100, mb: 1 }}
+                  >
+                    {displayName?.[0]?.toUpperCase()}
+                  </Avatar>
+                  <IconButton
+                    component="label"
+                    sx={{
+                      position: "absolute",
+                      bottom: 5,
+                      right: -5,
+                      bgcolor: "primary.main",
+                      color: "white",
+                      "&:hover": { bgcolor: "primary.dark" },
+                    }}
+                  >
+                    <PhotoCameraIcon fontSize="small" />
+                    <input
+                      type="file"
+                      hidden
+                      accept="image/*"
+                      onChange={handlePhotoChange}
+                      disabled={loading}
+                    />
+                  </IconButton>
+                </Box>
+                <Typography variant="caption" color="text.secondary" textAlign="center">
+                  Haz clic en el ícono de cámara para cambiar tu foto
+                </Typography>
               </Box>
-              <Typography variant="caption" color="text.secondary" textAlign="center">
-                Haz clic en el ícono de cámara para cambiar tu foto
-              </Typography>
-            </Box>
 
-            {/* Información de cuenta */}
-            <Alert severity="info" sx={{ mb: 2 }}>
-              <Typography variant="body2">
-                <strong>Correo:</strong> {user?.email}
-              </Typography>
-            </Alert>
+              {/* Información de cuenta */}
+              <Alert severity="info" sx={{ mb: 2 }}>
+                <Typography variant="body2">
+                  <strong>Correo:</strong> {user?.email}
+                </Typography>
+              </Alert>
 
-            {/* Campo de nombre */}
-            <TextField
-              label="Nombre"
-              fullWidth
-              required
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              disabled={loading}
-              sx={{ mb: 2 }}
-              helperText="Este nombre se mostrará en tus partidos y estadísticas"
-            />
-
-            {/* Botones */}
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <Button
-                variant="outlined"
+              {/* Campo de nombre */}
+              <TextField
+                label="Nombre"
                 fullWidth
-                onClick={() => navigate("/")}
+                required
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
                 disabled={loading}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                variant="contained"
-                fullWidth
-                disabled={loading}
-              >
-                {loading ? <CircularProgress size={24} /> : "Guardar Cambios"}
-              </Button>
+                sx={{ mb: 2 }}
+                helperText="Este nombre se mostrará en tus partidos y estadísticas"
+              />
+
+              {/* Botones */}
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  onClick={() => navigate("/")}
+                  disabled={loading}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  fullWidth
+                  disabled={loading}
+                >
+                  {loading ? <CircularProgress size={24} /> : "Guardar Cambios"}
+                </Button>
+              </Box>
             </Box>
-          </Box>
           ) : (
             // Vista de solo lectura para otros perfiles
             <Box>
