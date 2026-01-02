@@ -15,11 +15,16 @@ import { auth } from "../firebaseConfig";
 import { updateProfile } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../firebaseConfig";
-import { updatePlayerProfile, getPlayerByUserId } from "../firebase/endpoints";
+import {
+  updatePlayerProfile,
+  getPlayerByUserId,
+  getPlayerAwards,
+  getAllPlayerSeasonStats,
+} from "../firebase/endpoints";
 import { toast } from "react-toastify";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "react-router-dom";
+import PlayerStatsCard from "../components/PlayerStatsCard";
 
 function MiPerfilPage() {
   const [user] = useAuthState(auth);
@@ -29,6 +34,8 @@ function MiPerfilPage() {
   const [photoPreview, setPhotoPreview] = useState("");
   const [playerData, setPlayerData] = useState(null);
   const [loadingData, setLoadingData] = useState(true);
+  const [awards, setAwards] = useState([]);
+  const [seasonStats, setSeasonStats] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,6 +46,16 @@ function MiPerfilPage() {
           setPlayerData(player);
           setDisplayName(player?.name || user.displayName || "");
           setPhotoPreview(user.photoURL || "");
+
+          // Cargar premios
+          if (player?.id) {
+            const playerAwards = await getPlayerAwards(player.id);
+            setAwards(playerAwards);
+
+            // Cargar estadísticas por temporada
+            const stats = await getAllPlayerSeasonStats(player.id);
+            setSeasonStats(stats);
+          }
         } catch (error) {
           console.error("Error loading player data:", error);
         } finally {
@@ -120,21 +137,27 @@ function MiPerfilPage() {
   }
 
   return (
-    <Box sx={{ bgcolor: "grey.50", minHeight: "100vh", p: 2 }}>
-      <Box sx={{ maxWidth: 600, mx: "auto" }}>
-        <Paper sx={{ p: { xs: 3, sm: 4 } }}>
-          <Typography variant="h5" fontWeight={700} mb={3} color="primary">
+    <Box
+      sx={{
+        bgcolor: "grey.50",
+        height: "100dvh",
+        overflow: "auto",
+      }}
+    >
+      <Box sx={{ px: 2, py: 2 }}>
+        <Paper sx={{ p: 2, mb: 2 }}>
+          <Typography variant="h5" fontWeight={700} mb={2} color="primary">
             Mi Perfil
           </Typography>
 
           <Box component="form" onSubmit={handleSubmit}>
             {/* Foto de perfil */}
-            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mb: 4 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mb: 2 }}>
               <Box sx={{ position: "relative" }}>
                 <Avatar
                   src={photoPreview}
                   alt={displayName}
-                  sx={{ width: 120, height: 120, mb: 2 }}
+                  sx={{ width: 100, height: 100, mb: 1 }}
                 >
                   {displayName?.[0]?.toUpperCase()}
                 </Avatar>
@@ -142,14 +165,14 @@ function MiPerfilPage() {
                   component="label"
                   sx={{
                     position: "absolute",
-                    bottom: 10,
+                    bottom: 5,
                     right: -5,
                     bgcolor: "primary.main",
                     color: "white",
                     "&:hover": { bgcolor: "primary.dark" },
                   }}
                 >
-                  <PhotoCameraIcon />
+                  <PhotoCameraIcon fontSize="small" />
                   <input
                     type="file"
                     hidden
@@ -165,7 +188,7 @@ function MiPerfilPage() {
             </Box>
 
             {/* Información de cuenta */}
-            <Alert severity="info" sx={{ mb: 3 }}>
+            <Alert severity="info" sx={{ mb: 2 }}>
               <Typography variant="body2">
                 <strong>Correo:</strong> {user?.email}
               </Typography>
@@ -179,7 +202,7 @@ function MiPerfilPage() {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               disabled={loading}
-              sx={{ mb: 3 }}
+              sx={{ mb: 2 }}
               helperText="Este nombre se mostrará en tus partidos y estadísticas"
             />
 
@@ -204,6 +227,13 @@ function MiPerfilPage() {
             </Box>
           </Box>
         </Paper>
+
+        {/* Estadísticas y Premios */}
+        <PlayerStatsCard
+          playerData={playerData}
+          seasonStats={seasonStats}
+          awards={awards}
+        />
       </Box>
     </Box>
   );

@@ -12,20 +12,34 @@ import {
     Button,
     Collapse,
     IconButton,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
 } from "@mui/material";
-import { getBallonDeOroResults, getAllPlayers } from "../firebase/endpoints";
+import { getBallonDeOroResults, getAllPlayers, saveBallonDeOroWinners, getBallonDeOroWinners } from "../firebase/endpoints";
 import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import SaveIcon from "@mui/icons-material/Save";
 import { getPlayerDisplay } from "../utils/playersDisplayName";
+import { toast } from "react-toastify";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "../firebaseConfig";
+import { useAdmin } from "../hooks/useAdmin";
 
 function BallonDeOroResults() {
     const [results, setResults] = useState(null);
     const [players, setPlayers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [expandedVotes, setExpandedVotes] = useState({});
+    const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+    const [savingWinners, setSavingWinners] = useState(false);
+    const [winnersAlreadySaved, setWinnersAlreadySaved] = useState(false);
     const navigate = useNavigate();
+    const [user, ] = useAuthState(auth);
+    const isAdmin = useAdmin(user);
 
     useEffect(() => {
         getAllPlayers(setPlayers);
@@ -34,6 +48,10 @@ function BallonDeOroResults() {
             try {
                 const data = await getBallonDeOroResults(2025);
                 setResults(data);
+
+                // Verificar si ya se guardaron los ganadores
+                const winners = await getBallonDeOroWinners(2025);
+                setWinnersAlreadySaved(!!winners);
             } catch (error) {
                 console.error("Error fetching results:", error);
             } finally {
@@ -87,6 +105,36 @@ function BallonDeOroResults() {
         return getPlayerDisplay(player) || "Anónimo";
     };
 
+    const handleSaveWinners = async () => {
+        if (!results || !results.playerPoints) return;
+
+        setSavingWinners(true);
+        try {
+            const ranking = createRanking(results.playerPoints);
+            
+            if (ranking.length < 3) {
+                toast.error("No hay suficientes jugadores para guardar los ganadores");
+                return;
+            }
+
+            await saveBallonDeOroWinners(
+                2025,
+                ranking[0].playerId,
+                ranking[1].playerId,
+                ranking[2].playerId
+            );
+
+            toast.success("¡Ganadores registrados exitosamente! 🏆");
+            setWinnersAlreadySaved(true);
+            setOpenConfirmDialog(false);
+        } catch (error) {
+            console.error("Error saving winners:", error);
+            toast.error("Error al guardar los ganadores");
+        } finally {
+            setSavingWinners(false);
+        }
+    };
+
     if (loading) {
         return (
             <Box
@@ -120,6 +168,31 @@ function BallonDeOroResults() {
 
     return (
         <Box sx={{ bgcolor: "grey.50", height: "100dvh" }} overflow={'auto'}>
+            {/* Botón de guardar ganadores (solo para admins) */}
+            {isAdmin && !winnersAlreadySaved && (
+                <Box sx={{ px: 2, pt: 2 }}>
+                    <Button
+                        variant="contained"
+                        startIcon={<SaveIcon />}
+                        onClick={() => setOpenConfirmDialog(true)}
+                        fullWidth
+                        color="success"
+                    >
+                        Registrar Ganadores Oficiales
+                    </Button>
+                </Box>
+            )}
+
+            {isAdmin && winnersAlreadySaved && (
+                <Box sx={{ px: 2, pt: 2 }}>
+                    <Chip 
+                        label="✅ Ganadores ya registrados" 
+                        color="success" 
+                        sx={{ width: '100%', py: 2 }}
+                    />
+                </Box>
+            )}
+
             <Typography
                 variant="h4"
                 align="center"
@@ -320,6 +393,42 @@ function BallonDeOroResults() {
                     </Box>
                 ))}
             </Grid2>
+
+            {/* Dialog de confirmación para guardar ganadores */}
+            <Dialog open={openConfirmDialog} onClose={() => setOpenConfirmDialog(false)}>
+                <DialogTitle>Confirmar Registro de Ganadores</DialogTitle>
+                <DialogContent>
+                    <Typography mb={2}>
+                        ¿Estás seguro de que deseas registrar oficialmente a estos jugadores como ganadores del Balón de Oro 2025?
+                    </Typography>
+                    <Box sx={{ bgcolor: "grey.50", p: 2, borderRadius: 1 }}>
+                        <Typography fontWeight={700} mb={1}>🥇 Balón de Oro</Typography>
+                        <Typography mb={2}>{gold?.name} ({gold?.points} pts)</Typography>
+                        
+                        <Typography fontWeight={700} mb={1}>🥈 Balón de Plata</Typography>
+                        <Typography mb={2}>{silver?.name} ({silver?.points} pts)</Typography>
+                        
+                        <Typography fontWeight={700} mb={1}>🥉 Balón de Bronce</Typography>
+                        <Typography>{bronze?.name} ({bronze?.points} pts)</Typography>
+                    </Box>
+                    <Typography variant="caption" color="text.secondary" mt={2} display="block">
+                        Esta acción actualizará los perfiles de los jugadores con sus premios.
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenConfirmDialog(false)} disabled={savingWinners}>
+                        Cancelar
+                    </Button>
+                    <Button 
+                        onClick={handleSaveWinners} 
+                        variant="contained" 
+                        disabled={savingWinners}
+                        startIcon={savingWinners ? <CircularProgress size={20} /> : <SaveIcon />}
+                    >
+                        {savingWinners ? "Guardando..." : "Confirmar"}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }
