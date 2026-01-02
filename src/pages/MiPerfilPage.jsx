@@ -165,9 +165,6 @@ function MiPerfilPage() {
     >
       <Box sx={{ px: 2, py: 2 }}>
         <Paper sx={{ p: 2, mb: 2 }}>
-          <Typography variant="h5" fontWeight={700} mb={2} color="primary">
-            {isViewingOwnProfile ? "Mi Perfil" : `Perfil de ${playerData?.name}`}
-          </Typography>
 
           {isViewingOwnProfile ? (
             // Formulario editable para perfil propio
