@@ -15,49 +15,93 @@ import {
   Select,
   MenuItem,
   FormControl,
+  Button,
+  Fade,
 } from "@mui/material";
 import { SportsSoccer, Stadium, Stars, Person, ShowChart, Analytics, CalendarMonth } from "@mui/icons-material";
 import AssistIcon from "/assets/shoe.png";
 import { useState, useEffect } from "react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebaseConfig";
+import { useNavigate } from "react-router-dom";
+import { getAllPlayersSeasonStats, getAllPlayers } from "../firebase/endpoints";
 import { getPlayerDisplay } from "../utils/playersDisplayName";
-import { calculateSeasonStats, filterMatchesByYear } from "../utils/seasonStats";
-import { getAllMatches } from "../firebase/endpoints";
 
-// Función para preparar stats de todos los años combinando con datos de jugadores
-const preparePlayerStatsAllYears = (matches, players) => {
-  const stats = {
-    historico: [],
-    2025: [],
-    2026: [],
-  };
+// Función para combinar stats de PlayerSeasonStats con datos de jugadores
+const preparePlayerStatsFromSeasonStats = async (players) => {
+  try {
+    // Obtener todas las estadísticas de PlayerSeasonStats agrupadas por temporada
+    const statsBySeason = await getAllPlayersSeasonStats();
 
-  // Histórico: usar directamente los players props
-  stats.historico = players;
+    const stats = {
+      historico: [],
+      2025: [],
+      2026: [],
+    };
 
-  // Para cada año, calcular stats y combinar con datos de jugadores
-  [2025, 2026].forEach(year => {
-    const filteredMatches = filterMatchesByYear(matches, year);
-    const seasonStats = calculateSeasonStats(filteredMatches);
+    // Calcular histórico total para cada jugador
+    const historicTotals = {};
 
-    if (seasonStats?.allPlayerStats) {
-      // Combinar stats del año con datos completos del jugador
-      stats[year] = seasonStats.allPlayerStats.map(stat => {
-        const fullPlayer = players.find(p => p.id === stat.id);
-        return {
-          ...stat,
-          name: fullPlayer?.name,
-          photoURL: fullPlayer?.photoURL,
-          originalName: fullPlayer?.originalName,
-          userId: fullPlayer?.userId,
-        };
+    Object.keys(statsBySeason).forEach(season => {
+      statsBySeason[season].forEach(stat => {
+        if (!historicTotals[stat.playerId]) {
+          historicTotals[stat.playerId] = {
+            id: stat.playerId,
+            goals: 0,
+            assists: 0,
+            matches: 0,
+            won: 0,
+            draw: 0,
+            lost: 0,
+          };
+        }
+
+        historicTotals[stat.playerId].goals += stat.goals || 0;
+        historicTotals[stat.playerId].assists += stat.assists || 0;
+        historicTotals[stat.playerId].matches += stat.matches || 0;
+        historicTotals[stat.playerId].won += stat.won || 0;
+        historicTotals[stat.playerId].draw += stat.draw || 0;
+        historicTotals[stat.playerId].lost += stat.lost || 0;
       });
-    }
-  });
-  console.log(stats)
+    });
 
-  return stats;
+    // Convertir histórico a array y combinar con datos de jugadores
+    stats.historico = Object.values(historicTotals).map(stat => {
+      const fullPlayer = players.find(p => p.id === stat.id);
+      return {
+        ...stat,
+        name: fullPlayer?.name,
+        photoURL: fullPlayer?.photoURL,
+        originalName: fullPlayer?.originalName,
+        userId: fullPlayer?.userId,
+      };
+    });
+
+    // Para cada año específico, combinar con datos de jugadores
+    [2025, 2026].forEach(year => {
+      if (statsBySeason[year]) {
+        stats[year] = statsBySeason[year].map(stat => {
+          const fullPlayer = players.find(p => p.id === stat.playerId);
+          return {
+            id: stat.playerId,
+            goals: stat.goals || 0,
+            assists: stat.assists || 0,
+            matches: stat.matches || 0,
+            won: stat.won || 0,
+            draw: stat.draw || 0,
+            lost: stat.lost || 0,
+            name: fullPlayer?.name,
+            photoURL: fullPlayer?.photoURL,
+            originalName: fullPlayer?.originalName,
+            userId: fullPlayer?.userId,
+          };
+        });
+      }
+    });
+
+    return stats;
+  } catch (error) {
+    console.error("Error preparing player stats:", error);
+    return { historico: [], 2025: [], 2026: [] };
+  }
 };
 
 export const PlayersTablePage = ({ players }) => {
@@ -66,6 +110,8 @@ export const PlayersTablePage = ({ players }) => {
   const [selectedYear, setSelectedYear] = useState("2025");
   const [allYearStats, setAllYearStats] = useState({ historico: [], 2025: [], 2026: [] });
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const navigate = useNavigate();
 
   const handleSort = (property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -73,14 +119,25 @@ export const PlayersTablePage = ({ players }) => {
     setOrderBy(property);
   };
 
-  // Cargar matches y calcular stats una sola vez
+  const handleRowClick = (player) => {
+    // Si el jugador ya está seleccionado, deseleccionar
+    if (selectedPlayer?.id === player.id) {
+      setSelectedPlayer(null);
+    } else {
+      setSelectedPlayer(player);
+    }
+  };
+
+  // Cargar stats desde PlayerSeasonStats una sola vez
   useEffect(() => {
-    const unsubscribe = getAllMatches((matches) => {
-      const stats = preparePlayerStatsAllYears(matches, players);
+    const loadStats = async () => {
+      setIsLoading(true);
+      const stats = await preparePlayerStatsFromSeasonStats(players);
       setAllYearStats(stats);
       setIsLoading(false);
-    });
-    return () => unsubscribe;
+    };
+
+    loadStats();
   }, [players]);
 
   // Obtener los jugadores del año seleccionado
@@ -382,18 +439,26 @@ export const PlayersTablePage = ({ players }) => {
                 return (
                   <TableRow
                     key={player.id}
+                    onClick={() => handleRowClick(player)}
                     sx={{
-                      bgcolor: index % 2 === 0 ? "grey.50" : "white",
+                      bgcolor: selectedPlayer?.id === player.id
+                        ? "primary.main"
+                        : index % 2 === 0
+                          ? "grey.50"
+                          : "white",
                       "&:hover": {
-                        bgcolor: "primary.light",
+                        bgcolor: selectedPlayer?.id === player.id
+                          ? "primary.dark"
+                          : "primary.light",
                         cursor: "pointer",
                       },
+                      transition: "background-color 0.2s",
                     }}
                   >
                     <TableCell
                       sx={{
                         fontWeight: "bold",
-                        color: index < 3 ? "primary.main" : "text.primary",
+                        color: selectedPlayer?.id === player.id ? "white" : index < 3 ? "primary.main" : "text.primary",
                         fontSize: { xs: "0.7rem", sm: "0.875rem" },
                         px: { xs: 0.5, sm: 2 },
                         py: { xs: 0.5, sm: 1 },
@@ -409,6 +474,7 @@ export const PlayersTablePage = ({ players }) => {
                         px: { xs: 0, sm: 2 },
                         py: { xs: 0.5, sm: 1 },
                         maxWidth: { xs: 70, sm: 150 },
+                        color: selectedPlayer?.id === player.id ? "white" : "inherit",
                       }}
                     >
                       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -436,7 +502,7 @@ export const PlayersTablePage = ({ players }) => {
                       align="center"
                       sx={{
                         fontWeight: "bold",
-                        color: "success.main",
+                        color: selectedPlayer?.id === player.id ? "white" : "success.main",
                         fontSize: { xs: "0.7rem", sm: "0.875rem" },
                         px: { xs: 0.1, sm: 0.2 },
                         py: { xs: 0.5, sm: 1 },
@@ -449,7 +515,7 @@ export const PlayersTablePage = ({ players }) => {
                       align="center"
                       sx={{
                         fontWeight: "bold",
-                        color: "info.main",
+                        color: selectedPlayer?.id === player.id ? "white" : "info.main",
                         fontSize: { xs: "0.7rem", sm: "0.875rem" },
                         px: { xs: 0.1, sm: 0.2 },
                         py: { xs: 0.5, sm: 1 },
@@ -462,7 +528,7 @@ export const PlayersTablePage = ({ players }) => {
                       align="center"
                       sx={{
                         fontWeight: "bold",
-                        color: "warning.main",
+                        color: selectedPlayer?.id === player.id ? "white" : "warning.main",
                         fontSize: { xs: "0.7rem", sm: "0.875rem" },
                         px: { xs: 0.1, sm: 0.2 },
                         py: { xs: 0.5, sm: 1 },
@@ -478,6 +544,7 @@ export const PlayersTablePage = ({ players }) => {
                         px: { xs: 0.1, sm: 0.2 },
                         py: { xs: 0.5, sm: 1 },
                         width: { xs: 45, sm: 60 },
+                        color: selectedPlayer?.id === player.id ? "white" : "inherit",
                       }}
                     >
                       {player.matches}
@@ -489,6 +556,7 @@ export const PlayersTablePage = ({ players }) => {
                         px: { xs: 0.1, sm: 0.2 },
                         py: { xs: 0.5, sm: 1 },
                         width: { xs: 50, sm: 65 },
+                        color: selectedPlayer?.id === player.id ? "white" : "inherit",
                       }}
                     >
                       {goalsPerMatch}
@@ -500,6 +568,7 @@ export const PlayersTablePage = ({ players }) => {
                         px: { xs: 0.1, sm: 0.2 },
                         py: { xs: 0.5, sm: 1 },
                         width: { xs: 50, sm: 65 },
+                        color: selectedPlayer?.id === player.id ? "white" : "inherit",
                       }}
                     >
                       {assistsPerMatch}
@@ -511,6 +580,47 @@ export const PlayersTablePage = ({ players }) => {
           </Table>
         </TableContainer>
       </Box>
+
+      {/* Botón flotante para ver perfil */}
+      <Fade in={selectedPlayer !== null}>
+        <Box
+          sx={{
+            position: "absolute",
+            right: 10,
+            backgroundColor: 'red',
+            bottom: 10,
+            zIndex: 1000,
+            width: 300,
+          }}
+        >
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={() => navigate(`/perfil/${selectedPlayer?.id}`)}
+            sx={{
+              boxShadow: 4,
+              width: "100%",
+              "&:hover": {
+                boxShadow: 8,
+              },
+            }}
+          >
+            <Typography
+              sx={{
+                width: '100%',
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                flexShrink: 0,
+                fontSize: 14
+              }}
+            >
+              Ver Perfil de {getPlayerDisplay(selectedPlayer)}
+            </Typography>
+          </Button>
+        </Box>
+      </Fade>
     </Grid2>
   );
 };

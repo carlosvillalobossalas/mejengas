@@ -449,6 +449,25 @@ export const getPlayerByUserId = async (userId) => {
   }
 };
 
+// Obtener jugador por ID
+export const getPlayerById = async (playerId) => {
+  try {
+    const playerRef = doc(db, "Players", playerId);
+    const playerDoc = await getDoc(playerRef);
+    
+    if (playerDoc.exists()) {
+      return {
+        id: playerDoc.id,
+        ...playerDoc.data(),
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error("Error getting player by ID:", error);
+    throw new Error(error);
+  }
+};
+
 // Actualizar perfil del jugador
 export const updatePlayerProfile = async (playerId, updates) => {
   try {
@@ -670,6 +689,35 @@ export const getAllPlayerSeasonStats = async (playerId) => {
     })).sort((a, b) => b.season - a.season);
   } catch (error) {
     console.error("Error getting all player season stats:", error);
+    throw new Error(error);
+  }
+};
+
+// Obtener todas las estadísticas de todos los jugadores agrupadas por temporada
+export const getAllPlayersSeasonStats = async () => {
+  try {
+    const statsRef = collection(db, "PlayerSeasonStats");
+    const snapshot = await getDocs(statsRef);
+    
+    const statsBySeason = {};
+    
+    snapshot.docs.forEach(doc => {
+      const data = doc.data();
+      const season = data.season;
+      
+      if (!statsBySeason[season]) {
+        statsBySeason[season] = [];
+      }
+      
+      statsBySeason[season].push({
+        id: data.playerId,
+        ...data,
+      });
+    });
+    
+    return statsBySeason;
+  } catch (error) {
+    console.error("Error getting all players season stats:", error);
     throw new Error(error);
   }
 };

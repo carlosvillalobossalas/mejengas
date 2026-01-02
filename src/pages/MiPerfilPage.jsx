@@ -18,16 +18,19 @@ import { storage } from "../firebaseConfig";
 import {
   updatePlayerProfile,
   getPlayerByUserId,
+  getPlayerById,
   getPlayerAwards,
   getAllPlayerSeasonStats,
 } from "../firebase/endpoints";
 import { toast } from "react-toastify";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import PlayerStatsCard from "../components/PlayerStatsCard";
 
 function MiPerfilPage() {
   const [user] = useAuthState(auth);
+  const { playerId } = useParams(); // Obtener playerId de la URL si existe
+  const isViewingOwnProfile = !playerId; // Si no hay playerId, es el perfil propio
   const [loading, setLoading] = useState(false);
   const [displayName, setDisplayName] = useState("");
   const [photoFile, setPhotoFile] = useState(null);
@@ -40,31 +43,40 @@ function MiPerfilPage() {
 
   useEffect(() => {
     const loadPlayerData = async () => {
-      if (user?.uid) {
-        try {
-          const player = await getPlayerByUserId(user.uid);
+      try {
+        let player;
+        
+        // Si hay playerId en la URL, cargar ese jugador (vista de solo lectura)
+        if (playerId) {
+          player = await getPlayerById(playerId);
+        } 
+        // Si no hay playerId, cargar el jugador del usuario actual
+        else if (user?.uid) {
+          player = await getPlayerByUserId(user.uid);
+        }
+        
+        if (player) {
           setPlayerData(player);
-          setDisplayName(player?.name || user.displayName || "");
-          setPhotoPreview(user.photoURL || "");
+          setDisplayName(player?.name || user?.displayName || "");
+          setPhotoPreview(player?.photoURL || user?.photoURL || "");
 
           // Cargar premios
-          if (player?.id) {
-            const playerAwards = await getPlayerAwards(player.id);
-            setAwards(playerAwards);
+          const playerAwards = await getPlayerAwards(player.id);
+          setAwards(playerAwards);
 
-            // Cargar estadísticas por temporada
-            const stats = await getAllPlayerSeasonStats(player.id);
-            setSeasonStats(stats);
-          }
-        } catch (error) {
-          console.error("Error loading player data:", error);
-        } finally {
-          setLoadingData(false);
+          // Cargar estadísticas por temporada
+          const stats = await getAllPlayerSeasonStats(player.id);
+          setSeasonStats(stats);
         }
+      } catch (error) {
+        console.error("Error loading player data:", error);
+      } finally {
+        setLoadingData(false);
       }
     };
+    
     loadPlayerData();
-  }, [user]);
+  }, [user, playerId]);
 
   const handlePhotoChange = (event) => {
     const file = event.target.files?.[0];
@@ -147,10 +159,12 @@ function MiPerfilPage() {
       <Box sx={{ px: 2, py: 2 }}>
         <Paper sx={{ p: 2, mb: 2 }}>
           <Typography variant="h5" fontWeight={700} mb={2} color="primary">
-            Mi Perfil
+            {isViewingOwnProfile ? "Mi Perfil" : `Perfil de ${playerData?.name}`}
           </Typography>
 
-          <Box component="form" onSubmit={handleSubmit}>
+          {isViewingOwnProfile ? (
+            // Formulario editable para perfil propio
+            <Box component="form" onSubmit={handleSubmit}>
             {/* Foto de perfil */}
             <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mb: 2 }}>
               <Box sx={{ position: "relative" }}>
@@ -226,6 +240,33 @@ function MiPerfilPage() {
               </Button>
             </Box>
           </Box>
+          ) : (
+            // Vista de solo lectura para otros perfiles
+            <Box>
+              {/* Foto de perfil (solo lectura) */}
+              <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mb: 2 }}>
+                <Avatar
+                  src={photoPreview}
+                  alt={displayName}
+                  sx={{ width: 100, height: 100, mb: 1 }}
+                >
+                  {displayName?.[0]?.toUpperCase()}
+                </Avatar>
+                <Typography variant="h6" fontWeight={600}>
+                  {displayName}
+                </Typography>
+              </Box>
+
+              {/* Botón para volver */}
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={() => navigate(-1)}
+              >
+                Volver
+              </Button>
+            </Box>
+          )}
         </Paper>
 
         {/* Estadísticas y Premios */}

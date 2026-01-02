@@ -293,6 +293,11 @@ const App = () => {
               <MiPerfilPage />
             </AuthRoute>
           } />
+          <Route path="/perfil/:playerId" element={
+            <AuthRoute>
+              <MiPerfilPage />
+            </AuthRoute>
+          } />
         </Routes>
       </Box>
       <ToastContainer position="top-right" />
