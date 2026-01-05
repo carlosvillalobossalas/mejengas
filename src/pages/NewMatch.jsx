@@ -22,7 +22,22 @@ import { toast } from "react-toastify";
 import { getPlayerDisplay } from "../utils/playersDisplayName";
 import AddNewPlayerButton from "../components/AddNewPlayerButton";
 
-const emptyPlayers = Array(7).fill({ id: '', goals: 0, assists: 0, ownGoals: 0, isGK: false });
+// Función helper para obtener la posición por defecto según el índice
+const getDefaultPosition = (index) => {
+  if (index === 0) return 'POR'; // Portero
+  if (index >= 1 && index <= 3) return 'DEF'; // Defensas (2-4)
+  if (index >= 4 && index <= 5) return 'MED'; // Medios (5-6)
+  return 'DEL'; // Delantero (7)
+};
+
+const emptyPlayers = Array(7).fill(null).map((_, index) => ({
+  id: '',
+  goals: 0,
+  assists: 0,
+  ownGoals: 0,
+  position: getDefaultPosition(index)
+}));
+
 const initialState = {
   date: dayjs(new Date()),
   players1: emptyPlayers.map((p) => ({ ...p })),
@@ -102,7 +117,7 @@ function NewMatch(props) {
         sx={{
           bgcolor: "success.main",
           color: "white",
-          p: 2,
+          p: 1,
           textAlign: "center",
           flexShrink: 0,
         }}
@@ -132,15 +147,15 @@ function NewMatch(props) {
         </Box>
 
         {/* Team 1 Panel */}
-        <TabPanel value="1" sx={{ paddingY: { xs: 2, sm: 3 }, paddingX: { xs: 1, sm: 3 }, flex: 1, overflow: "auto", minHeight: 0 }}>
+        <TabPanel value="1" sx={{ paddingY: { xs: 2, sm: 3 }, paddingX: { xs: 0.5, sm: 3 }, flex: 1, overflow: "auto", minHeight: 0 }}>
           {/* ...equipo 1 code... */}
           <Box sx={{ maxWidth: 600, mx: "auto", pb: 4 }}>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
-              <Box component="span" sx={{ width: 30, textAlign: "center", fontWeight: "bold" }}>P?</Box>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, display: "flex", alignItems: "center", gap: 0.5 }}>
+              <Box component="span" sx={{ width: 50, textAlign: "center", fontWeight: "bold" }}>Pos.</Box>
               <Box component="span" sx={{ flex: 1 }}>Jugador</Box>
-              <Box component="span" sx={{ width: 50, textAlign: "center" }}>Goles</Box>
-              <Box component="span" sx={{ width: 50, textAlign: "center" }}>Asist.</Box>
-              <Box component="span" sx={{ width: 50, textAlign: "center" }}>A.G.</Box>
+              <Box component="span" sx={{ width: 45, textAlign: "center" }}>Gol</Box>
+              <Box component="span" sx={{ width: 45, textAlign: "center" }}>Ast</Box>
+              <Box component="span" sx={{ width: 45, textAlign: "center" }}>A.G</Box>
             </Typography>
             {(Array.isArray(newMatchForm.players1) ? newMatchForm.players1 : emptyPlayers).map((player, value) => (
               <Box
@@ -148,7 +163,7 @@ function NewMatch(props) {
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 1,
+                  gap: 0.5,
                   mb: 2,
                   bgcolor: "white",
                   p: 1,
@@ -156,22 +171,34 @@ function NewMatch(props) {
                   boxShadow: 1,
                 }}
               >
-                <Checkbox
-                  size="small"
-                  disabled={!player?.id}
-                  checked={player?.isGK ?? false}
-                  onChange={({ target }) => {
-                    setNewMatchForm((prev) => {
-                      const updatedPlayers = [...prev.players1];
-                      updatedPlayers[value] = {
-                        ...updatedPlayers[value],
-                        isGK: target.checked,
-                      };
-                      return { ...prev, players1: updatedPlayers };
-                    });
-                  }}
-                  sx={{ p: 0.5 }}
-                />
+                <FormControl size="small" sx={{ width: 65 }}>
+                  <Select
+                    value={player?.position ?? getDefaultPosition(value)}
+                    disabled={!player?.id}
+                    onChange={({ target }) => {
+                      setNewMatchForm((prev) => {
+                        const updatedPlayers = [...prev.players1];
+                        updatedPlayers[value] = {
+                          ...updatedPlayers[value],
+                          position: target.value,
+                        };
+                        return { ...prev, players1: updatedPlayers };
+                      });
+                    }}
+                    sx={{
+                      fontSize: "0.75rem",
+                      "& .MuiSelect-select": {
+                        py: 0.5,
+                        px: 0.5,
+                      }
+                    }}
+                  >
+                    <MenuItem value="POR" sx={{ fontSize: "0.75rem" }}>POR</MenuItem>
+                    <MenuItem value="DEF" sx={{ fontSize: "0.75rem" }}>DEF</MenuItem>
+                    <MenuItem value="MED" sx={{ fontSize: "0.75rem" }}>MED</MenuItem>
+                    <MenuItem value="DEL" sx={{ fontSize: "0.75rem" }}>DEL</MenuItem>
+                  </Select>
+                </FormControl>
                 <FormControl sx={{ flex: 1, minWidth: 120 }} size="small">
                   <InputLabel>{`J${value + 1}`}</InputLabel>
                   <Select
@@ -186,7 +213,7 @@ function NewMatch(props) {
                           goals: 0,
                           assists: 0,
                           ownGoals: 0,
-                          isGK: false,
+                          position: getDefaultPosition(value),
                         };
                         return { ...prev, players1: updatedPlayers };
                       })
@@ -206,7 +233,7 @@ function NewMatch(props) {
                 <TextField
                   type="number"
                   size="small"
-                  sx={{ width: 50 }}
+                  sx={{ width: 40 }}
                   disabled={!player?.id}
                   value={player?.goals ?? 0}
                   onChange={({ target }) =>
@@ -219,12 +246,12 @@ function NewMatch(props) {
                       return { ...prev, players1: updatedPlayers };
                     })
                   }
-                  slotProps={{ input: { min: 0, style: { textAlign: "center" } } }}
+                  slotProps={{ input: { min: 0, style: { textAlign: "center", fontSize: "0.875rem" } } }}
                 />
                 <TextField
                   type="number"
                   size="small"
-                  sx={{ width: 50 }}
+                  sx={{ width: 40 }}
                   disabled={!player?.id}
                   value={player?.assists ?? 0}
                   onChange={({ target }) =>
@@ -237,12 +264,12 @@ function NewMatch(props) {
                       return { ...prev, players1: updatedPlayers };
                     })
                   }
-                  slotProps={{ input: { min: 0, style: { textAlign: "center" } } }}
+                  slotProps={{ input: { min: 0, style: { textAlign: "center", fontSize: "0.875rem" } } }}
                 />
                 <TextField
                   type="number"
                   size="small"
-                  sx={{ width: 50 }}
+                  sx={{ width: 40 }}
                   disabled={!player?.id}
                   value={player?.ownGoals ?? 0}
                   onChange={({ target }) =>
@@ -255,7 +282,7 @@ function NewMatch(props) {
                       return { ...prev, players1: updatedPlayers };
                     })
                   }
-                  slotProps={{ input: { min: 0, style: { textAlign: "center" } } }}
+                  slotProps={{ input: { min: 0, style: { textAlign: "center", fontSize: "0.875rem" } } }}
                 />
               </Box>
             ))}
@@ -263,15 +290,15 @@ function NewMatch(props) {
         </TabPanel>
 
         {/* Team 2 Panel */}
-        <TabPanel value="2" sx={{ p: { xs: 2, sm: 3 }, flex: 1, overflow: "auto", minHeight: 0 }}>
+        <TabPanel value="2" sx={{ paddingY: { xs: 2, sm: 3 }, paddingX: { xs: 0.5, sm: 3 }, flex: 1, overflow: "auto", minHeight: 0 }}>
           {/* ...equipo 2 code... */}
           <Box sx={{ maxWidth: 600, mx: "auto", pb: 4 }}>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
-              <Box component="span" sx={{ width: 30, textAlign: "center", fontWeight: "bold" }}>P?</Box>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, display: "flex", alignItems: "center", gap: 0.5 }}>
+              <Box component="span" sx={{ width: 50, textAlign: "center", fontWeight: "bold" }}>Pos.</Box>
               <Box component="span" sx={{ flex: 1 }}>Jugador</Box>
-              <Box component="span" sx={{ width: 50, textAlign: "center" }}>Goles</Box>
-              <Box component="span" sx={{ width: 50, textAlign: "center" }}>Asist.</Box>
-              <Box component="span" sx={{ width: 50, textAlign: "center" }}>A.G.</Box>
+              <Box component="span" sx={{ width: 45, textAlign: "center" }}>Gol</Box>
+              <Box component="span" sx={{ width: 45, textAlign: "center" }}>Ast</Box>
+              <Box component="span" sx={{ width: 45, textAlign: "center" }}>A.G</Box>
             </Typography>
             {(Array.isArray(newMatchForm.players2) ? newMatchForm.players2 : emptyPlayers).map((player, value) => (
               <Box
@@ -279,7 +306,7 @@ function NewMatch(props) {
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 1,
+                  gap: 0.5,
                   mb: 2,
                   bgcolor: "white",
                   p: 1,
@@ -287,22 +314,34 @@ function NewMatch(props) {
                   boxShadow: 1,
                 }}
               >
-                <Checkbox
-                  size="small"
-                  disabled={!player?.id}
-                  checked={player?.isGK ?? false}
-                  onChange={({ target }) => {
-                    setNewMatchForm((prev) => {
-                      const updatedPlayers = [...prev.players2];
-                      updatedPlayers[value] = {
-                        ...updatedPlayers[value],
-                        isGK: target.checked,
-                      };
-                      return { ...prev, players2: updatedPlayers };
-                    });
-                  }}
-                  sx={{ p: 0.5 }}
-                />
+                <FormControl size="small" sx={{ width: 65 }}>
+                  <Select
+                    value={player?.position ?? getDefaultPosition(value)}
+                    disabled={!player?.id}
+                    onChange={({ target }) => {
+                      setNewMatchForm((prev) => {
+                        const updatedPlayers = [...prev.players2];
+                        updatedPlayers[value] = {
+                          ...updatedPlayers[value],
+                          position: target.value,
+                        };
+                        return { ...prev, players2: updatedPlayers };
+                      });
+                    }}
+                    sx={{
+                      fontSize: "0.75rem",
+                      "& .MuiSelect-select": {
+                        py: 0.5,
+                        px: 0.5,
+                      }
+                    }}
+                  >
+                    <MenuItem value="POR" sx={{ fontSize: "0.75rem" }}>POR</MenuItem>
+                    <MenuItem value="DEF" sx={{ fontSize: "0.75rem" }}>DEF</MenuItem>
+                    <MenuItem value="MED" sx={{ fontSize: "0.75rem" }}>MED</MenuItem>
+                    <MenuItem value="DEL" sx={{ fontSize: "0.75rem" }}>DEL</MenuItem>
+                  </Select>
+                </FormControl>
                 <FormControl sx={{ flex: 1, minWidth: 120 }} size="small">
                   <InputLabel>{`J${value + 1}`}</InputLabel>
                   <Select
@@ -317,7 +356,7 @@ function NewMatch(props) {
                           goals: 0,
                           assists: 0,
                           ownGoals: 0,
-                          isGK: false,
+                          position: getDefaultPosition(value),
                         };
                         return { ...prev, players2: updatedPlayers };
                       })
@@ -337,7 +376,7 @@ function NewMatch(props) {
                 <TextField
                   type="number"
                   size="small"
-                  sx={{ width: 50 }}
+                  sx={{ width: 40 }}
                   disabled={!player?.id}
                   value={player?.goals ?? 0}
                   onChange={({ target }) =>
@@ -350,12 +389,12 @@ function NewMatch(props) {
                       return { ...prev, players2: updatedPlayers };
                     })
                   }
-                  slotProps={{ input: { min: 0, style: { textAlign: "center" } } }}
+                  slotProps={{ input: { min: 0, style: { textAlign: "center", fontSize: "0.875rem" } } }}
                 />
                 <TextField
                   type="number"
                   size="small"
-                  sx={{ width: 50 }}
+                  sx={{ width: 40 }}
                   disabled={!player?.id}
                   value={player?.assists ?? 0}
                   onChange={({ target }) =>
@@ -368,12 +407,12 @@ function NewMatch(props) {
                       return { ...prev, players2: updatedPlayers };
                     })
                   }
-                  slotProps={{ input: { min: 0, style: { textAlign: "center" } } }}
+                  slotProps={{ input: { min: 0, style: { textAlign: "center", fontSize: "0.875rem" } } }}
                 />
                 <TextField
                   type="number"
                   size="small"
-                  sx={{ width: 50 }}
+                  sx={{ width: 40 }}
                   disabled={!player?.id}
                   value={player?.ownGoals ?? 0}
                   onChange={({ target }) =>
@@ -386,7 +425,7 @@ function NewMatch(props) {
                       return { ...prev, players2: updatedPlayers };
                     })
                   }
-                  slotProps={{ input: { min: 0, style: { textAlign: "center" } } }}
+                  slotProps={{ input: { min: 0, style: { textAlign: "center", fontSize: "0.875rem" } } }}
                 />
               </Box>
             ))}

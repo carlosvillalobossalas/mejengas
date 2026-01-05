@@ -116,7 +116,7 @@ export const saveNewMatch = async (data, players) => {
     await addDoc(matchCollectionRef, match);
 
     //update gks
-    const gk1 = data.players1.find((p) => p.isGK);
+    const gk1 = data.players1.find((p) => p.position === 'POR');
     const playerGK1 = players.find((p) => p.id === gk1.id);
     const gk1DocRef = doc(db, "Goalkeepers", gk1.id);
     const gk1Doc = await getDoc(gk1DocRef);
@@ -143,8 +143,8 @@ export const saveNewMatch = async (data, players) => {
       { merge: true }
     );
 
-    const gk2 = data.players2.find((p) => p.isGK);
-    const playerGK2 = players.find((p) => p.id === gk1.id);
+    const gk2 = data.players2.find((p) => p.position === 'POR');
+    const playerGK2 = players.find((p) => p.id === gk2.id);
 
     const gk2DocRef = doc(db, "Goalkeepers", gk2.id);
     const gk2Doc = await getDoc(gk2DocRef);
