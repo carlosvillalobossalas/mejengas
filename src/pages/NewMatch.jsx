@@ -427,7 +427,11 @@ function NewMatch(props) {
           </Box>
         </TabPanel>
       </TabContext>
-      <AddNewPlayerButton />
+      {
+        tabIndex === "3" && (
+          <AddNewPlayerButton />
+        )
+      }
       <Outlet />
     </Box>
   );
