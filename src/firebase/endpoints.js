@@ -101,15 +101,16 @@ export const saveNewMatch = async (data, players) => {
       date: data.date.toDate(),
       goalsTeam1: data.players1.reduce((acc, value) => {
         if (value.goals === "") return acc;
-
         return parseInt(acc ?? 0) + parseInt(value?.goals ?? 0);
+      }, 0) + data.players2.reduce((acc, value) => {
+        return parseInt(acc ?? 0) + parseInt(value?.ownGoals ?? 0);
       }, 0),
-      goalsTeam2:
-        data.players2.reduce((acc, value) => {
-          if (value.goals === "") return acc;
-
-          return parseInt(acc ?? 0) + parseInt(value?.goals ?? 0);
-        }, 0) ?? 0,
+      goalsTeam2: data.players2.reduce((acc, value) => {
+        if (value.goals === "") return acc;
+        return parseInt(acc ?? 0) + parseInt(value?.goals ?? 0);
+      }, 0) + data.players1.reduce((acc, value) => {
+        return parseInt(acc ?? 0) + parseInt(value?.ownGoals ?? 0);
+      }, 0),
     };
     const matchCollectionRef = collection(db, "Matches");
     await addDoc(matchCollectionRef, match);

@@ -22,7 +22,7 @@ import { toast } from "react-toastify";
 import { getPlayerDisplay } from "../utils/playersDisplayName";
 import AddNewPlayerButton from "../components/AddNewPlayerButton";
 
-const emptyPlayers = Array(7).fill({ id: '', goals: 0, assists: 0, isGK: false });
+const emptyPlayers = Array(7).fill({ id: '', goals: 0, assists: 0, ownGoals: 0, isGK: false });
 const initialState = {
   date: dayjs(new Date()),
   players1: emptyPlayers.map((p) => ({ ...p })),
@@ -132,14 +132,15 @@ function NewMatch(props) {
         </Box>
 
         {/* Team 1 Panel */}
-        <TabPanel value="1" sx={{ p: { xs: 2, sm: 3 }, flex: 1, overflow: "auto", minHeight: 0 }}>
+        <TabPanel value="1" sx={{ paddingY: { xs: 2, sm: 3 }, paddingX: { xs: 1, sm: 3 }, flex: 1, overflow: "auto", minHeight: 0 }}>
           {/* ...equipo 1 code... */}
           <Box sx={{ maxWidth: 600, mx: "auto", pb: 4 }}>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
               <Box component="span" sx={{ width: 30, textAlign: "center", fontWeight: "bold" }}>P?</Box>
               <Box component="span" sx={{ flex: 1 }}>Jugador</Box>
-              <Box component="span" sx={{ width: 60, textAlign: "center" }}>Goles</Box>
-              <Box component="span" sx={{ width: 60, textAlign: "center" }}>Asist.</Box>
+              <Box component="span" sx={{ width: 50, textAlign: "center" }}>Goles</Box>
+              <Box component="span" sx={{ width: 50, textAlign: "center" }}>Asist.</Box>
+              <Box component="span" sx={{ width: 50, textAlign: "center" }}>A.G.</Box>
             </Typography>
             {(Array.isArray(newMatchForm.players1) ? newMatchForm.players1 : emptyPlayers).map((player, value) => (
               <Box
@@ -184,6 +185,7 @@ function NewMatch(props) {
                           id: target.value,
                           goals: 0,
                           assists: 0,
+                          ownGoals: 0,
                           isGK: false,
                         };
                         return { ...prev, players1: updatedPlayers };
@@ -204,7 +206,7 @@ function NewMatch(props) {
                 <TextField
                   type="number"
                   size="small"
-                  sx={{ width: 60 }}
+                  sx={{ width: 50 }}
                   disabled={!player?.id}
                   value={player?.goals ?? 0}
                   onChange={({ target }) =>
@@ -222,7 +224,7 @@ function NewMatch(props) {
                 <TextField
                   type="number"
                   size="small"
-                  sx={{ width: 60 }}
+                  sx={{ width: 50 }}
                   disabled={!player?.id}
                   value={player?.assists ?? 0}
                   onChange={({ target }) =>
@@ -231,6 +233,24 @@ function NewMatch(props) {
                       updatedPlayers[value] = {
                         ...updatedPlayers[value],
                         assists: parseInt(target.value) || 0,
+                      };
+                      return { ...prev, players1: updatedPlayers };
+                    })
+                  }
+                  slotProps={{ input: { min: 0, style: { textAlign: "center" } } }}
+                />
+                <TextField
+                  type="number"
+                  size="small"
+                  sx={{ width: 50 }}
+                  disabled={!player?.id}
+                  value={player?.ownGoals ?? 0}
+                  onChange={({ target }) =>
+                    setNewMatchForm((prev) => {
+                      const updatedPlayers = [...prev.players1];
+                      updatedPlayers[value] = {
+                        ...updatedPlayers[value],
+                        ownGoals: parseInt(target.value) || 0,
                       };
                       return { ...prev, players1: updatedPlayers };
                     })
@@ -249,8 +269,9 @@ function NewMatch(props) {
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
               <Box component="span" sx={{ width: 30, textAlign: "center", fontWeight: "bold" }}>P?</Box>
               <Box component="span" sx={{ flex: 1 }}>Jugador</Box>
-              <Box component="span" sx={{ width: 60, textAlign: "center" }}>Goles</Box>
-              <Box component="span" sx={{ width: 60, textAlign: "center" }}>Asist.</Box>
+              <Box component="span" sx={{ width: 50, textAlign: "center" }}>Goles</Box>
+              <Box component="span" sx={{ width: 50, textAlign: "center" }}>Asist.</Box>
+              <Box component="span" sx={{ width: 50, textAlign: "center" }}>A.G.</Box>
             </Typography>
             {(Array.isArray(newMatchForm.players2) ? newMatchForm.players2 : emptyPlayers).map((player, value) => (
               <Box
@@ -295,6 +316,7 @@ function NewMatch(props) {
                           id: target.value,
                           goals: 0,
                           assists: 0,
+                          ownGoals: 0,
                           isGK: false,
                         };
                         return { ...prev, players2: updatedPlayers };
@@ -315,7 +337,7 @@ function NewMatch(props) {
                 <TextField
                   type="number"
                   size="small"
-                  sx={{ width: 60 }}
+                  sx={{ width: 50 }}
                   disabled={!player?.id}
                   value={player?.goals ?? 0}
                   onChange={({ target }) =>
@@ -333,7 +355,7 @@ function NewMatch(props) {
                 <TextField
                   type="number"
                   size="small"
-                  sx={{ width: 60 }}
+                  sx={{ width: 50 }}
                   disabled={!player?.id}
                   value={player?.assists ?? 0}
                   onChange={({ target }) =>
@@ -342,6 +364,24 @@ function NewMatch(props) {
                       updatedPlayers[value] = {
                         ...updatedPlayers[value],
                         assists: parseInt(target.value) || 0,
+                      };
+                      return { ...prev, players2: updatedPlayers };
+                    })
+                  }
+                  slotProps={{ input: { min: 0, style: { textAlign: "center" } } }}
+                />
+                <TextField
+                  type="number"
+                  size="small"
+                  sx={{ width: 50 }}
+                  disabled={!player?.id}
+                  value={player?.ownGoals ?? 0}
+                  onChange={({ target }) =>
+                    setNewMatchForm((prev) => {
+                      const updatedPlayers = [...prev.players2];
+                      updatedPlayers[value] = {
+                        ...updatedPlayers[value],
+                        ownGoals: parseInt(target.value) || 0,
                       };
                       return { ...prev, players2: updatedPlayers };
                     })
@@ -363,13 +403,13 @@ function NewMatch(props) {
                   Equipo 1
                 </Typography>
                 <Typography variant="h3" fontWeight="bold" color="primary" sx={{ fontSize: { xs: "2rem", sm: "3rem" }, lineHeight: 1.1 }}>
-                  {(Array.isArray(newMatchForm.players1)
-                    ? newMatchForm.players1
-                    : emptyPlayers
-                  ).reduce((acc, value) => {
-                    if (value.goals === "") return acc;
-                    return parseInt(acc ?? 0) + (parseInt(value?.goals) ?? 0);
-                  }, 0) ?? 0}
+                  {(() => {
+                    const team1Goals = (Array.isArray(newMatchForm.players1) ? newMatchForm.players1 : emptyPlayers)
+                      .reduce((acc, value) => acc + (parseInt(value?.goals) || 0), 0);
+                    const team2OwnGoals = (Array.isArray(newMatchForm.players2) ? newMatchForm.players2 : emptyPlayers)
+                      .reduce((acc, value) => acc + (parseInt(value?.ownGoals) || 0), 0);
+                    return team1Goals + team2OwnGoals;
+                  })()}
                 </Typography>
               </Box>
               <Typography variant="h4" color="text.secondary" sx={{ fontSize: { xs: "1.5rem", sm: "2.5rem" }, mx: 2 }}>
@@ -380,13 +420,13 @@ function NewMatch(props) {
                   Equipo 2
                 </Typography>
                 <Typography variant="h3" fontWeight="bold" color="error" sx={{ fontSize: { xs: "2rem", sm: "3rem" }, lineHeight: 1.1 }}>
-                  {(Array.isArray(newMatchForm.players2)
-                    ? newMatchForm.players2
-                    : emptyPlayers
-                  ).reduce((acc, value) => {
-                    if (value.goals === "") return acc;
-                    return parseInt(acc ?? 0) + parseInt(value?.goals ?? 0);
-                  }, 0) ?? 0}
+                  {(() => {
+                    const team2Goals = (Array.isArray(newMatchForm.players2) ? newMatchForm.players2 : emptyPlayers)
+                      .reduce((acc, value) => acc + (parseInt(value?.goals) || 0), 0);
+                    const team1OwnGoals = (Array.isArray(newMatchForm.players1) ? newMatchForm.players1 : emptyPlayers)
+                      .reduce((acc, value) => acc + (parseInt(value?.ownGoals) || 0), 0);
+                    return team2Goals + team1OwnGoals;
+                  })()}
                 </Typography>
               </Box>
             </Box>
