@@ -207,165 +207,274 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
                     </Box>
                   )}
 
-                  {/* Título de secciones */}
-                  <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-                    <Typography variant="subtitle2" color="primary" fontWeight="bold">
+                  {/* Equipo 1 */}
+                  <Box sx={{ mb: 2 }}>
+                    <Typography 
+                      variant="subtitle2" 
+                      color="primary" 
+                      fontWeight="bold"
+                      sx={{ 
+                        mb: 1, 
+                        display: "flex", 
+                        alignItems: "center",
+                        gap: 0.5
+                      }}
+                    >
+                      <Box 
+                        sx={{ 
+                          width: 4, 
+                          height: 16, 
+                          bgcolor: "primary.main",
+                          borderRadius: 1
+                        }} 
+                      />
                       Equipo 1
                     </Typography>
-                    <Typography variant="subtitle2" color="primary" fontWeight="bold">
-                      Equipo 2
-                    </Typography>
-                  </Box>
-
-                  {/* Jugadores */}
-                  {match.players1.map((player1, playerIndex) => {
-                    const player2 = match.players2[playerIndex];
-                    const player1Name = getPlayerDisplay(players.find((p) => p.id === player1.id)) || player1.name;
-                    const player2Name = getPlayerDisplay(players.find((p) => p.id === player2.id)) || player2.name;
-                    player1.name = player1Name;
-                    player2.name = player2Name;
-                    return (
-                      <Box
-                        key={player1.id}
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          py: 1,
-                          px: 0.5,
-                          mb: 0.5,
-                          bgcolor: "white",
-                          borderRadius: 1,
-                          boxShadow: 1,
-                        }}
-                      >
-                        {/* Equipo 1 */}
+                    {match.players1.map((player, idx) => {
+                      const playerName = getPlayerDisplay(players.find((p) => p.id === player.id)) || player.name;
+                      const isGK = player.position === "POR" || player.isGK;
+                      return (
                         <Box
+                          key={player.id || idx}
                           sx={{
                             display: "flex",
                             alignItems: "center",
                             gap: 0.5,
-                            flex: 1,
-                            minWidth: 0,
+                            py: 0.75,
+                            px: 1,
+                            mb: 0.5,
+                            bgcolor: "white",
+                            borderRadius: 1,
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
                           }}
                         >
-                          {player1.isGK && (
+                          {/* Posición */}
+                          {(player.position || player.isGK) && (
                             <Chip
-                              label="GK"
+                              label={player.position || "POR"}
                               size="small"
-                              color="info"
-                              sx={{ height: 20, fontSize: "0.7rem", flexShrink: 0 }}
+                              color={isGK ? "info" : "default"}
+                              sx={{ 
+                                height: 20, 
+                                fontSize: "0.65rem", 
+                                fontWeight: "bold",
+                                minWidth: 38,
+                                "& .MuiChip-label": { px: 0.5 }
+                              }}
                             />
                           )}
+                          
+                          {/* Nombre */}
                           <Typography 
                             variant="body2" 
-                            fontWeight={player1.isGK ? "bold" : "normal"}
+                            fontWeight={isGK ? "bold" : "medium"}
                             sx={{
-                              width: 90,
+                              flex: 1,
                               overflow: "hidden",
                               textOverflow: "ellipsis",
                               whiteSpace: "nowrap",
-                              flexShrink: 0,
+                              fontSize: "0.875rem"
                             }}
                           >
-                            {player1.name}
+                            {playerName}
                           </Typography>
-                          {!player1.isGK && (
-                            <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
-                              {player1.goals > 0 && (
-                                <Chip
-                                  icon={<SportsSoccer sx={{ fontSize: "0.9rem !important" }} />}
-                                  label={player1.goals}
-                                  size="small"
-                                  color="success"
-                                  sx={{ height: 22 }}
-                                />
+                          
+                          {/* Stats - solo para no porteros */}
+                          {!isGK && (
+                            <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
+                              {player.goals > 0 && (
+                                <Box sx={{ 
+                                  display: "flex", 
+                                  alignItems: "center", 
+                                  gap: 0.25,
+                                  bgcolor: "success.50",
+                                  px: 0.5,
+                                  py: 0.25,
+                                  borderRadius: 0.5
+                                }}>
+                                  <SportsSoccer sx={{ fontSize: "1.1rem", color: "success.main" }} />
+                                  <Typography variant="caption" fontWeight="bold" color="success.main" fontSize={'0.85rem'}>
+                                    {player.goals}
+                                  </Typography>
+                                </Box>
                               )}
-                              {player1.assists > 0 && (
-                                <Chip
-                                  icon={
-                                    <img
-                                      src={AssistIcon}
-                                      style={{ width: 12, height: 12, marginLeft: 4 }}
-                                    />
-                                  }
-                                  label={player1.assists}
-                                  size="small"
-                                  color="info"
-                                  sx={{ height: 22 }}
-                                />
+                              {player.assists > 0 && (
+                                <Box sx={{ 
+                                  display: "flex", 
+                                  alignItems: "center", 
+                                  gap: 0.25,
+                                  bgcolor: "info.50",
+                                  px: 0.5,
+                                  py: 0.25,
+                                  borderRadius: 0.5
+                                }}>
+                                  <img
+                                    src={AssistIcon}
+                                    style={{ width: 18, height: 18,}}
+                                  />
+                                  <Typography variant="caption" fontWeight="bold" color="info.main" fontSize={'0.85rem'}>
+                                    {player.assists}
+                                  </Typography>
+                                </Box>
+                              )}
+                              {player.ownGoals > 0 && (
+                                <Box sx={{ 
+                                  display: "flex", 
+                                  alignItems: "center", 
+                                  gap: 0.25,
+                                  bgcolor: "error.50",
+                                  px: 0.5,
+                                  py: 0.25,
+                                  borderRadius: 0.5
+                                }}>
+                                  <SportsSoccer sx={{ fontSize: "1.1rem", color: "error.main" }} />
+                                  <Typography variant="caption" fontWeight="bold" color="error.main" fontSize={'0.85rem'}>
+                                    {player.ownGoals}
+                                  </Typography>
+                                </Box>
                               )}
                             </Box>
                           )}
                         </Box>
+                      );
+                    })}
+                  </Box>
 
-                        {/* Separador */}
-                        <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                  {/* Separador entre equipos */}
+                  <Divider sx={{ my: 2 }} />
 
-                        {/* Equipo 2 */}
+                  {/* Equipo 2 */}
+                  <Box sx={{ mb: 2 }}>
+                    <Typography 
+                      variant="subtitle2" 
+                      color="primary" 
+                      fontWeight="bold"
+                      sx={{ 
+                        mb: 1, 
+                        display: "flex", 
+                        alignItems: "center",
+                        gap: 0.5
+                      }}
+                    >
+                      <Box 
+                        sx={{ 
+                          width: 4, 
+                          height: 16, 
+                          bgcolor: "primary.main",
+                          borderRadius: 1
+                        }} 
+                      />
+                      Equipo 2
+                    </Typography>
+                    {match.players2.map((player, idx) => {
+                      const playerName = getPlayerDisplay(players.find((p) => p.id === player.id)) || player.name;
+                      const isGK = player.position === "POR" || player.isGK;
+                      return (
                         <Box
+                          key={player.id || idx}
                           sx={{
                             display: "flex",
                             alignItems: "center",
-                            justifyContent: "flex-end",
                             gap: 0.5,
-                            flex: 1,
-                            minWidth: 0,
+                            py: 0.75,
+                            px: 1,
+                            mb: 0.5,
+                            bgcolor: "white",
+                            borderRadius: 1,
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
                           }}
                         >
-                          {!player2.isGK && (
-                            <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
-                              {player2.goals > 0 && (
-                                <Chip
-                                  icon={<SportsSoccer sx={{ fontSize: "0.9rem !important" }} />}
-                                  label={player2.goals}
-                                  size="small"
-                                  color="success"
-                                  sx={{ height: 22 }}
-                                />
-                              )}
-                              {player2.assists > 0 && (
-                                <Chip
-                                  icon={
-                                    <img
-                                      src={AssistIcon}
-                                      style={{ width: 12, height: 12, marginLeft: 4 }}
-                                    />
-                                  }
-                                  label={player2.assists}
-                                  size="small"
-                                  color="info"
-                                  sx={{ height: 22 }}
-                                />
-                              )}
-                            </Box>
+                          {/* Posición */}
+                          {(player.position || player.isGK) && (
+                            <Chip
+                              label={player.position || "POR"}
+                              size="small"
+                              color={isGK ? "info" : "default"}
+                              sx={{ 
+                                height: 20, 
+                                fontSize: "0.65rem", 
+                                fontWeight: "bold",
+                                minWidth: 38,
+                                "& .MuiChip-label": { px: 0.5 }
+                              }}
+                            />
                           )}
-                          <Typography
-                            variant="body2"
-                            fontWeight={player2.isGK ? "bold" : "normal"}
-                            textAlign="right"
+                          
+                          {/* Nombre */}
+                          <Typography 
+                            variant="body2" 
+                            fontWeight={isGK ? "bold" : "medium"}
                             sx={{
-                              width: 90,
+                              flex: 1,
                               overflow: "hidden",
                               textOverflow: "ellipsis",
                               whiteSpace: "nowrap",
-                              flexShrink: 0,
+                              fontSize: "0.875rem"
                             }}
                           >
-                            {player2.name}
+                            {playerName}
                           </Typography>
-                          {player2.isGK && (
-                            <Chip
-                              label="GK"
-                              size="small"
-                              color="info"
-                              sx={{ height: 20, fontSize: "0.7rem", flexShrink: 0 }}
-                            />
+                          
+                          {/* Stats - solo para no porteros */}
+                          {!isGK && (
+                            <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
+                              {player.goals > 0 && (
+                                <Box sx={{ 
+                                  display: "flex", 
+                                  alignItems: "center", 
+                                  gap: 0.25,
+                                  bgcolor: "success.50",
+                                  px: 0.5,
+                                  py: 0.25,
+                                  borderRadius: 0.5
+                                }}>
+                                  <SportsSoccer sx={{ fontSize: "1.1rem", color: "success.main" }} />
+                                  <Typography variant="caption" fontWeight="bold" color="success.main" fontSize={'0.85rem'}>
+                                    {player.goals}
+                                  </Typography>
+                                </Box>
+                              )}
+                              {player.assists > 0 && (
+                                <Box sx={{ 
+                                  display: "flex", 
+                                  alignItems: "center", 
+                                  gap: 0.25,
+                                  bgcolor: "info.50",
+                                  px: 0.5,
+                                  py: 0.25,
+                                  borderRadius: 0.5
+                                }}>
+                                  <img
+                                    src={AssistIcon}
+                                    style={{ width: 18, height: 18 }}
+                                  />
+                                  <Typography variant="caption" fontWeight="bold" color="info.main" fontSize={'0.85rem'}>
+                                    {player.assists}
+                                  </Typography>
+                                </Box>
+                              )}
+                              {player.ownGoals > 0 && (
+                                <Box sx={{ 
+                                  display: "flex", 
+                                  alignItems: "center", 
+                                  gap: 0.25,
+                                  bgcolor: "error.50",
+                                  px: 0.5,
+                                  py: 0.25,
+                                  borderRadius: 0.5
+                                }}>
+                                  <SportsSoccer sx={{ fontSize: "1.1rem", color: "error.main" }} />
+                                  <Typography variant="caption" fontWeight="bold" color="error.main" fontSize={'0.85rem'}>
+                                    {player.ownGoals}
+                                  </Typography>
+                                </Box>
+                              )}
+                            </Box>
                           )}
                         </Box>
-                      </Box>
-                    );
-                  })}
+                      );
+                    })}
+                  </Box>
 
                   {/* Botón WhatsApp */}
                   <Divider sx={{ my: 2 }} />
