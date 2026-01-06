@@ -18,6 +18,7 @@ import { useState } from "react";
 import AssistIcon from "/assets/shoe.png";
 import { formatMatchSummary, shareToWhatsApp } from "../utils/whatsappShare";
 import { getPlayerDisplay } from "../utils/playersDisplayName";
+import MatchLineup from "./MatchLineup";
 
 const HistoricMatchesList = ({ matches = [], players = [] }) => {
   const [openItems, setOpenItems] = useState({});
@@ -206,6 +207,20 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
                       </Box>
                     </Box>
                   )}
+
+                  {/* Alineación táctica */}
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="subtitle2" color="primary" fontWeight="bold" gutterBottom>
+                      ⚽ Alineaciones
+                    </Typography>
+                    <MatchLineup
+                      team1Players={match.players1}
+                      team2Players={match.players2}
+                      allPlayers={players}
+                    />
+                  </Box>
+
+                  <Divider sx={{ my: 2 }} />
 
                   {/* Equipo 1 */}
                   <Box sx={{ mb: 2 }}>
