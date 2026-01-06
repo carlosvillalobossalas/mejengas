@@ -5,3 +5,12 @@ export const getPlayerDisplay = (player) => {
   }
   return player?.originalName || player?.name || 'Sin nombre';
 };
+
+export const getPlayerShortDisplay = (player) => {
+  const displayName = getPlayerDisplay(player);
+  const names = displayName.split(' ');
+  if (names.length === 1) {
+    return names[0];
+  }
+  return `${names[0]} ${names[1][0]}`;
+}
