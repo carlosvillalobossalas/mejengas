@@ -45,15 +45,11 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
       {/* Header */}
       <Box
         sx={{
-          py: 2,
-          px: 2,
+          p: 1,
           bgcolor: "primary.main",
           color: "white",
         }}
       >
-        <Typography variant="h6" textAlign="center" fontWeight="bold">
-          ⚽ Histórico de Partidos
-        </Typography>
         <Typography variant="caption" textAlign="center" display="block">
           Total: {matches.length} partidos
         </Typography>
@@ -224,24 +220,24 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
 
                   {/* Equipo 1 */}
                   <Box sx={{ mb: 2 }}>
-                    <Typography 
-                      variant="subtitle2" 
-                      color="primary" 
+                    <Typography
+                      variant="subtitle2"
+                      color="primary"
                       fontWeight="bold"
-                      sx={{ 
-                        mb: 1, 
-                        display: "flex", 
+                      sx={{
+                        mb: 1,
+                        display: "flex",
                         alignItems: "center",
                         gap: 0.5
                       }}
                     >
-                      <Box 
-                        sx={{ 
-                          width: 4, 
-                          height: 16, 
+                      <Box
+                        sx={{
+                          width: 4,
+                          height: 16,
                           bgcolor: "primary.main",
                           borderRadius: 1
-                        }} 
+                        }}
                       />
                       Equipo 1
                     </Typography>
@@ -269,19 +265,19 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
                               label={player.position || "POR"}
                               size="small"
                               color={isGK ? "info" : "default"}
-                              sx={{ 
-                                height: 20, 
-                                fontSize: "0.65rem", 
+                              sx={{
+                                height: 20,
+                                fontSize: "0.65rem",
                                 fontWeight: "bold",
                                 minWidth: 38,
                                 "& .MuiChip-label": { px: 0.5 }
                               }}
                             />
                           )}
-                          
+
                           {/* Nombre */}
-                          <Typography 
-                            variant="body2" 
+                          <Typography
+                            variant="body2"
                             fontWeight={isGK ? "bold" : "medium"}
                             sx={{
                               flex: 1,
@@ -293,14 +289,14 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
                           >
                             {playerName}
                           </Typography>
-                          
+
                           {/* Stats - solo para no porteros */}
                           {!isGK && (
                             <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
                               {player.goals > 0 && (
-                                <Box sx={{ 
-                                  display: "flex", 
-                                  alignItems: "center", 
+                                <Box sx={{
+                                  display: "flex",
+                                  alignItems: "center",
                                   gap: 0.25,
                                   bgcolor: "success.50",
                                   px: 0.5,
@@ -314,9 +310,9 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
                                 </Box>
                               )}
                               {player.assists > 0 && (
-                                <Box sx={{ 
-                                  display: "flex", 
-                                  alignItems: "center", 
+                                <Box sx={{
+                                  display: "flex",
+                                  alignItems: "center",
                                   gap: 0.25,
                                   bgcolor: "info.50",
                                   px: 0.5,
@@ -325,7 +321,7 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
                                 }}>
                                   <img
                                     src={AssistIcon}
-                                    style={{ width: 18, height: 18,}}
+                                    style={{ width: 18, height: 18, }}
                                   />
                                   <Typography variant="caption" fontWeight="bold" color="info.main" fontSize={'0.85rem'}>
                                     {player.assists}
@@ -333,9 +329,9 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
                                 </Box>
                               )}
                               {player.ownGoals > 0 && (
-                                <Box sx={{ 
-                                  display: "flex", 
-                                  alignItems: "center", 
+                                <Box sx={{
+                                  display: "flex",
+                                  alignItems: "center",
                                   gap: 0.25,
                                   bgcolor: "error.50",
                                   px: 0.5,
@@ -360,24 +356,24 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
 
                   {/* Equipo 2 */}
                   <Box sx={{ mb: 2 }}>
-                    <Typography 
-                      variant="subtitle2" 
-                      color="primary" 
+                    <Typography
+                      variant="subtitle2"
+                      color="primary"
                       fontWeight="bold"
-                      sx={{ 
-                        mb: 1, 
-                        display: "flex", 
+                      sx={{
+                        mb: 1,
+                        display: "flex",
                         alignItems: "center",
                         gap: 0.5
                       }}
                     >
-                      <Box 
-                        sx={{ 
-                          width: 4, 
-                          height: 16, 
+                      <Box
+                        sx={{
+                          width: 4,
+                          height: 16,
                           bgcolor: "primary.main",
                           borderRadius: 1
-                        }} 
+                        }}
                       />
                       Equipo 2
                     </Typography>
@@ -405,19 +401,19 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
                               label={player.position || "POR"}
                               size="small"
                               color={isGK ? "info" : "default"}
-                              sx={{ 
-                                height: 20, 
-                                fontSize: "0.65rem", 
+                              sx={{
+                                height: 20,
+                                fontSize: "0.65rem",
                                 fontWeight: "bold",
                                 minWidth: 38,
                                 "& .MuiChip-label": { px: 0.5 }
                               }}
                             />
                           )}
-                          
+
                           {/* Nombre */}
-                          <Typography 
-                            variant="body2" 
+                          <Typography
+                            variant="body2"
                             fontWeight={isGK ? "bold" : "medium"}
                             sx={{
                               flex: 1,
@@ -429,14 +425,14 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
                           >
                             {playerName}
                           </Typography>
-                          
+
                           {/* Stats - solo para no porteros */}
                           {!isGK && (
                             <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
                               {player.goals > 0 && (
-                                <Box sx={{ 
-                                  display: "flex", 
-                                  alignItems: "center", 
+                                <Box sx={{
+                                  display: "flex",
+                                  alignItems: "center",
                                   gap: 0.25,
                                   bgcolor: "success.50",
                                   px: 0.5,
@@ -450,9 +446,9 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
                                 </Box>
                               )}
                               {player.assists > 0 && (
-                                <Box sx={{ 
-                                  display: "flex", 
-                                  alignItems: "center", 
+                                <Box sx={{
+                                  display: "flex",
+                                  alignItems: "center",
                                   gap: 0.25,
                                   bgcolor: "info.50",
                                   px: 0.5,
@@ -469,9 +465,9 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
                                 </Box>
                               )}
                               {player.ownGoals > 0 && (
-                                <Box sx={{ 
-                                  display: "flex", 
-                                  alignItems: "center", 
+                                <Box sx={{
+                                  display: "flex",
+                                  alignItems: "center",
                                   gap: 0.25,
                                   bgcolor: "error.50",
                                   px: 0.5,
