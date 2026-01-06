@@ -107,7 +107,7 @@ const preparePlayerStatsFromSeasonStats = async (players) => {
 export const PlayersTablePage = ({ players }) => {
   const [orderBy, setOrderBy] = useState("goals");
   const [order, setOrder] = useState("desc");
-  const [selectedYear, setSelectedYear] = useState("2025");
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [allYearStats, setAllYearStats] = useState({ historico: [], 2025: [], 2026: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
