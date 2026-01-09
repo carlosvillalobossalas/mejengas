@@ -3,8 +3,8 @@ import { Box, Avatar, Typography, Tabs, Tab, Chip } from "@mui/material";
 import { useState } from "react";
 import AssistIcon from "/assets/shoe.png";
 import { getPlayerShortDisplay } from "../utils/playersDisplayName";
-
-const MatchLineup = ({ team1Players = [], team2Players = [], allPlayers = [] }) => {
+import StarIcon from '@mui/icons-material/Star';
+const MatchLineup = ({ team1Players = [], team2Players = [], allPlayers = [], mvpPlayerId = null }) => {
     const [selectedTeam, setSelectedTeam] = useState(0);
 
     const handleTeamChange = (event, newValue) => {
@@ -59,7 +59,7 @@ const MatchLineup = ({ team1Players = [], team2Players = [], allPlayers = [] }) 
         return { x, y };
     };
 
-    const renderPlayer = (player, positionIndex) => {
+    const renderPlayer = (player) => {
         if (!player || !player.id) return null;
 
         const playerInfo = getPlayerInfo(player.id);
@@ -74,6 +74,7 @@ const MatchLineup = ({ team1Players = [], team2Players = [], allPlayers = [] }) 
 
         const coords = getPositionCoordinates(player.position, indexInPosition, playersInPosition.length);
         const hasStats = (player.goals > 0 || player.assists > 0 || player.ownGoals > 0);
+        const isMVP = mvpPlayerId && player.id === mvpPlayerId;
 
         return (
             <Box
@@ -97,8 +98,10 @@ const MatchLineup = ({ team1Players = [], team2Players = [], allPlayers = [] }) 
                         sx={{
                             width: 52,
                             height: 52,
-                            border: "3px solid white",
-                            boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                            border: isMVP ? "3px solid gold" : "3px solid white",
+                            boxShadow: isMVP
+                                ? "0 0 12px rgba(255, 215, 0, 0.8), 0 2px 8px rgba(0,0,0,0.2)"
+                                : "0 2px 8px rgba(0,0,0,0.2)",
                             bgcolor: player.position === "POR" ? "warning.main" : "primary.main",
                             fontSize: "1.25rem",
                             fontWeight: "bold",
@@ -106,6 +109,29 @@ const MatchLineup = ({ team1Players = [], team2Players = [], allPlayers = [] }) 
                     >
                         {!playerPhoto && getPlayerInitial(playerName)}
                     </Avatar>
+
+                    {/* Badge MVP */}
+                    {isMVP && (
+                        <Box
+                            sx={{
+                                position: "absolute",
+                                top: -4,
+                                left: -2,
+                                width: 16,
+                                height: 16,
+                                borderRadius: "50%",
+                                bgcolor: "gold",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                boxShadow: "0 2px 6px rgba(255, 215, 0, 0.6)",
+                                border: "2px solid white",
+                                zIndex: 3,
+                            }}
+                        >
+                            <StarIcon sx={{ fontSize: "1rem", color: "white" }} />
+                        </Box>
+                    )}
 
                     {/* Badge de posición */}
                     <Chip

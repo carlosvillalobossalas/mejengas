@@ -13,15 +13,47 @@ import {
   Card,
   Chip,
   Divider,
+  Button,
 } from "@mui/material";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AssistIcon from "/assets/shoe.png";
 import { formatMatchSummary, shareToWhatsApp } from "../utils/whatsappShare";
 import { getPlayerDisplay } from "../utils/playersDisplayName";
 import MatchLineup from "./MatchLineup";
+import MVPVoteModal from "./MVPVoteModal";
+import { getPlayerByUserId, saveMVPVote, calculateAndSaveMVP } from "../firebase/endpoints";
+import { auth } from "../firebaseConfig";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 const HistoricMatchesList = ({ matches = [], players = [] }) => {
   const [openItems, setOpenItems] = useState({});
+  const [mvpModalOpen, setMvpModalOpen] = useState(false);
+  const [selectedMatch, setSelectedMatch] = useState(null);
+  const [user] = useAuthState(auth);
+  const [currentPlayer, setCurrentPlayer] = useState(null);
+
+  // Cargar datos del jugador actual
+  useEffect(() => {
+    if (user?.uid) {
+      getPlayerByUserId(user.uid).then(setCurrentPlayer);
+    }
+  }, [user]);
+
+  // Calcular MVP para partidos que ya pasaron 24 horas
+  useEffect(() => {
+    matches.forEach((match) => {
+      if (match.registeredDate && !match.mvpPlayerId) {
+        const registeredDate = match.registeredDate.toDate();
+        const now = new Date();
+        const hoursDiff = (now - registeredDate) / (1000 * 60 * 60);
+
+        // Si pasaron más de 24 horas, calcular MVP
+        if (hoursDiff > 24) {
+          calculateAndSaveMVP(match.id).catch(console.error);
+        }
+      }
+    });
+  }, [matches]);
 
   const handleClick = (index) => {
     setOpenItems((prev) => ({
@@ -34,6 +66,59 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
     event.stopPropagation();
     const message = formatMatchSummary(match);
     shareToWhatsApp(message);
+  };
+
+  const handleOpenMVPVote = (match, event) => {
+    event.stopPropagation();
+    setSelectedMatch(match);
+    setMvpModalOpen(true);
+  };
+
+  const handleCloseMVPVote = () => {
+    setMvpModalOpen(false);
+    setSelectedMatch(null);
+  };
+
+  const handleVote = async (playerId) => {
+    if (!selectedMatch || !currentPlayer) return;
+
+    try {
+      await saveMVPVote(selectedMatch.id, currentPlayer.id, playerId);
+      // La UI se actualizará automáticamente porque matches usa onSnapshot
+    } catch (error) {
+      console.error("Error saving MVP vote:", error);
+      alert("Error al guardar el voto. Por favor intenta de nuevo.");
+    }
+  };
+
+  const canVote = (match) => {
+    if (!currentPlayer || !match) return { canVote: false };
+
+    // Verificar si el partido tiene registeredDate
+    if (!match.registeredDate) return { canVote: false };
+
+    // Verificar si han pasado más de 24 horas
+    const registeredDate = match.registeredDate.toDate();
+    const now = new Date();
+    const hoursDiff = (now - registeredDate) / (1000 * 60 * 60);
+    if (hoursDiff > 24) return { canVote: false };
+
+    // Verificar si el jugador participó en el partido
+    const allMatchPlayers = [...(match.players1 || []), ...(match.players2 || [])];
+    const playerInMatch = allMatchPlayers.find(p => p.id === currentPlayer.id);
+    if (!playerInMatch) return { canVote: false };
+
+    // Verificar si ya votó
+    if (playerInMatch.mvpVote) {
+      const votedPlayerInfo = players.find(p => p.id === playerInMatch.mvpVote);
+      return {
+        canVote: false,
+        hasVoted: true,
+        votedFor: getPlayerDisplay(votedPlayerInfo)
+      };
+    }
+
+    return { canVote: true };
   };
 
   return (
@@ -213,6 +298,7 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
                       team1Players={match.players1}
                       team2Players={match.players2}
                       allPlayers={players}
+                      mvpPlayerId={match.mvpPlayerId}
                     />
                   </Box>
 
@@ -244,6 +330,7 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
                     {match.players1.map((player, idx) => {
                       const playerName = getPlayerDisplay(players.find((p) => p.id === player.id)) || player.name;
                       const isGK = player.position === "POR" || player.isGK;
+                      const isMVP = match.mvpPlayerId && player.id === match.mvpPlayerId;
                       return (
                         <Box
                           key={player.id || idx}
@@ -346,6 +433,26 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
                               )}
                             </Box>
                           )}
+
+                          {/* MVP Indicator */}
+                          {isMVP && (
+                            <Chip
+                              label="MVP"
+                              size="small"
+                              sx={{
+                                height: 22,
+                                bgcolor: "#FFD700",
+                                color: "white",
+                                fontWeight: "bold",
+                                fontSize: "0.65rem",
+                                "& .MuiChip-icon": {
+                                  fontSize: "0.9rem",
+                                  color: "#000"
+                                },
+                                "& .MuiChip-label": { px: 0.5 }
+                              }}
+                            />
+                          )}
                         </Box>
                       );
                     })}
@@ -380,6 +487,7 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
                     {match.players2.map((player, idx) => {
                       const playerName = getPlayerDisplay(players.find((p) => p.id === player.id)) || player.name;
                       const isGK = player.position === "POR" || player.isGK;
+                      const isMVP = match.mvpPlayerId && player.id === match.mvpPlayerId;
                       return (
                         <Box
                           key={player.id || idx}
@@ -482,6 +590,26 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
                               )}
                             </Box>
                           )}
+
+                          {/* MVP Indicator */}
+                          {isMVP && (
+                            <Chip
+                              label="MVP"
+                              size="small"
+                              sx={{
+                                height: 22,
+                                bgcolor: "#FFD700",
+                                color: "white",
+                                fontWeight: "bold",
+                                fontSize: "0.65rem",
+                                "& .MuiChip-icon": {
+                                  fontSize: "0.9rem",
+                                  color: "#000"
+                                },
+                                "& .MuiChip-label": { px: 0.5 }
+                              }}
+                            />
+                          )}
                         </Box>
                       );
                     })}
@@ -489,6 +617,58 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
 
                   {/* Botón WhatsApp */}
                   <Divider sx={{ my: 2 }} />
+
+                  {/* Botón MVP Vote */}
+                  {(() => {
+                    const voteStatus = canVote(match);
+                    if (voteStatus.hasVoted) {
+                      return (
+                        <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+                          <Box
+                            sx={{
+                              bgcolor: "success.50",
+                              border: "1px solid",
+                              borderColor: "success.main",
+                              borderRadius: 2,
+                              px: 3,
+                              py: 1.5,
+                            }}
+                          >
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: 600, color: "success.dark", textAlign: "center" }}
+                            >
+                              ✅ Ya votaste MVP: <strong>{voteStatus.votedFor}</strong>
+                            </Typography>
+                          </Box>
+                        </Box>
+                      );
+                    }
+
+                    if (voteStatus.canVote) {
+                      return (
+                        <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+                          <Button
+                            onClick={(e) => handleOpenMVPVote(match, e)}
+                            variant="contained"
+                            color="warning"
+                            startIcon={<EmojiEventsIcon />}
+                            sx={{
+                              borderRadius: 2,
+                              px: 3,
+                              py: 1,
+                              fontWeight: 600,
+                            }}
+                          >
+                            Votar MVP
+                          </Button>
+                        </Box>
+                      );
+                    }
+
+                    return null;
+                  })()}
+
                   <Box sx={{ display: "flex", justifyContent: "center" }}>
                     <Tooltip title="Compartir resumen en WhatsApp">
                       <IconButton
@@ -520,6 +700,15 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
           ))}
         </Box>
       </Box>
+
+      {/* MVP Vote Modal */}
+      <MVPVoteModal
+        open={mvpModalOpen}
+        onClose={handleCloseMVPVote}
+        match={selectedMatch}
+        allPlayers={players}
+        onVote={handleVote}
+      />
     </Grid2>
   );
 };

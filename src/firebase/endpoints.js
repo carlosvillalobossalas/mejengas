@@ -98,7 +98,7 @@ export const saveNewMatch = async (data, players) => {
     //new match save
     const match = {
       ...data,
-      date: data.date.toDate(),
+      registeredDate: new Date(),
       goalsTeam1: data.players1.reduce((acc, value) => {
         if (value.goals === "") return acc;
         return parseInt(acc ?? 0) + parseInt(value?.goals ?? 0);
@@ -171,34 +171,14 @@ export const saveNewMatch = async (data, players) => {
       { merge: true }
     );
 
-    //update players - solo actualizar info básica, NO estadísticas
-    const players1Promises = data.players1.map((player) => {
-      const playerDocRef = doc(db, "Players", player.id);
-      return updateDoc(playerDocRef, {
-        name: player.name,
-        photoURL: player.photoURL,
-      });
-    });
-
-    await Promise.all(players1Promises);
-
-    const players2Promises = data.players2.map((player) => {
-      const playerDocRef = doc(db, "Players", player.id);
-      return updateDoc(playerDocRef, {
-        name: player.name,
-        photoURL: player.photoURL,
-      });
-    });
-
-    await Promise.all(players2Promises);
-
     // Actualizar estadísticas por temporada (nuevo sistema)
     await updatePlayerSeasonStatsAfterMatch(match);
 
     // Recalcular y actualizar el resumen de la temporada
-    const matchYear = getMatchYear(match);
-    await updateSeasonSummary(matchYear);
+    // const matchYear = getMatchYear(match);
+    // await updateSeasonSummary(matchYear);
   } catch (error) {
+    console.log(error)
     throw new Error(error);
   }
 };
@@ -597,7 +577,8 @@ export const getPlayerSeasonStats = async (playerId, season) => {
 // Actualizar estadísticas de temporada después de un partido
 export const updatePlayerSeasonStatsAfterMatch = async (matchData) => {
   try {
-    const matchYear = matchData.date.toDate().getFullYear();
+    console.log(matchData)
+    const matchYear = matchData.date.getFullYear();
     const allPlayers = [...matchData.players1, ...matchData.players2];
     const team1Won = matchData.goalsTeam1 > matchData.goalsTeam2;
     const isDraw = matchData.goalsTeam1 === matchData.goalsTeam2;
@@ -769,6 +750,103 @@ export const migrateHistoricalMatchesToSeasonStats = async () => {
     };
   } catch (error) {
     console.error("❌ Error en la migración:", error);
+    throw new Error(error);
+  }
+};
+
+// Guardar voto MVP de un jugador en un partido
+export const saveMVPVote = async (matchId, voterId, votedPlayerId) => {
+  try {
+    const matchRef = doc(db, "Matches", matchId);
+    const matchDoc = await getDoc(matchRef);
+    
+    if (!matchDoc.exists()) {
+      throw new Error("Partido no encontrado");
+    }
+
+    const matchData = matchDoc.data();
+    
+    // Actualizar el voto en el jugador correspondiente
+    const updatedPlayers1 = (matchData.players1 || []).map(player => {
+      if (player.id === voterId) {
+        return { ...player, mvpVote: votedPlayerId };
+      }
+      return player;
+    });
+
+    const updatedPlayers2 = (matchData.players2 || []).map(player => {
+      if (player.id === voterId) {
+        return { ...player, mvpVote: votedPlayerId };
+      }
+      return player;
+    });
+
+    await updateDoc(matchRef, {
+      players1: updatedPlayers1,
+      players2: updatedPlayers2,
+      lastMVPVoteAt: new Date(),
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error saving MVP vote:", error);
+    throw new Error(error);
+  }
+};
+
+// Calcular y guardar el MVP del partido después de 24 horas
+export const calculateAndSaveMVP = async (matchId) => {
+  try {
+    const matchRef = doc(db, "Matches", matchId);
+    const matchDoc = await getDoc(matchRef);
+    
+    if (!matchDoc.exists()) {
+      throw new Error("Partido no encontrado");
+    }
+
+    const matchData = matchDoc.data();
+    
+    // Si ya tiene MVP, no recalcular
+    if (matchData.mvpPlayerId) {
+      return { success: true, mvpPlayerId: matchData.mvpPlayerId };
+    }
+
+    // Contar votos
+    const allPlayers = [...(matchData.players1 || []), ...(matchData.players2 || [])];
+    const voteCounts = {};
+    
+    allPlayers.forEach(player => {
+      if (player.mvpVote) {
+        voteCounts[player.mvpVote] = (voteCounts[player.mvpVote] || 0) + 1;
+      }
+    });
+
+    // Si no hay votos, no guardar MVP
+    if (Object.keys(voteCounts).length === 0) {
+      return { success: true, mvpPlayerId: null };
+    }
+
+    // Encontrar el jugador con más votos
+    let mvpPlayerId = null;
+    let maxVotes = 0;
+    
+    Object.entries(voteCounts).forEach(([playerId, votes]) => {
+      if (votes > maxVotes) {
+        maxVotes = votes;
+        mvpPlayerId = playerId;
+      }
+    });
+
+    // Guardar MVP en el partido
+    await updateDoc(matchRef, {
+      mvpPlayerId,
+      mvpVotes: maxVotes,
+      mvpCalculatedAt: new Date(),
+    });
+
+    return { success: true, mvpPlayerId, mvpVotes: maxVotes };
+  } catch (error) {
+    console.error("Error calculating MVP:", error);
     throw new Error(error);
   }
 };

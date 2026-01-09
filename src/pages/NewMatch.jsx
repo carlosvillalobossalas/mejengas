@@ -86,8 +86,8 @@ function NewMatch(props) {
       }
       await saveNewMatch({
         ...newMatchForm,
-        date: newMatchForm.date ? newMatchForm.date.toISOString() : null,
-      });
+        date: newMatchForm.date ? newMatchForm.date.toDate() : null,
+      }, players);
       toast.success("Partido guardado correctamente");
       setNewMatchForm({
         ...initialState,
@@ -96,6 +96,7 @@ function NewMatch(props) {
       });
       setTabIndex("1");
     } catch (e) {
+      console.log(e)
       toast.error("Error al guardar el partido");
     } finally {
       setIsSaving(false);
@@ -368,7 +369,7 @@ function NewMatch(props) {
                         key={player.id}
                         value={player.id}
                       >
-                        {player.name}
+                        {getPlayerDisplay(player)}
                       </MenuItem>
                     ))}
                   </Select>
