@@ -31,7 +31,6 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [user] = useAuthState(auth);
   const [currentPlayer, setCurrentPlayer] = useState(null);
-
   // Cargar datos del jugador actual
   useEffect(() => {
     if (user?.uid) {
@@ -706,7 +705,7 @@ const HistoricMatchesList = ({ matches = [], players = [] }) => {
         open={mvpModalOpen}
         onClose={handleCloseMVPVote}
         match={selectedMatch}
-        allPlayers={players}
+        allPlayers={players.filter(player=> player.userId!== user.uid)}
         onVote={handleVote}
       />
     </Grid2>

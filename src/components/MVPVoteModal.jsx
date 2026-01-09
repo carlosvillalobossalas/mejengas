@@ -45,7 +45,6 @@ const MVPVoteModal = ({ open, onClose, match, allPlayers, onVote }) => {
 
   // Combinar jugadores de ambos equipos
   const allMatchPlayers = [...(match.players1 || []), ...(match.players2 || [])];
-
   return (
     <Dialog 
       open={open} 
@@ -82,6 +81,7 @@ const MVPVoteModal = ({ open, onClose, match, allPlayers, onVote }) => {
           >
             {allMatchPlayers.map((player) => {
               const playerInfo = allPlayers.find((p) => p.id === player.id);
+              if(playerInfo===undefined) return null;
               const playerName = getPlayerDisplay(playerInfo);
               const playerPhoto = playerInfo?.photoURL;
 
