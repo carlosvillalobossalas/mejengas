@@ -12,7 +12,8 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Outlet } from "react-router";
-import { getAllPlayers, saveNewMatch } from "../firebase/endpoints";
+import { saveNewMatch } from "../firebase/endpoints";
+import { getAllPlayers } from "../firebase/playerEndpoints";
 import dayjs from "dayjs";
 import { DatePicker } from "@mui/x-date-pickers";
 import TabContext from "@mui/lab/TabContext";

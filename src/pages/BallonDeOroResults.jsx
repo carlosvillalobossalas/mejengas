@@ -17,7 +17,8 @@ import {
     DialogContent,
     DialogActions,
 } from "@mui/material";
-import { getBallonDeOroResults, getAllPlayers, saveBallonDeOroWinners, getBallonDeOroWinners } from "../firebase/endpoints";
+import { getBallonDeOroResults, saveBallonDeOroWinners, getBallonDeOroWinners } from "../firebase/endpoints";
+import { getAllPlayers } from "../firebase/playerEndpoints";
 import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";

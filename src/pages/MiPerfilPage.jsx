@@ -21,7 +21,7 @@ import {
   getPlayerById,
   getPlayerAwards,
   getAllPlayerSeasonStats,
-} from "../firebase/endpoints";
+} from "../firebase/playerEndpoints";
 import { toast } from "react-toastify";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import { useNavigate, useParams } from "react-router-dom";

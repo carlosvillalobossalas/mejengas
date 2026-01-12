@@ -22,7 +22,7 @@ import { SportsSoccer, Stadium, Stars, Person, ShowChart, Analytics, CalendarMon
 import AssistIcon from "/assets/shoe.png";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAllPlayersSeasonStats, getAllPlayers } from "../firebase/endpoints";
+import { getAllPlayers, getAllPlayersSeasonStats } from "../firebase/playerEndpoints";
 import { getPlayerDisplay } from "../utils/playersDisplayName";
 
 // Función para combinar stats de PlayerSeasonStats con datos de jugadores

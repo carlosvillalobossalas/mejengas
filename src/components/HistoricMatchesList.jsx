@@ -21,7 +21,8 @@ import { formatMatchSummary, shareToWhatsApp } from "../utils/whatsappShare";
 import { getPlayerDisplay } from "../utils/playersDisplayName";
 import MatchLineup from "./MatchLineup";
 import MVPVoteModal from "./MVPVoteModal";
-import { getPlayerByUserId, saveMVPVote, calculateAndSaveMVP } from "../firebase/endpoints";
+import { saveMVPVote, calculateAndSaveMVP } from "../firebase/endpoints";
+import { getPlayerByUserId } from "../firebase/playerEndpoints";
 import { auth } from "../firebaseConfig";
 import { useAuthState } from "react-firebase-hooks/auth";
 

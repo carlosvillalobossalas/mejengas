@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography, Button, FormControl, InputLabel, MenuItem, Select, Paper, CircularProgress } from "@mui/material";
-import { getAllPlayers, saveBallonDeOroVotes, checkIfUserVoted } from "../firebase/endpoints";
+import { saveBallonDeOroVotes, checkIfUserVoted } from "../firebase/endpoints";
+import { getAllPlayers } from "../firebase/playerEndpoints";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebaseConfig";
 import { useRegisterCompleted } from "../hooks/useRegisterCompleted";

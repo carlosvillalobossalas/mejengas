@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
-import { addNewPlayer } from "../firebase/endpoints";
+import { addNewPlayer } from "../firebase/playerEndpoints";
 import { useParams } from "react-router";
 import { toast } from "react-toastify";
 
