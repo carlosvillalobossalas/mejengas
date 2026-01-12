@@ -26,7 +26,6 @@ import { db } from "../firebaseConfig";
 import { toast } from "react-toastify";
 
 const UserManagementPage = () => {
-  const [authUsers, setAuthUsers] = useState([]);
   const [players, setPlayers] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,11 +54,10 @@ const UserManagementPage = () => {
         id: doc.id,
         ...doc.data(),
       }));
+      console.log(playersData)
       setPlayers(playersData);
 
-      // En producción, necesitarías una Cloud Function para listar usuarios de Auth
-      // Por ahora solo mostramos los que están en Firestore
-      setAuthUsers(usersData);
+    
     } catch (error) {
       console.error("Error loading data:", error);
       toast.error("Error al cargar datos");
@@ -269,7 +267,9 @@ const UserManagementPage = () => {
               Jugadores del Sistema
             </Typography>
             <Box>
-              {players.map((player) => (
+              {players.map((player) => {
+                console.log(player)
+                return (
                 <Box
                   key={player.id}
                   sx={{
@@ -289,7 +289,7 @@ const UserManagementPage = () => {
                   </Avatar>
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography variant="body2" fontWeight="bold" noWrap>
-                      {player.originalName}
+                      {player?.originalName ?? player.name}
                     </Typography>
                     <Box sx={{ mt: 0.5 }}>
                       {player.userId ? (
@@ -300,7 +300,7 @@ const UserManagementPage = () => {
                     </Box>
                   </Box>
                 </Box>
-              ))}
+              )})}
             </Box>
           </Card>
         </Grid2>
