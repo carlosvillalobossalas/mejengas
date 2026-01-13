@@ -54,7 +54,6 @@ const UserManagementPage = () => {
         id: doc.id,
         ...doc.data(),
       }));
-      console.log(playersData)
       setPlayers(playersData);
 
     

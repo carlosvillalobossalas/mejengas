@@ -148,9 +148,9 @@ export const getPlayerAwards = async (playerId) => {
 // ==================== ESTADÍSTICAS DE TEMPORADA ====================
 
 // Obtener o crear estadísticas de temporada para un jugador
-export const getPlayerSeasonStats = async (playerId, season) => {
+export const getPlayerSeasonStats = async (playerId, season, groupId = "HpWjsA6l5WjJ7FNlC8uA") => {
   try {
-    const statsRef = doc(db, "PlayerSeasonStats", `${playerId}_${season}`);
+    const statsRef = doc(db, "PlayerSeasonStats", `${playerId}_${season}_${groupId}`);
     const statsDoc = await getDoc(statsRef);
     
     if (statsDoc.exists()) {
@@ -161,6 +161,7 @@ export const getPlayerSeasonStats = async (playerId, season) => {
     const initialStats = {
       playerId,
       season,
+      groupId,
       goals: 0,
       assists: 0,
       matches: 0,
@@ -173,7 +174,7 @@ export const getPlayerSeasonStats = async (playerId, season) => {
     };
     
     await setDoc(statsRef, initialStats);
-    return { id: `${playerId}_${season}`, ...initialStats };
+    return { id: `${playerId}_${season}_${groupId}`, ...initialStats };
   } catch (error) {
     console.error("Error getting player season stats:", error);
     throw new Error(error);
@@ -181,10 +182,14 @@ export const getPlayerSeasonStats = async (playerId, season) => {
 };
 
 // Obtener todas las estadísticas de temporadas de un jugador
-export const getAllPlayerSeasonStats = async (playerId) => {
+export const getAllPlayerSeasonStats = async (playerId, groupId = "HpWjsA6l5WjJ7FNlC8uA") => {
   try {
     const statsRef = collection(db, "PlayerSeasonStats");
-    const q = query(statsRef, where("playerId", "==", playerId));
+    const q = query(
+      statsRef, 
+      where("playerId", "==", playerId),
+      where("groupId", "==", groupId)
+    );
     const snapshot = await getDocs(q);
     
     return snapshot.docs.map(doc => ({
@@ -198,10 +203,11 @@ export const getAllPlayerSeasonStats = async (playerId) => {
 };
 
 // Obtener todas las estadísticas de todos los jugadores agrupadas por temporada
-export const getAllPlayersSeasonStats = async () => {
+export const getAllPlayersSeasonStats = async (groupId = "HpWjsA6l5WjJ7FNlC8uA") => {
   try {
     const statsRef = collection(db, "PlayerSeasonStats");
-    const snapshot = await getDocs(statsRef);
+    const q = query(statsRef, where("groupId", "==", groupId));
+    const snapshot = await getDocs(q);
     
     const statsBySeason = {};
     
@@ -227,7 +233,7 @@ export const getAllPlayersSeasonStats = async () => {
 };
 
 // Actualizar estadísticas de temporada después de un partido
-export const updatePlayerSeasonStatsAfterMatch = async (matchData) => {
+export const updatePlayerSeasonStatsAfterMatch = async (matchData, groupId = "HpWjsA6l5WjJ7FNlC8uA") => {
   try {
     console.log(matchData)
     const matchYear = matchData.date.getFullYear();
@@ -238,12 +244,13 @@ export const updatePlayerSeasonStatsAfterMatch = async (matchData) => {
     for (let i = 0; i < allPlayers.length; i++) {
       const player = allPlayers[i];
       const isTeam1 = i < matchData.players1.length;
-      const statsRef = doc(db, "PlayerSeasonStats", `${player.id}_${matchYear}`);
+      const statsRef = doc(db, "PlayerSeasonStats", `${player.id}_${matchYear}_${groupId}`);
       
       const statsDoc = await getDoc(statsRef);
       const currentStats = statsDoc.exists() ? statsDoc.data() : {
         playerId: player.id,
         season: matchYear,
+        groupId,
         goals: 0,
         assists: 0,
         matches: 0,
