@@ -1,16 +1,12 @@
-import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../firebaseConfig';
 import {
-  setUser,
-  fetchUserData,
   selectUser,
   selectUserData,
   selectIsAuthenticated,
   selectAuthLoading,
   selectAuthError,
   selectIsAdmin,
+  selectAuthInitialized,
 } from '../store/slices/authSlice';
 
 /**
@@ -19,40 +15,14 @@ import {
  * y sincroniza con el store de Redux
  */
 export const useAuth = () => {
-  const dispatch = useDispatch();
+  useDispatch();
   const user = useSelector(selectUser);
   const userData = useSelector(selectUserData);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const loading = useSelector(selectAuthLoading);
   const error = useSelector(selectAuthError);
   const isAdmin = useSelector(selectIsAdmin);
-
-  useEffect(() => {
-    // Listener para cambios en autenticación
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      try {
-        if (firebaseUser) {
-          // Usuario autenticado
-          dispatch(setUser({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            displayName: firebaseUser.displayName,
-            photoURL: firebaseUser.photoURL,
-          }));
-          
-          // Obtener datos de Firestore (sin snapshot)
-          await dispatch(fetchUserData(firebaseUser.uid));
-        } else {
-          // Usuario no autenticado
-          dispatch(setUser(null));
-        }
-      } catch (error) {
-        console.error('Error en onAuthStateChanged:', error);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [dispatch]);
+  const initialized = useSelector(selectAuthInitialized);
 
   return {
     user,
@@ -61,5 +31,6 @@ export const useAuth = () => {
     loading,
     error,
     isAdmin,
+    initialized,
   };
 };

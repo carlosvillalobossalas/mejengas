@@ -9,7 +9,7 @@ export const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: {
         // Ignorar estas acciones porque Firebase devuelve objetos no serializables
-        ignoredActions: ['auth/setUser', 'auth/setUserData', 'auth/loginWithGoogle/fulfilled'],
+        ignoredActions: ['auth/setUser', 'auth/setUserData', 'auth/loginWithGoogle/fulfilled', 'auth/fetchUserData/fulfilled'],
         // Ignorar estos paths en el state - todos los campos de userData pueden tener Timestamps
         ignoredPaths: ['auth.user', 'auth.userData', 'auth.userData.createdAt', 'auth.userData.updatedAt'],
       },

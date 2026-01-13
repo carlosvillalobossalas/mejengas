@@ -5,6 +5,7 @@ import { PlayersTablePage } from "../pages/PlayersTablePage";
 import BalonDeOro from "../pages/BalonDeOro";
 import BallonDeOroResults from "../pages/BallonDeOroResults";
 import MiPerfilPage from "../pages/MiPerfilPage";
+import MisGruposPage from "../pages/MisGruposPage";
 import LoginPage from "../pages/LoginPage";
 import AdminRoute from "./AdminRoute";
 import UserManagementPage from "../pages/UserManagementPage";
@@ -14,11 +15,11 @@ import SeasonSummaryPage from "../pages/SeasonSummaryPage";
 import { useAuth } from "../hooks/useAuthRedux";
 
 const AppRoutes = ({ players, goalkeepers, matches }) => {
-  const { user, loading: loadingAuth } = useAuth();
+  const { user, initialized } = useAuth();
 
   // Ruta protegida solo por autenticación
   const AuthRoute = ({ children }) => {
-    if (loadingAuth) {
+    if (!initialized) {
       return (
         <Box sx={{ height: "calc(100vh - 56px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <CircularProgress />
@@ -30,7 +31,7 @@ const AppRoutes = ({ players, goalkeepers, matches }) => {
 
   // Ruta pública - redirige a inicio si ya está autenticado
   const PublicRoute = ({ children }) => {
-    if (loadingAuth) {
+    if (!initialized) {
       return (
         <Box sx={{ height: "calc(100vh - 56px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <CircularProgress />
@@ -66,6 +67,11 @@ const AppRoutes = ({ players, goalkeepers, matches }) => {
         <Route path="/porteros" element={
           <AuthRoute>
             <GoalkeepersTablePage goalkeepers={goalkeepers} />
+          </AuthRoute>
+        } />
+        <Route path="/mis-grupos" element={
+          <AuthRoute>
+            <MisGruposPage />
           </AuthRoute>
         } />
         <Route path="/admin/usuarios" element={

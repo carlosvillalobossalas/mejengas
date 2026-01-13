@@ -487,3 +487,135 @@ export const updatePlayerSeasonStatsAfterMatch = async (matchData, groupId = "Hp
     throw new Error(error);
   }
 };
+
+// ==================== GESTIÓN DE GRUPOS ====================
+
+// Obtener todos los grupos de un usuario
+export const getUserGroups = async (userId) => {
+  try {
+    const countMembersByGroupId = async (groupId) => {
+      const membersRef = collection(db, "groupMembers");
+      const membersQuery = query(membersRef, where("groupId", "==", groupId));
+      const membersSnap = await getDocs(membersQuery);
+      return membersSnap.size;
+    };
+
+    const groupMembersRef = collection(db, "groupMembers");
+    const q = query(groupMembersRef, where("userId", "==", userId));
+    const snapshot = await getDocs(q);
+    
+    const groupPromises = snapshot.docs.map(async (memberDoc) => {
+      const membershipData = memberDoc.data();
+      const groupDoc = await getDoc(doc(db, "groups", membershipData.groupId));
+      
+      if (groupDoc.exists()) {
+        const groupData = groupDoc.data();
+        const memberCount = await countMembersByGroupId(groupDoc.id);
+        return {
+          id: groupDoc.id,
+          ...groupData,
+          createdAt: groupData.createdAt?.toDate ? groupData.createdAt.toDate() : groupData.createdAt,
+          updatedAt: groupData.updatedAt?.toDate ? groupData.updatedAt.toDate() : groupData.updatedAt,
+          memberCount,
+          membershipId: memberDoc.id,
+          role: membershipData.role,
+          status: membershipData.status,
+        };
+      }
+      return null;
+    });
+
+    const groups = await Promise.all(groupPromises);
+    return groups.filter(group => group !== null);
+  } catch (error) {
+    console.error("Error getting user groups:", error);
+    throw new Error(error);
+  }
+};
+
+// Obtener un grupo por ID
+export const getGroupById = async (groupId) => {
+  try {
+    const groupDoc = await getDoc(doc(db, "groups", groupId));
+    if (groupDoc.exists()) {
+      const groupData = groupDoc.data();
+      return {
+        id: groupDoc.id,
+        ...groupData,
+        createdAt: groupData.createdAt?.toDate ? groupData.createdAt.toDate() : groupData.createdAt,
+        updatedAt: groupData.updatedAt?.toDate ? groupData.updatedAt.toDate() : groupData.updatedAt,
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error("Error getting group:", error);
+    throw new Error(error);
+  }
+};
+
+// Crear un nuevo grupo
+export const createGroup = async (groupData, userId) => {
+  try {
+    const newGroupRef = await addDoc(collection(db, "groups"), {
+      ...groupData,
+      createdBy: userId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      memberCount: 1,
+    });
+
+    // Agregar al creador como owner del grupo
+    await addDoc(collection(db, "groupMembers"), {
+      userId,
+      groupId: newGroupRef.id,
+      role: "owner",
+      status: "active",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    return newGroupRef.id;
+  } catch (error) {
+    console.error("Error creating group:", error);
+    throw new Error(error);
+  }
+};
+
+// Actualizar información de un grupo
+export const updateGroup = async (groupId, groupData) => {
+  try {
+    const groupRef = doc(db, "groups", groupId);
+    await updateDoc(groupRef, {
+      ...groupData,
+      updatedAt: new Date(),
+    });
+  } catch (error) {
+    console.error("Error updating group:", error);
+    throw new Error(error);
+  }
+};
+
+// Obtener miembros de un grupo
+export const getGroupMembers = async (groupId) => {
+  try {
+    const membersRef = collection(db, "groupMembers");
+    const q = query(membersRef, where("groupId", "==", groupId));
+    const snapshot = await getDocs(q);
+    
+    const memberPromises = snapshot.docs.map(async (doc) => {
+      const memberData = doc.data();
+      const userDoc = await getDoc(doc(db, "users", memberData.userId));
+      
+      return {
+        id: doc.id,
+        ...memberData,
+        userData: userDoc.exists() ? userDoc.data() : null,
+      };
+    });
+
+    return await Promise.all(memberPromises);
+  } catch (error) {
+    console.error("Error getting group members:", error);
+    throw new Error(error);
+  }
+};

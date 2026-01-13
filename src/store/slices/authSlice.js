@@ -7,6 +7,29 @@ import {
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../../firebaseConfig';
 
+const sanitizeFirestoreValue = (value) => {
+  if (!value) return value;
+
+  // Firestore Timestamp
+  if (typeof value === 'object' && typeof value.toDate === 'function') {
+    return value.toDate();
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(sanitizeFirestoreValue);
+  }
+
+  if (typeof value === 'object') {
+    const result = {};
+    for (const [key, nested] of Object.entries(value)) {
+      result[key] = sanitizeFirestoreValue(nested);
+    }
+    return result;
+  }
+
+  return value;
+};
+
 // ==================== ASYNC THUNKS ====================
 
 // Login con Google
@@ -58,7 +81,7 @@ export const fetchUserData = createAsyncThunk(
   async (uid, { rejectWithValue }) => {
     try {
       const userData = await getUserDataFromFirestore(uid);
-      return userData;
+      return sanitizeFirestoreValue(userData);
     } catch (error) {
       console.error('Error obteniendo datos del usuario:', error);
       return rejectWithValue(error.message);
@@ -100,7 +123,7 @@ const createOrUpdateUserInFirestore = async (user) => {
 // Obtener datos del usuario desde Firestore
 const getUserDataFromFirestore = async (uid) => {
   const userDoc = await getDoc(doc(db, 'users', uid));
-  return userDoc.exists() ? userDoc.data() : null;
+  return userDoc.exists() ? sanitizeFirestoreValue(userDoc.data()) : null;
 };
 
 // ==================== SLICE ====================
@@ -111,6 +134,7 @@ const initialState = {
   loading: false,
   error: null,
   isAuthenticated: false,
+  initialized: false,
 };
 
 const authSlice = createSlice({
@@ -120,9 +144,15 @@ const authSlice = createSlice({
     setUser: (state, action) => {
       state.user = action.payload;
       state.isAuthenticated = !!action.payload;
+      if (!action.payload) {
+        state.userData = null;
+      }
     },
     setUserData: (state, action) => {
       state.userData = action.payload;
+    },
+    setInitialized: (state, action) => {
+      state.initialized = action.payload;
     },
     clearError: (state) => {
       state.error = null;
@@ -175,7 +205,7 @@ const authSlice = createSlice({
   },
 });
 
-export const { setUser, setUserData, clearError } = authSlice.actions;
+export const { setUser, setUserData, setInitialized, clearError } = authSlice.actions;
 
 export default authSlice.reducer;
 
@@ -186,3 +216,4 @@ export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;
 export const selectAuthLoading = (state) => state.auth.loading;
 export const selectAuthError = (state) => state.auth.error;
 export const selectIsAdmin = (state) => state.auth.userData?.role === 'admin';
+export const selectAuthInitialized = (state) => state.auth.initialized;

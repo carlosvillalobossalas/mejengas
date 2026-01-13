@@ -18,6 +18,7 @@ import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import SportsHandballIcon from "@mui/icons-material/SportsHandball";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
+import GroupIcon from "@mui/icons-material/Group";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logout } from "../store/slices/authSlice";
@@ -34,6 +35,7 @@ const AppDrawer = ({ open, onClose }) => {
     { text: 'Jugadores', icon: <SportsSoccerIcon />, path: '/jugadores' },
     { text: 'Porteros', icon: <SportsHandballIcon />, path: '/porteros' },
     { text: 'Balón de Oro', icon: <EmojiEventsIcon />, path: '/balon-de-oro/resultados' },
+    { text: 'Mis Grupos', icon: <GroupIcon />, path: '/mis-grupos' },
   ];
 
   const handleMenuClick = (path) => {

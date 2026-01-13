@@ -6,6 +6,7 @@ import { ToastContainer } from "react-toastify";
 import { useEffect, useState } from "react";
 import AppDrawer from "./components/AppDrawer";
 import AppRoutes from "./components/AppRoutes";
+import AuthListener from "./components/AuthListener";
 
 const App = () => {
   const [players, setPlayers] = useState([]);
@@ -58,6 +59,8 @@ const App = () => {
 
       {/* Drawer */}
       <AppDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+
+      <AuthListener />
 
       {/* Routes */}
       <AppRoutes players={players} goalkeepers={goalkeepers} matches={matches} />
