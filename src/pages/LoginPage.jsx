@@ -21,13 +21,12 @@ import GoogleIcon from "@mui/icons-material/Google";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
   sendPasswordResetEmail,
 } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
-import { createOrUpdateUser } from "../firebase/userManagement";
+import { useDispatch } from "react-redux";
+import { loginWithGoogle } from "../store/slices/authSlice";
 
 const LoginPage = () => {
   const [tabValue, setTabValue] = useState(0);
@@ -42,6 +41,7 @@ const LoginPage = () => {
   const [resetSuccess, setResetSuccess] = useState(false);
   const [resetError, setResetError] = useState("");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -108,9 +108,7 @@ const LoginPage = () => {
     setError("");
     setLoading(true);
     try {
-      const provider = new GoogleAuthProvider();
-      const userCredential = await signInWithPopup(auth, provider);
-      await createOrUpdateUser(userCredential.user);
+      await dispatch(loginWithGoogle()).unwrap();
       navigate("/");
     } catch (err) {
       setError("Error al iniciar sesión con Google");

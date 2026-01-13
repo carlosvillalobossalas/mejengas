@@ -1,14 +1,11 @@
 import { Navigate } from "react-router-dom";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "../firebaseConfig";
-import { useAdmin } from "../hooks/useAdmin";
+import { useAuth } from "../hooks/useAuthRedux";
 import { Box, CircularProgress, Typography } from "@mui/material";
 
 const AdminRoute = ({ children }) => {
-  const [user, loading] = useAuthState(auth);
-  const { isAdmin, loading: adminLoading } = useAdmin(user);
+  const { user, isAdmin, loading } = useAuth();
 
-  if (loading || adminLoading) {
+  if (loading) {
     return (
       <Box
         sx={{

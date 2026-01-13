@@ -30,14 +30,12 @@ import BallonDeOroResults from "./pages/BallonDeOroResults";
 import MiPerfilPage from "./pages/MiPerfilPage";
 import { Route, Routes, useNavigate, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { signOut } from "firebase/auth";
-import { auth } from "./firebaseConfig";
+import { useDispatch } from "react-redux";
+import { logout } from "./store/slices/authSlice";
+import { useAuth } from "./hooks/useAuthRedux";
 import LoginPage from "./pages/LoginPage";
 import AdminRoute from "./components/AdminRoute";
 import UserManagementPage from "./pages/UserManagementPage";
-import { useAdmin } from "./hooks/useAdmin";
-import { createOrUpdateUser } from "./firebase/userManagement";
 import { useEffect, useState } from "react";
 import HistoricMatchesList from "./components/HistoricMatchesList";
 import NewMatch from "./pages/NewMatch";
@@ -47,12 +45,12 @@ import SeasonSummaryPage from "./pages/SeasonSummaryPage";
 
 const App = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [players, setPlayers] = useState([]);
   const [goalkeepers, setGoalkeepers] = useState([]);
   const [matches, setMatches] = useState([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [user, loadingAuth] = useAuthState(auth);
-  const { isAdmin } = useAdmin(user);
+  const { user, userData, loading: loadingAuth, isAdmin } = useAuth();
 
   // Ruta protegida solo por autenticación
   const AuthRoute = ({ children }) => {
@@ -66,16 +64,9 @@ const App = () => {
     return user ? children : <Navigate to="/login" replace />;
   };
 
-  // Crear/actualizar documento de usuario en Firestore al autenticarse
-  useEffect(() => {
-    if (user) {
-      createOrUpdateUser(user);
-    }
-  }, [user]);
-
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await dispatch(logout()).unwrap();
       navigate("/login");
       setDrawerOpen(false);
     } catch (error) {
@@ -187,15 +178,15 @@ const App = () => {
                   setDrawerOpen(false);
                 }}
               >
-                <Avatar src={user.photoURL} alt={user.displayName || user.email}>
-                  {(user.displayName || user.email)?.[0]?.toUpperCase()}
+                <Avatar src={user?.photoURL} alt={user?.displayName || user?.email}>
+                  {(user?.displayName || user?.email)?.[0]?.toUpperCase()}
                 </Avatar>
                 <Box sx={{ flex: 1, overflow: 'hidden' }}>
                   <Typography variant="body2" fontWeight="bold" noWrap>
-                    {user.displayName || 'Usuario'}
+                    {user?.displayName || 'Usuario'}
                   </Typography>
                   <Typography variant="caption" color="text.secondary" noWrap>
-                    {user.email}
+                    {user?.email}
                   </Typography>
                 </Box>
               </Box>
