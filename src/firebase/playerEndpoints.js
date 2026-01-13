@@ -9,18 +9,20 @@ import {
   updateDoc,
   where,
   setDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
 // ==================== CRUD DE JUGADORES ====================
 
 // Agregar un nuevo jugador
-export const addNewPlayer = async (name) => {
+export const addNewPlayer = async (name, groupId = "HpWjsA6l5WjJ7FNlC8uA") => {
   try {
     const playerCollectionRef = collection(db, "Players");
     await addDoc(playerCollectionRef, {
       name,
       originalName: name,
+      groupId,
     });
     return true;
   } catch (error) {
@@ -29,12 +31,13 @@ export const addNewPlayer = async (name) => {
 };
 
 // Obtener todos los jugadores con listener en tiempo real
-export const getAllPlayers = async (callback) => {
+export const getAllPlayers = async (callback, groupId = "HpWjsA6l5WjJ7FNlC8uA") => {
   try {
     const playerCollectionRef = collection(db, "Players");
+    const q = query(playerCollectionRef, where("groupId", "==", groupId));
 
     // Configura el listener y ejecuta el callback con los datos actualizados
-    const unsubscribe = onSnapshot(playerCollectionRef, (snapshot) => {
+    const unsubscribe = onSnapshot(q, (snapshot) => {
       const players = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -45,6 +48,23 @@ export const getAllPlayers = async (callback) => {
     // Devuelve la función para cancelar la suscripción
     return unsubscribe;
   } catch (error) {
+    throw new Error(error);
+  }
+};
+
+// Obtener todos los jugadores sin listener (para operaciones únicas)
+export const getAllPlayersOnce = async (groupId = "HpWjsA6l5WjJ7FNlC8uA") => {
+  try {
+    const playerCollectionRef = collection(db, "Players");
+    const q = query(playerCollectionRef, where("groupId", "==", groupId));
+    const snapshot = await getDocs(q);
+    
+    return snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })).sort((a, b) => a.name.localeCompare(b.name));
+  } catch (error) {
+    console.error("Error getting all players:", error);
     throw new Error(error);
   }
 };
@@ -100,6 +120,83 @@ export const updatePlayerProfile = async (playerId, updates) => {
     return true;
   } catch (error) {
     console.error("Error updating player profile:", error);
+    throw new Error(error);
+  }
+};
+
+// Enlazar usuario a jugador
+export const linkUserToPlayer = async (userId, playerId, userDisplayName, userPhotoURL, userEmail) => {
+  try {
+    // Obtener el jugador para guardar su nombre original
+    const playerDoc = await getDoc(doc(db, "Players", playerId));
+    const playerData = playerDoc.data();
+
+    // Actualizar documento de usuario
+    await updateDoc(doc(db, "users", userId), {
+      playerId: playerId,
+      updatedAt: new Date(),
+    });
+
+    // Actualizar documento de jugador - solo campos permitidos
+    const playerUpdates = {
+      userId: userId,
+      name: userDisplayName || userEmail,
+      updatedAt: new Date(),
+    };
+
+    // Guardar la foto de perfil si viene de Google u otro proveedor
+    if (userPhotoURL) {
+      playerUpdates.photoURL = userPhotoURL;
+    }
+
+    // Guardar el nombre original solo si no existe ya (para poder restaurarlo al desenlazar)
+    if (!playerData.originalName) {
+      playerUpdates.originalName = playerData.name;
+    }
+
+    await updateDoc(doc(db, "Players", playerId), playerUpdates);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error linking user to player:", error);
+    throw new Error(error);
+  }
+};
+
+// Desenlazar usuario de jugador
+export const unlinkUserFromPlayer = async (userId, playerId) => {
+  try {
+    // Obtener el nombre actual del jugador antes de desenlazar
+    const playerDoc = await getDoc(doc(db, "Players", playerId));
+    const playerData = playerDoc.data();
+
+    // Actualizar documento de usuario
+    await updateDoc(doc(db, "users", userId), {
+      playerId: null,
+      updatedAt: new Date(),
+    });
+
+    // Actualizar documento de jugador - mantener solo campos permitidos
+    const playerUpdates = {
+      userId: null,
+      updatedAt: new Date(),
+    };
+
+    // Si existe originalName, restaurarlo
+    if (playerData.originalName) {
+      playerUpdates.name = playerData.originalName;
+    }
+
+    // Remover photoURL si existía
+    if (playerData.photoURL) {
+      playerUpdates.photoURL = null;
+    }
+
+    await updateDoc(doc(db, "Players", playerId), playerUpdates);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error unlinking user from player:", error);
     throw new Error(error);
   }
 };

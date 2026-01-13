@@ -21,9 +21,14 @@ import PersonIcon from "@mui/icons-material/Person";
 import LinkIcon from "@mui/icons-material/Link";
 import LinkOffIcon from "@mui/icons-material/LinkOff";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
-import { collection, getDocs, doc, setDoc, updateDoc, getDoc } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { toast } from "react-toastify";
+import { 
+  getAllPlayersOnce,
+  linkUserToPlayer,
+  unlinkUserFromPlayer
+} from "../firebase/playerEndpoints";
 
 const UserManagementPage = () => {
   const [players, setPlayers] = useState([]);
@@ -48,12 +53,8 @@ const UserManagementPage = () => {
       }));
       setUsers(usersData);
 
-      // Cargar jugadores
-      const playersSnapshot = await getDocs(collection(db, "Players"));
-      const playersData = playersSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      // Cargar jugadores usando playerEndpoints
+      const playersData = await getAllPlayersOnce();
       setPlayers(playersData);
 
     
@@ -75,25 +76,13 @@ const UserManagementPage = () => {
     if (!selectedUser || !selectedPlayerId) return;
 
     try {
-      // Obtener el jugador para guardar su nombre original
-      const playerDoc = await getDoc(doc(db, "Players", selectedPlayerId));
-      const playerData = playerDoc.data();
-
-      // Actualizar documento de usuario
-      await updateDoc(doc(db, "users", selectedUser.id), {
-        playerId: selectedPlayerId,
-        updatedAt: new Date(),
-      });
-
-      // Actualizar documento de jugador - incluye el displayName y photoURL del usuario
-      await updateDoc(doc(db, "Players", selectedPlayerId), {
-        userId: selectedUser.id,
-        name: selectedUser.displayName || selectedUser.email,
-        // Guardar la foto de perfil si viene de Google u otro proveedor
-        ...(selectedUser.photoURL && { photoURL: selectedUser.photoURL }),
-        // Guardar el nombre original solo si no existe ya (para poder restaurarlo al desenlazar)
-        ...((!playerData.originalName) && { originalName: playerData.name }),
-      });
+      await linkUserToPlayer(
+        selectedUser.id,
+        selectedPlayerId,
+        selectedUser.displayName,
+        selectedUser.photoURL,
+        selectedUser.email
+      );
 
       toast.success("Usuario enlazado correctamente");
       setLinkDialogOpen(false);
@@ -108,22 +97,7 @@ const UserManagementPage = () => {
     if (!user.playerId) return;
 
     try {
-      // Obtener el nombre actual del jugador antes de desenlazar
-      const playerDoc = await getDoc(doc(db, "Players", user.playerId));
-      const playerData = playerDoc.data();
-
-      // Actualizar documento de usuario
-      await updateDoc(doc(db, "users", user.id), {
-        playerId: null,
-        updatedAt: new Date(),
-      });
-
-      // Actualizar documento de jugador - mantener el nombre o usar el original si existe
-      await updateDoc(doc(db, "Players", user.playerId), {
-        userId: null,
-        // Si existe originalName, restaurarlo; si no, mantener el nombre actual
-        ...(playerData.originalName && { name: playerData.originalName }),
-      });
+      await unlinkUserFromPlayer(user.id, user.playerId);
 
       toast.success("Usuario desenlazado correctamente");
       loadData();
@@ -131,11 +105,6 @@ const UserManagementPage = () => {
       console.error("Error unlinking user:", error);
       toast.error("Error al desenlazar usuario");
     }
-  };
-
-  const getPlayerName = (playerId) => {
-    const player = players.find((p) => p.id === playerId);
-    return player ? player.name : "Desconocido";
   };
 
   if (loading) {
@@ -173,7 +142,6 @@ const UserManagementPage = () => {
             </Typography>
             <Box>
               {users.map((user) => {
-                // console.log(user)
                 return (
                   <Box
                     key={user.id}
@@ -267,7 +235,6 @@ const UserManagementPage = () => {
             </Typography>
             <Box>
               {players.map((player) => {
-                console.log(player)
                 return (
                 <Box
                   key={player.id}
