@@ -35,12 +35,16 @@ export const getAllGKs = async (callback) => {
   }
 };
 
-export const getAllMatches = async (callback) => {
+export const getAllMatches = async (callback, groupId = "HpWjsA6l5WjJ7FNlC8uA") => {
   try {
     const matchCollectionRef = collection(db, "Matches");
 
-    // Crea una consulta que ordena los documentos por fecha en orden descendente
-    const matchesQuery = query(matchCollectionRef, orderBy("date", "desc"));
+    // Crea una consulta que ordena los documentos por fecha en orden descendente y filtra por groupId
+    const matchesQuery = query(
+      matchCollectionRef, 
+      where("groupId", "==", groupId),
+      orderBy("date", "desc")
+    );
 
     // Configura el listener y ejecuta el callback con los datos actualizados
     const unsubscribe = onSnapshot(matchesQuery, (snapshot) => {
@@ -57,11 +61,12 @@ export const getAllMatches = async (callback) => {
   }
 };
 
-export const saveNewMatch = async (data, players) => {
+export const saveNewMatch = async (data, players, groupId = "HpWjsA6l5WjJ7FNlC8uA") => {
   try {
     //new match save
     const match = {
       ...data,
+      groupId,
       registeredDate: new Date(),
       goalsTeam1: data.players1.reduce((acc, value) => {
         if (value.goals === "") return acc;
@@ -136,7 +141,7 @@ export const saveNewMatch = async (data, players) => {
     );
 
     // Actualizar estadísticas por temporada (nuevo sistema)
-    await updatePlayerSeasonStatsAfterMatch(match);
+    await updatePlayerSeasonStatsAfterMatch(match, groupId);
 
     // Recalcular y actualizar el resumen de la temporada
     // const matchYear = getMatchYear(match);
