@@ -20,11 +20,7 @@ export const addNewPlayer = async (name) => {
     const playerCollectionRef = collection(db, "Players");
     await addDoc(playerCollectionRef, {
       name,
-      goals: 0,
-      assists: 0,
-      won: 0,
-      matches: 0,
-      draw: 0,
+      originalName: name,
     });
     return true;
   } catch (error) {
@@ -291,20 +287,6 @@ export const updatePlayerSeasonStatsAfterMatch = async (matchData) => {
       };
 
       await setDoc(statsRef, updatedStats);
-
-      // También actualizar los totales en la tabla Players
-      const playerRef = doc(db, "Players", player.id);
-      const playerDoc = await getDoc(playerRef);
-      if (playerDoc.exists()) {
-        const playerData = playerDoc.data();
-        await updateDoc(playerRef, {
-          goals: (playerData.goals || 0) + (player.goals || 0),
-          assists: (playerData.assists || 0) + (player.assists || 0),
-          matches: (playerData.matches || 0) + 1,
-          won: (playerData.won || 0) + won,
-          draw: (playerData.draw || 0) + draw,
-        });
-      }
     }
 
     return true;
