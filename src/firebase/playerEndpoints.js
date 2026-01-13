@@ -13,6 +13,171 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
+// ==================== GESTIÓN DE GRUPOS Y MIEMBROS ====================
+
+// Verificar si existe un enlace entre usuario y jugador en un grupo
+export const getGroupMembership = async (userId, groupId = "HpWjsA6l5WjJ7FNlC8uA") => {
+  try {
+    const groupMembersRef = collection(db, "groupMembers");
+    const q = query(
+      groupMembersRef,
+      where("userId", "==", userId),
+      where("groupId", "==", groupId)
+    );
+    const snapshot = await getDocs(q);
+    
+    if (!snapshot.empty) {
+      const doc = snapshot.docs[0];
+      return {
+        id: doc.id,
+        ...doc.data(),
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error("Error getting group membership:", error);
+    throw new Error(error);
+  }
+};
+
+// Obtener jugador enlazado a un usuario en un grupo específico
+export const getPlayerByUserIdAndGroup = async (userId, groupId = "HpWjsA6l5WjJ7FNlC8uA") => {
+  try {
+    const membership = await getGroupMembership(userId, groupId);
+    if (!membership || !membership.playerId) return null;
+    
+    return await getPlayerById(membership.playerId);
+  } catch (error) {
+    console.error("Error getting player by userId and group:", error);
+    throw new Error(error);
+  }
+};
+
+// Enlazar usuario a jugador en un grupo
+export const linkUserToPlayer = async (userId, playerId, userDisplayName, userPhotoURL, userEmail, groupId = "HpWjsA6l5WjJ7FNlC8uA") => {
+  try {
+    // Verificar si ya existe un enlace para este usuario en este grupo
+    const existingMembership = await getGroupMembership(userId, groupId);
+    
+    if (existingMembership) {
+      throw new Error("El usuario ya está enlazado a un jugador en este grupo");
+    }
+
+    // Obtener el jugador para guardar su nombre original
+    const playerDoc = await getDoc(doc(db, "Players", playerId));
+    const playerData = playerDoc.data();
+
+    // Crear el registro en groupMembers
+    const groupMemberData = {
+      userId,
+      playerId,
+      groupId,
+      role: "member", // Por defecto es miembro, puede ser "admin" también
+      status: "active",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    await addDoc(collection(db, "groupMembers"), groupMemberData);
+
+    // Actualizar documento de jugador - solo campos permitidos
+    const playerUpdates = {
+      userId: userId,
+      name: userDisplayName || userEmail,
+      updatedAt: new Date(),
+    };
+
+    // Guardar la foto de perfil si viene de Google u otro proveedor
+    if (userPhotoURL) {
+      playerUpdates.photoURL = userPhotoURL;
+    }
+
+    // Guardar el nombre original solo si no existe ya (para poder restaurarlo al desenlazar)
+    if (!playerData.originalName) {
+      playerUpdates.originalName = playerData.name;
+    }
+
+    await updateDoc(doc(db, "Players", playerId), playerUpdates);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error linking user to player:", error);
+    throw new Error(error);
+  }
+};
+
+// Desenlazar usuario de jugador en un grupo
+export const unlinkUserFromPlayer = async (userId, groupId = "HpWjsA6l5WjJ7FNlC8uA") => {
+  try {
+    // Obtener el registro de groupMembers
+    const membership = await getGroupMembership(userId, groupId);
+    
+    if (!membership) {
+      throw new Error("No se encontró el enlace entre usuario y jugador en este grupo");
+    }
+
+    const playerId = membership.playerId;
+
+    // Obtener el nombre actual del jugador antes de desenlazar
+    const playerDoc = await getDoc(doc(db, "Players", playerId));
+    const playerData = playerDoc.data();
+
+    // Eliminar el registro de groupMembers
+    await deleteDoc(doc(db, "groupMembers", membership.id));
+
+    // Actualizar documento de jugador - mantener solo campos permitidos
+    const playerUpdates = {
+      userId: null,
+      updatedAt: new Date(),
+    };
+
+    // Si existe originalName, restaurarlo
+    if (playerData.originalName) {
+      playerUpdates.name = playerData.originalName;
+    }
+
+    // Remover photoURL si existía
+    if (playerData.photoURL) {
+      playerUpdates.photoURL = null;
+    }
+
+    await updateDoc(doc(db, "Players", playerId), playerUpdates);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error unlinking user from player:", error);
+    throw new Error(error);
+  }
+};
+
+// Obtener todos los jugadores enlazados a un usuario (en todos los grupos)
+export const getAllPlayersByUserId = async (userId) => {
+  try {
+    const groupMembersRef = collection(db, "groupMembers");
+    const q = query(groupMembersRef, where("userId", "==", userId));
+    const snapshot = await getDocs(q);
+    
+    const memberships = [];
+    for (const docSnapshot of snapshot.docs) {
+      const data = docSnapshot.data();
+      const player = await getPlayerById(data.playerId);
+      
+      memberships.push({
+        membershipId: docSnapshot.id,
+        groupId: data.groupId,
+        role: data.role,
+        status: data.status,
+        player: player,
+      });
+    }
+    
+    return memberships;
+  } catch (error) {
+    console.error("Error getting all players by userId:", error);
+    throw new Error(error);
+  }
+};
+
 // ==================== CRUD DE JUGADORES ====================
 
 // Agregar un nuevo jugador
@@ -120,83 +285,6 @@ export const updatePlayerProfile = async (playerId, updates) => {
     return true;
   } catch (error) {
     console.error("Error updating player profile:", error);
-    throw new Error(error);
-  }
-};
-
-// Enlazar usuario a jugador
-export const linkUserToPlayer = async (userId, playerId, userDisplayName, userPhotoURL, userEmail) => {
-  try {
-    // Obtener el jugador para guardar su nombre original
-    const playerDoc = await getDoc(doc(db, "Players", playerId));
-    const playerData = playerDoc.data();
-
-    // Actualizar documento de usuario
-    await updateDoc(doc(db, "users", userId), {
-      playerId: playerId,
-      updatedAt: new Date(),
-    });
-
-    // Actualizar documento de jugador - solo campos permitidos
-    const playerUpdates = {
-      userId: userId,
-      name: userDisplayName || userEmail,
-      updatedAt: new Date(),
-    };
-
-    // Guardar la foto de perfil si viene de Google u otro proveedor
-    if (userPhotoURL) {
-      playerUpdates.photoURL = userPhotoURL;
-    }
-
-    // Guardar el nombre original solo si no existe ya (para poder restaurarlo al desenlazar)
-    if (!playerData.originalName) {
-      playerUpdates.originalName = playerData.name;
-    }
-
-    await updateDoc(doc(db, "Players", playerId), playerUpdates);
-
-    return { success: true };
-  } catch (error) {
-    console.error("Error linking user to player:", error);
-    throw new Error(error);
-  }
-};
-
-// Desenlazar usuario de jugador
-export const unlinkUserFromPlayer = async (userId, playerId) => {
-  try {
-    // Obtener el nombre actual del jugador antes de desenlazar
-    const playerDoc = await getDoc(doc(db, "Players", playerId));
-    const playerData = playerDoc.data();
-
-    // Actualizar documento de usuario
-    await updateDoc(doc(db, "users", userId), {
-      playerId: null,
-      updatedAt: new Date(),
-    });
-
-    // Actualizar documento de jugador - mantener solo campos permitidos
-    const playerUpdates = {
-      userId: null,
-      updatedAt: new Date(),
-    };
-
-    // Si existe originalName, restaurarlo
-    if (playerData.originalName) {
-      playerUpdates.name = playerData.originalName;
-    }
-
-    // Remover photoURL si existía
-    if (playerData.photoURL) {
-      playerUpdates.photoURL = null;
-    }
-
-    await updateDoc(doc(db, "Players", playerId), playerUpdates);
-
-    return { success: true };
-  } catch (error) {
-    console.error("Error unlinking user from player:", error);
     throw new Error(error);
   }
 };

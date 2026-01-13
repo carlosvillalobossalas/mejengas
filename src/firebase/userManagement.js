@@ -18,13 +18,11 @@ export const createOrUpdateUser = async (user) => {
       displayName: user.displayName || null,
       photoURL: user.photoURL || null,
       role: "user", // Por defecto es usuario normal
-      playerId: null, // Sin enlazar inicialmente
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
   } else {
     // Actualizar datos básicos si cambiaron
-    const userData = userDoc.data();
     const updates = {
       displayName: user.displayName || null,
       photoURL: user.photoURL || null,
@@ -32,16 +30,12 @@ export const createOrUpdateUser = async (user) => {
     };
 
     await setDoc(userRef, updates, { merge: true });
-
-    // Si el usuario está enlazado a un jugador y el displayName cambió, actualizar el jugador
-    if (userData.playerId && user.displayName && userData.displayName !== user.displayName) {
-      await syncDisplayNameToPlayer(user.uid, userData.playerId, user.displayName);
-    }
   }
 };
 
 /**
  * Sincroniza el displayName del usuario con el nombre del jugador enlazado
+ * DEPRECATED: Ahora se usa groupMembers para la relación usuario-jugador
  */
 export const syncDisplayNameToPlayer = async (userId, playerId, displayName) => {
   if (!playerId || !displayName) return;

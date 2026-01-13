@@ -27,8 +27,11 @@ import { toast } from "react-toastify";
 import { 
   getAllPlayersOnce,
   linkUserToPlayer,
-  unlinkUserFromPlayer
+  unlinkUserFromPlayer,
+  getGroupMembership,
 } from "../firebase/playerEndpoints";
+
+const DEFAULT_GROUP_ID = "HpWjsA6l5WjJ7FNlC8uA";
 
 const UserManagementPage = () => {
   const [players, setPlayers] = useState([]);
@@ -37,6 +40,7 @@ const UserManagementPage = () => {
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedPlayerId, setSelectedPlayerId] = useState("");
+  const [userMemberships, setUserMemberships] = useState({}); // userId -> playerId
 
   useEffect(() => {
     loadData();
@@ -54,10 +58,19 @@ const UserManagementPage = () => {
       setUsers(usersData);
 
       // Cargar jugadores usando playerEndpoints
-      const playersData = await getAllPlayersOnce();
+      const playersData = await getAllPlayersOnce(DEFAULT_GROUP_ID);
       setPlayers(playersData);
 
-    
+      // Cargar membresías de groupMembers para cada usuario
+      const memberships = {};
+      for (const user of usersData) {
+        const membership = await getGroupMembership(user.id, DEFAULT_GROUP_ID);
+        if (membership) {
+          memberships[user.id] = membership.playerId;
+        }
+      }
+      setUserMemberships(memberships);
+
     } catch (error) {
       console.error("Error loading data:", error);
       toast.error("Error al cargar datos");
@@ -68,7 +81,8 @@ const UserManagementPage = () => {
 
   const handleLinkUser = (user) => {
     setSelectedUser(user);
-    setSelectedPlayerId(user.playerId || "");
+    // Usar playerId desde userMemberships en lugar de user.playerId
+    setSelectedPlayerId(userMemberships[user.id] || "");
     setLinkDialogOpen(true);
   };
 
@@ -81,7 +95,8 @@ const UserManagementPage = () => {
         selectedPlayerId,
         selectedUser.displayName,
         selectedUser.photoURL,
-        selectedUser.email
+        selectedUser.email,
+        DEFAULT_GROUP_ID
       );
 
       toast.success("Usuario enlazado correctamente");
@@ -94,10 +109,11 @@ const UserManagementPage = () => {
   };
 
   const handleUnlinkUser = async (user) => {
-    if (!user.playerId) return;
+    const playerId = userMemberships[user.id];
+    if (!playerId) return;
 
     try {
-      await unlinkUserFromPlayer(user.id, user.playerId);
+      await unlinkUserFromPlayer(user.id, DEFAULT_GROUP_ID);
 
       toast.success("Usuario desenlazado correctamente");
       loadData();
@@ -180,10 +196,9 @@ const UserManagementPage = () => {
                       <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>
                         {user.email}
                       </Typography>
-                      {user.playerId && (
+                      {userMemberships[user.id] && (
                         <Chip
-                          // label={`Jugador: ${getPlayerName(user.playerId)}`}
-                          label={`Jugador: ${players.find(p => p.id === user.playerId)?.originalName}`}
+                          label={`Jugador: ${players.find(p => p.id === userMemberships[user.id])?.originalName}`}
                           size="small"
                           color="success"
                         />
@@ -192,7 +207,7 @@ const UserManagementPage = () => {
 
                     {/* Botones */}
                     <Box sx={{ display: "flex", gap: 1, width: { xs: "100%", md: "auto" } }}>
-                      {user.playerId ? (
+                      {userMemberships[user.id] ? (
                         <Button
                           size="small"
                           variant="outlined"
