@@ -30,8 +30,8 @@ import { getPlayerDisplay } from "../utils/playersDisplayName";
 
 function MiPerfilPage() {
   const [user] = useAuthState(auth);
-  const { playerId } = useParams(); // Obtener playerId de la URL si existe
-  const isViewingOwnProfile = !playerId; // Si no hay playerId, es el perfil propio
+  const { playerId } = useParams();
+  const isViewingOwnProfile = !playerId;
   const [loading, setLoading] = useState(false);
   const [displayName, setDisplayName] = useState("");
   const [photoFile, setPhotoFile] = useState(null);
@@ -47,31 +47,25 @@ function MiPerfilPage() {
       try {
         let player;
 
-        // Si hay playerId en la URL, cargar ese jugador (vista de solo lectura)
         if (playerId) {
           player = await getPlayerById(playerId);
-        }
-        // Si no hay playerId, cargar el jugador del usuario actual
-        else if (user?.uid) {
+        } else if (user?.uid) {
           player = await getPlayerByUserId(user.uid);
         }
 
         if (player) {
-          setPlayerData({...player, name: getPlayerDisplay(player) });
+          setPlayerData({ ...player, name: getPlayerDisplay(player) });
           setDisplayName(getPlayerDisplay(player));
 
-          // Si estamos viendo otro perfil, NO usar la foto del usuario actual como fallback
           if (playerId) {
             setPhotoPreview(player?.photoURL || "");
           } else {
             setPhotoPreview(player?.photoURL || user?.photoURL || "");
           }
 
-          // Cargar premios
           const playerAwards = await getPlayerAwards(player.id);
           setAwards(playerAwards);
 
-          // Cargar estadísticas por temporada
           const stats = await getAllPlayerSeasonStats(player.id);
           setSeasonStats(stats);
         }
@@ -116,20 +110,17 @@ function MiPerfilPage() {
     try {
       let photoURL = user.photoURL;
 
-      // Si hay una nueva foto, subirla a Firebase Storage
       if (photoFile) {
         const storageRef = ref(storage, `profile-photos/${user.uid}/${Date.now()}_${photoFile.name}`);
         const snapshot = await uploadBytes(storageRef, photoFile);
         photoURL = await getDownloadURL(snapshot.ref);
       }
 
-      // Actualizar Firebase Auth
       await updateProfile(auth.currentUser, {
         displayName: displayName.trim(),
         photoURL: photoURL,
       });
 
-      // Actualizar Firestore (tabla players)
       if (playerData?.id) {
         await updatePlayerProfile(playerData.id, {
           name: displayName.trim(),
