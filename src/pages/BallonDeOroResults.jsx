@@ -29,6 +29,8 @@ import { toast } from "react-toastify";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebaseConfig";
 import { useAdmin } from "../hooks/useAdmin";
+import { useSelector } from "react-redux";
+import { selectActiveGroupId } from "../store/slices/groupsSlice";
 
 function BallonDeOroResults() {
     const [results, setResults] = useState(null);
@@ -41,9 +43,10 @@ function BallonDeOroResults() {
     const navigate = useNavigate();
     const [user, ] = useAuthState(auth);
     const isAdmin = useAdmin(user);
+    const activeGroupId = useSelector(selectActiveGroupId);
 
     useEffect(() => {
-        getAllPlayers(setPlayers);
+        const unsubscribe = getAllPlayers(setPlayers, activeGroupId);
 
         const fetchResults = async () => {
             try {
@@ -61,7 +64,8 @@ function BallonDeOroResults() {
         };
 
         fetchResults();
-    }, []);
+        return () => unsubscribe && unsubscribe();
+    }, [activeGroupId]);
 
     const getPlayerName = (playerId) => {
         const player = players.find((p) => p.id === playerId);

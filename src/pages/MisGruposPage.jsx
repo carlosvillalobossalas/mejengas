@@ -14,11 +14,18 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  IconButton,
   Fab,
 } from "@mui/material";
 import { useAuth } from "../hooks/useAuthRedux";
-import { getUserGroups, createGroup } from "../firebase/playerEndpoints";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  createGroupAndRefresh,
+  fetchUserGroups,
+  selectActiveGroupId,
+  selectGroups,
+  selectGroupsLoading,
+  setActiveGroupId,
+} from "../store/slices/groupsSlice";
 import { toast } from "react-toastify";
 import GroupIcon from "@mui/icons-material/Group";
 import AddIcon from "@mui/icons-material/Add";
@@ -28,35 +35,19 @@ import StarIcon from "@mui/icons-material/Star";
 
 function MisGruposPage() {
   const { user } = useAuth();
-  const [groups, setGroups] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const groups = useSelector(selectGroups);
+  const loading = useSelector(selectGroupsLoading);
+  const activeGroupId = useSelector(selectActiveGroupId);
   const [openDialog, setOpenDialog] = useState(false);
   const [creatingGroup, setCreatingGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupDescription, setNewGroupDescription] = useState("");
 
   useEffect(() => {
-    loadGroups();
-  }, [user]);
-
-  const loadGroups = async () => {
-    if (!user?.uid) {
-      setGroups([]);
-      setLoading(false);
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      const userGroups = await getUserGroups(user.uid);
-      setGroups(userGroups);
-    } catch (error) {
-      console.error("Error loading groups:", error);
-      toast.error("Error al cargar los grupos");
-    } finally {
-      setLoading(false);
-    }
-  };
+    if (!user?.uid) return;
+    dispatch(fetchUserGroups(user.uid));
+  }, [user?.uid, dispatch]);
 
   const handleCreateGroup = async () => {
     if (!newGroupName.trim()) {
@@ -66,25 +57,31 @@ function MisGruposPage() {
 
     try {
       setCreatingGroup(true);
-      await createGroup(
-        {
-          name: newGroupName.trim(),
-          description: newGroupDescription.trim(),
-        },
-        user.uid
-      );
+      await dispatch(
+        createGroupAndRefresh({
+          userId: user.uid,
+          groupData: {
+            name: newGroupName.trim(),
+            description: newGroupDescription.trim(),
+          },
+        })
+      ).unwrap();
       
       toast.success("Grupo creado exitosamente");
       setOpenDialog(false);
       setNewGroupName("");
       setNewGroupDescription("");
-      loadGroups();
     } catch (error) {
       console.error("Error creating group:", error);
       toast.error("Error al crear el grupo");
     } finally {
       setCreatingGroup(false);
     }
+  };
+
+  const handleSelectGroup = (groupId) => {
+    dispatch(setActiveGroupId(groupId));
+    toast.success("Grupo seleccionado");
   };
 
   const getRoleIcon = (role) => {
@@ -202,6 +199,13 @@ function MisGruposPage() {
                         </Typography>
                       )}
                       <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                        {activeGroupId === group.id && (
+                          <Chip
+                            label="Activo"
+                            size="small"
+                            color="success"
+                          />
+                        )}
                         <Chip
                           icon={getRoleIcon(group.role)}
                           label={getRoleLabel(group.role)}
@@ -219,8 +223,13 @@ function MisGruposPage() {
                   </Box>
                 </CardContent>
                 <CardActions sx={{ px: 2, pb: 2 }}>
-                  <Button size="small" variant="outlined" fullWidth>
-                    Ver Detalles
+                  <Button
+                    size="small"
+                    variant={activeGroupId === group.id ? "contained" : "outlined"}
+                    fullWidth
+                    onClick={() => handleSelectGroup(group.id)}
+                  >
+                    {activeGroupId === group.id ? "Seleccionado" : "Seleccionar"}
                   </Button>
                 </CardActions>
               </Card>

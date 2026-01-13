@@ -4,30 +4,33 @@ import { getAllGKs, getAllMatches } from "./firebase/endpoints";
 import { getAllPlayers } from "./firebase/playerEndpoints";
 import { ToastContainer } from "react-toastify";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import AppDrawer from "./components/AppDrawer";
 import AppRoutes from "./components/AppRoutes";
 import AuthListener from "./components/AuthListener";
+import { selectActiveGroupId } from "./store/slices/groupsSlice";
 
 const App = () => {
   const [players, setPlayers] = useState([]);
   const [goalkeepers, setGoalkeepers] = useState([]);
   const [matches, setMatches] = useState([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const activeGroupId = useSelector(selectActiveGroupId);
 
   useEffect(() => {
-    const unsubscribe = getAllPlayers(setPlayers);
-    return () => unsubscribe;
-  }, []);
+    const unsubscribe = getAllPlayers(setPlayers, activeGroupId);
+    return () => unsubscribe && unsubscribe();
+  }, [activeGroupId]);
 
   useEffect(() => {
     const unsubscribe = getAllGKs(setGoalkeepers);
-    return () => unsubscribe;
+    return () => unsubscribe && unsubscribe();
   }, []);
 
   useEffect(() => {
-    const unsubscribe = getAllMatches(setMatches);
-    return () => unsubscribe;
-  }, []);
+    const unsubscribe = getAllMatches(setMatches, activeGroupId);
+    return () => unsubscribe && unsubscribe();
+  }, [activeGroupId]);
 
   return (
     <Box

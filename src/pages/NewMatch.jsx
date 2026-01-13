@@ -14,6 +14,8 @@ import { useEffect, useState } from "react";
 import { Outlet } from "react-router";
 import { saveNewMatch } from "../firebase/endpoints";
 import { getAllPlayers } from "../firebase/playerEndpoints";
+import { useSelector } from "react-redux";
+import { selectActiveGroupId } from "../store/slices/groupsSlice";
 import dayjs from "dayjs";
 import { DatePicker } from "@mui/x-date-pickers";
 import TabContext from "@mui/lab/TabContext";
@@ -55,10 +57,12 @@ function NewMatch(props) {
   const [newMatchForm, setNewMatchForm] = useState(initialState);
   const [tabIndex, setTabIndex] = useState("1");
   const [isSaving, setIsSaving] = useState(false);
+  const activeGroupId = useSelector(selectActiveGroupId);
 
   useEffect(() => {
-    getAllPlayers(setPlayers)
-  }, []);
+    const unsubscribe = getAllPlayers(setPlayers, activeGroupId);
+    return () => unsubscribe && unsubscribe();
+  }, [activeGroupId]);
 
   // Cambiar de tab
   const handleTabChange = (event, newValue) => {
@@ -88,7 +92,7 @@ function NewMatch(props) {
       await saveNewMatch({
         ...newMatchForm,
         date: newMatchForm.date ? newMatchForm.date.toDate() : null,
-      }, players);
+      }, players, activeGroupId);
       toast.success("Partido guardado correctamente");
       setNewMatchForm({
         ...initialState,

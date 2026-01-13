@@ -3,6 +3,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { useDispatch } from "react-redux";
 import { auth } from "../firebaseConfig";
 import { fetchUserData, setInitialized, setUser, setUserData } from "../store/slices/authSlice";
+import { fetchUserGroups } from "../store/slices/groupsSlice";
 
 const AuthListener = () => {
   const dispatch = useDispatch();
@@ -22,6 +23,9 @@ const AuthListener = () => {
           );
 
           await dispatch(fetchUserData(firebaseUser.uid)).unwrap();
+
+          // Cargar grupos del usuario (multi-tenant)
+          await dispatch(fetchUserGroups(firebaseUser.uid)).unwrap();
         } else {
           dispatch(setUser(null));
           dispatch(setUserData(null));

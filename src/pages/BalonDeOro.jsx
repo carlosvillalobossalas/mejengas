@@ -7,6 +7,8 @@ import { auth } from "../firebaseConfig";
 import { useRegisterCompleted } from "../hooks/useRegisterCompleted";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import { selectActiveGroupId } from "../store/slices/groupsSlice";
 
 
 function BalonDeOro() {
@@ -18,6 +20,7 @@ function BalonDeOro() {
     const [hasVoted, setHasVoted] = useState(false);
     const [initialized, setInitialized] = useState(false);
     const navigate = useNavigate();
+    const activeGroupId = useSelector(selectActiveGroupId);
 
     useEffect(() => {
         if (!user) return;
@@ -31,7 +34,7 @@ function BalonDeOro() {
             }
         };
 
-        getAllPlayers((allPlayers) => {
+        const unsubscribe = getAllPlayers((allPlayers) => {
             setPlayers(
                 user?.uid
                     ? allPlayers.filter((player) => player?.userId !== user.uid)
@@ -39,7 +42,7 @@ function BalonDeOro() {
             );
             playersLoaded = true;
             checkInitialized();
-        });
+        }, activeGroupId);
 
         const checkVote = async () => {
             try {
@@ -63,7 +66,8 @@ function BalonDeOro() {
         };
 
         checkVote();
-    }, [user]);
+        return () => unsubscribe && unsubscribe();
+    }, [user, activeGroupId]);
 
     const handleChange = (medal) => (event) => {
         setVotes((prev) => ({ ...prev, [medal]: event.target.value }));
