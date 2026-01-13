@@ -21,7 +21,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import LinkIcon from "@mui/icons-material/Link";
 import LinkOffIcon from "@mui/icons-material/LinkOff";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
-import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { toast } from "react-toastify";
 import { 
@@ -49,26 +49,26 @@ const UserManagementPage = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      // Cargar usuarios de Firestore users
-      const usersSnapshot = await getDocs(collection(db, "users"));
+      // Cargar todas las colecciones en paralelo
+      const [usersSnapshot, playersData, groupMembersSnapshot] = await Promise.all([
+        getDocs(collection(db, "users")),
+        getAllPlayersOnce(DEFAULT_GROUP_ID),
+        getDocs(query(collection(db, "groupMembers"), where("groupId", "==", DEFAULT_GROUP_ID)))
+      ]);
+
       const usersData = usersSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
       setUsers(usersData);
-
-      // Cargar jugadores usando playerEndpoints
-      const playersData = await getAllPlayersOnce(DEFAULT_GROUP_ID);
       setPlayers(playersData);
 
-      // Cargar membresías de groupMembers para cada usuario
+      // Crear mapa de membresías desde la snapshot
       const memberships = {};
-      for (const user of usersData) {
-        const membership = await getGroupMembership(user.id, DEFAULT_GROUP_ID);
-        if (membership) {
-          memberships[user.id] = membership.playerId;
-        }
-      }
+      groupMembersSnapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        memberships[data.userId] = data.playerId;
+      });
       setUserMemberships(memberships);
 
     } catch (error) {
