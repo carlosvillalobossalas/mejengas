@@ -11,10 +11,11 @@ import {
   Alert,
 } from "@mui/material";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "../firebaseConfig";
+import { auth, db } from "../firebaseConfig";
 import { updateProfile } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../firebaseConfig";
+import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import {
   updatePlayerProfile,
   getPlayerByUserId,
@@ -119,6 +120,12 @@ function MiPerfilPage() {
       await updateProfile(auth.currentUser, {
         displayName: displayName.trim(),
         photoURL: photoURL,
+      });
+
+      await updateDoc(doc(db, "users", user.uid), {
+        displayName: displayName.trim(),
+        photoURL: photoURL,
+        updatedAt: serverTimestamp(),
       });
 
       if (playerData?.id) {
