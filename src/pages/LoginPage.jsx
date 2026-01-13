@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -27,8 +27,10 @@ import { auth } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginWithGoogle } from "../store/slices/authSlice";
+import { useAuth } from "../hooks/useAuthRedux";
 
 const LoginPage = () => {
+  const { user } = useAuth();
   const [tabValue, setTabValue] = useState(0);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,6 +44,13 @@ const LoginPage = () => {
   const [resetError, setResetError] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  // Si el usuario ya está autenticado, redirigir a inicio
+  useEffect(() => {
+    if (user) {
+      navigate("/", { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);

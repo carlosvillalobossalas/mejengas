@@ -28,14 +28,46 @@ const AppRoutes = ({ players, goalkeepers, matches }) => {
     return user ? children : <Navigate to="/login" replace />;
   };
 
+  // Ruta pública - redirige a inicio si ya está autenticado
+  const PublicRoute = ({ children }) => {
+    if (loadingAuth) {
+      return (
+        <Box sx={{ height: "calc(100vh - 56px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <CircularProgress />
+        </Box>
+      );
+    }
+    return user ? <Navigate to="/" replace /> : children;
+  };
+
   return (
     <Box sx={{ height: "calc(100vh - 56px)", overflow: "hidden" }}>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="" element={<HistoricMatchesList matches={matches} players={players} />} />
-        <Route path="/resumen-temporada" element={<SeasonSummaryPage />} />
-        <Route path="/jugadores" element={<PlayersTablePage players={players} />} />
-        <Route path="/porteros" element={<GoalkeepersTablePage goalkeepers={goalkeepers} />} />
+        <Route path="/login" element={
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        } />
+        <Route path="" element={
+          <AuthRoute>
+            <HistoricMatchesList matches={matches} players={players} />
+          </AuthRoute>
+        } />
+        <Route path="/resumen-temporada" element={
+          <AuthRoute>
+            <SeasonSummaryPage />
+          </AuthRoute>
+        } />
+        <Route path="/jugadores" element={
+          <AuthRoute>
+            <PlayersTablePage players={players} />
+          </AuthRoute>
+        } />
+        <Route path="/porteros" element={
+          <AuthRoute>
+            <GoalkeepersTablePage goalkeepers={goalkeepers} />
+          </AuthRoute>
+        } />
         <Route path="/admin/usuarios" element={
           <AdminRoute>
             <UserManagementPage />
