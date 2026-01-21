@@ -10,10 +10,11 @@ import {
   setDoc,
   updateDoc,
   where,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { calculateSeasonStats, filterMatchesByYear, getMatchYear } from "../utils/seasonStats";
-import { updatePlayerSeasonStatsAfterMatch, updatePlayerAwards } from "./playerEndpoints";
+import { updatePlayerSeasonStatsAfterMatch, updatePlayerAwards, getAllPlayersOnce } from "./playerEndpoints";
 
 export const getAllGKs = async (callback) => {
   try {
@@ -572,5 +573,89 @@ export const calculateAndSaveMVP = async (matchId) => {
   } catch (error) {
     console.error("Error calculating MVP:", error);
     throw new Error(error);
+  }
+};
+
+// Group Management Functions
+
+/**
+ * Get complete group data with members and players
+ * @param {string} groupId - Group ID
+ * @returns {Promise<Object>} Object with groupData, players, users, and userMemberships
+ */
+export const getGroupWithMembers = async (groupId) => {
+  try {
+    // Cargar datos del grupo
+    const groupDoc = await getDoc(doc(db, "groups", groupId));
+    if (!groupDoc.exists()) {
+      throw new Error("Grupo no encontrado");
+    }
+    const groupData = { id: groupDoc.id, ...groupDoc.data() };
+
+    // Cargar jugadores del grupo y miembros del grupo en paralelo
+    const [playersData, groupMembersSnapshot] = await Promise.all([
+      getAllPlayersOnce(groupId),
+      getDocs(query(collection(db, "groupMembers"), where("groupId", "==", groupId)))
+    ]);
+
+    // Crear mapa de membresías y obtener datos de usuarios
+    const memberships = {};
+    const userIds = [];
+    
+    groupMembersSnapshot.docs.forEach((doc) => {
+      const data = doc.data();
+      memberships[data.userId] = data.playerId;
+      userIds.push(data.userId);
+    });
+
+    // Cargar datos de usuarios
+    const usersData = [];
+    if (userIds.length > 0) {
+      for (const userId of userIds) {
+        const userDoc = await getDoc(doc(db, "users", userId));
+        if (userDoc.exists()) {
+          usersData.push({
+            id: userDoc.id,
+            ...userDoc.data(),
+          });
+        }
+      }
+    }
+
+    return {
+      groupData,
+      players: playersData,
+      users: usersData,
+      userMemberships: memberships,
+    };
+  } catch (error) {
+    console.error("Error loading group data:", error);
+    throw error;
+  }
+};
+
+/**
+ * Send invitation to join a group
+ * @param {string} email - Email to invite
+ * @param {string} groupId - Group ID
+ * @param {string} groupName - Group name
+ * @param {string} invitedBy - User ID who sends the invite
+ * @param {string} invitedByName - Name of user who sends the invite
+ * @returns {Promise<void>}
+ */
+export const sendGroupInvite = async (email, groupId, groupName, invitedBy, invitedByName) => {
+  try {
+    await addDoc(collection(db, "invites"), {
+      email: email.toLowerCase().trim(),
+      groupId,
+      groupName,
+      invitedBy,
+      invitedByName,
+      status: "pending",
+      createdAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error("Error sending invite:", error);
+    throw error;
   }
 };

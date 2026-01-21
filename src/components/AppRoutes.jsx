@@ -74,10 +74,10 @@ const AppRoutes = ({ players, goalkeepers, matches }) => {
             <MisGruposPage />
           </AuthRoute>
         } />
-        <Route path="/admin/usuarios" element={
-          <AdminRoute>
+        <Route path="/admin/user-management/:groupId" element={
+          <AuthRoute>
             <UserManagementPage />
-          </AdminRoute>
+          </AuthRoute>
         } />
         <Route path="/admin/nuevo-partido" element={
           <AdminRoute>

@@ -135,14 +135,6 @@ const AppDrawer = ({ open, onClose }) => {
                   <ListItemText primary="Registrar Partido" />
                 </ListItemButton>
               </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton onClick={() => handleMenuClick('/admin/usuarios')}>
-                  <ListItemIcon>
-                    <ManageAccountsIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Gestión de Usuarios" />
-                </ListItemButton>
-              </ListItem>
             </List>
             <Divider />
           </>

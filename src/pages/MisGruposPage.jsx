@@ -27,15 +27,18 @@ import {
   setActiveGroupId,
 } from "../store/slices/groupsSlice";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 import GroupIcon from "@mui/icons-material/Group";
 import AddIcon from "@mui/icons-material/Add";
 import PeopleIcon from "@mui/icons-material/People";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import StarIcon from "@mui/icons-material/Star";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 function MisGruposPage() {
   const { user } = useAuth();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const groups = useSelector(selectGroups);
   const loading = useSelector(selectGroupsLoading);
   const activeGroupId = useSelector(selectActiveGroupId);
@@ -222,15 +225,25 @@ function MisGruposPage() {
                     </Box>
                   </Box>
                 </CardContent>
-                <CardActions sx={{ px: 2, pb: 2 }}>
+                <CardActions sx={{ px: 2, pb: 2, display: "flex", gap: 1 }}>
                   <Button
                     size="small"
                     variant={activeGroupId === group.id ? "contained" : "outlined"}
-                    fullWidth
+                    sx={{ flex: 1 }}
                     onClick={() => handleSelectGroup(group.id)}
                   >
                     {activeGroupId === group.id ? "Seleccionado" : "Seleccionar"}
                   </Button>
+                  {(group.role === "owner" || group.role === "admin") && (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<SettingsIcon />}
+                      onClick={() => navigate(`/admin/user-management/${group.id}`)}
+                    >
+                      Administrar
+                    </Button>
+                  )}
                 </CardActions>
               </Card>
             ))}

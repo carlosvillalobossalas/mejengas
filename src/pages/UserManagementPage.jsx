@@ -16,31 +16,35 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  TextField,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import LinkIcon from "@mui/icons-material/Link";
 import LinkOffIcon from "@mui/icons-material/LinkOff";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../firebaseConfig";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { toast } from "react-toastify";
-import { 
-  getAllPlayersOnce,
-  linkUserToPlayer,
-  unlinkUserFromPlayer,
-  getGroupMembership,
-} from "../firebase/playerEndpoints";
-
-const DEFAULT_GROUP_ID = "HpWjsA6l5WjJ7FNlC8uA";
+import { useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuthRedux";
+import { linkUserToPlayer, unlinkUserFromPlayer } from "../firebase/playerEndpoints";
+import { getGroupWithMembers, sendGroupInvite } from "../firebase/endpoints";
 
 const UserManagementPage = () => {
+  const { groupId } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [players, setPlayers] = useState([]);
   const [users, setUsers] = useState([]);
+  const [groupData, setGroupData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedPlayerId, setSelectedPlayerId] = useState("");
-  const [userMemberships, setUserMemberships] = useState({}); // userId -> playerId
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [sendingInvite, setSendingInvite] = useState(false);
+  const [userMemberships, setUserMemberships] = useState({});
 
   useEffect(() => {
     loadData();
@@ -49,31 +53,22 @@ const UserManagementPage = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      // Cargar todas las colecciones en paralelo
-      const [usersSnapshot, playersData, groupMembersSnapshot] = await Promise.all([
-        getDocs(collection(db, "users")),
-        getAllPlayersOnce(DEFAULT_GROUP_ID),
-        getDocs(query(collection(db, "groupMembers"), where("groupId", "==", DEFAULT_GROUP_ID)))
-      ]);
+      const data = await getGroupWithMembers(groupId);
+      
+      if (!data.groupData) {
+        toast.error("Grupo no encontrado");
+        navigate("/mis-grupos");
+        return;
+      }
 
-      const usersData = usersSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setUsers(usersData);
-      setPlayers(playersData);
-
-      // Crear mapa de membresías desde la snapshot
-      const memberships = {};
-      groupMembersSnapshot.docs.forEach((doc) => {
-        const data = doc.data();
-        memberships[data.userId] = data.playerId;
-      });
-      setUserMemberships(memberships);
-
+      setGroupData(data.groupData);
+      setPlayers(data.players);
+      setUsers(data.users);
+      setUserMemberships(data.userMemberships);
     } catch (error) {
       console.error("Error loading data:", error);
       toast.error("Error al cargar datos");
+      navigate("/mis-grupos");
     } finally {
       setLoading(false);
     }
@@ -96,7 +91,7 @@ const UserManagementPage = () => {
         selectedUser.displayName,
         selectedUser.photoURL,
         selectedUser.email,
-        DEFAULT_GROUP_ID
+        groupId
       );
 
       toast.success("Usuario enlazado correctamente");
@@ -108,18 +103,53 @@ const UserManagementPage = () => {
     }
   };
 
-  const handleUnlinkUser = async (user) => {
-    const playerId = userMemberships[user.id];
+  const handleUnlinkUser = async (userId) => {
+    const playerId = userMemberships[userId];
     if (!playerId) return;
 
     try {
-      await unlinkUserFromPlayer(user.id, DEFAULT_GROUP_ID);
+      await unlinkUserFromPlayer(userId, groupId);
 
       toast.success("Usuario desenlazado correctamente");
       loadData();
     } catch (error) {
       console.error("Error unlinking user:", error);
       toast.error("Error al desenlazar usuario");
+    }
+  };
+
+  const handleSendInvite = async () => {
+    if (!inviteEmail.trim()) {
+      toast.error("El correo es requerido");
+      return;
+    }
+
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(inviteEmail)) {
+      toast.error("Formato de correo inválido");
+      return;
+    }
+
+    try {
+      setSendingInvite(true);
+      
+      await sendGroupInvite(
+        inviteEmail,
+        groupId,
+        groupData?.name || "",
+        user.uid,
+        user.displayName || user.email
+      );
+
+      toast.success("Invitación enviada correctamente");
+      setInviteDialogOpen(false);
+      setInviteEmail("");
+    } catch (error) {
+      console.error("Error sending invite:", error);
+      toast.error("Error al enviar invitación");
+    } finally {
+      setSendingInvite(false);
     }
   };
 
@@ -139,23 +169,54 @@ const UserManagementPage = () => {
   }
 
   return (
-    <Box sx={{ height: "100%", overflow: "auto", p: { xs: 2, sm: 3 } }}>
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" fontWeight="bold" gutterBottom>
-          👥 Gestión de Usuarios
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Enlaza usuarios autenticados con jugadores del sistema
-        </Typography>
+    <Box sx={{ height: "100%", overflow: "auto", bgcolor: "grey.50", minHeight: "100vh", pb: 10 }}>
+      {/* Header */}
+      <Box
+        sx={{
+          bgcolor: "primary.main",
+          color: "white",
+          py: 3,
+          px: 2,
+          mb: 2,
+          display: "flex",
+          alignItems: "center",
+          gap: 2,
+        }}
+      >
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate("/mis-grupos")}
+          sx={{ color: "white", minWidth: "auto", px: 1 }}
+        >
+        </Button>
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="h5" fontWeight="bold">
+            Administrar Grupo
+          </Typography>
+          <Typography variant="body2" sx={{ mt: 0.5, opacity: 0.9 }}>
+            {groupData?.name || "Cargando..."}
+          </Typography>
+        </Box>
       </Box>
 
-      <Grid2 container spacing={3}>
+      <Box sx={{ px: 2 }}>
+        <Grid2 container spacing={3}>
         {/* Columna de usuarios autenticados */}
         <Grid2 size={{ xs: 12, md: 6 }}>
           <Card sx={{ p: 2 }}>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              Usuarios Autenticados
-            </Typography>
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+              <Typography variant="h6" fontWeight="bold">
+                Miembros del Grupo
+              </Typography>
+              <Button
+                size="small"
+                variant="contained"
+                startIcon={<PersonAddIcon />}
+                onClick={() => setInviteDialogOpen(true)}
+              >
+                Invitar
+              </Button>
+            </Box>
             <Box>
               {users.map((user) => {
                 return (
@@ -213,8 +274,7 @@ const UserManagementPage = () => {
                           variant="outlined"
                           color="error"
                           startIcon={<LinkOffIcon />}
-                          onClick={() => handleUnlinkUser(user)}
-                          sx={{ flex: { xs: 1, md: 0 } }}
+                          onClick={() => handleUnlinkUser(user.id)}
                         >
                           Desenlazar
                         </Button>
@@ -224,7 +284,6 @@ const UserManagementPage = () => {
                           variant="contained"
                           startIcon={<LinkIcon />}
                           onClick={() => handleLinkUser(user)}
-                          sx={{ flex: { xs: 1, md: 0 } }}
                         >
                           Enlazar
                         </Button>
@@ -235,7 +294,7 @@ const UserManagementPage = () => {
               })}
               {users.length === 0 && (
                 <Typography variant="body2" color="text.secondary" textAlign="center" py={2}>
-                  No hay usuarios registrados
+                  No hay miembros en este grupo
                 </Typography>
               )}
             </Box>
@@ -246,7 +305,7 @@ const UserManagementPage = () => {
         <Grid2 size={{ xs: 12, md: 6 }}>
           <Card sx={{ p: 2 }}>
             <Typography variant="h6" fontWeight="bold" gutterBottom>
-              Jugadores del Sistema
+              Jugadores del Grupo
             </Typography>
             <Box>
               {players.map((player) => {
@@ -286,6 +345,7 @@ const UserManagementPage = () => {
           </Card>
         </Grid2>
       </Grid2>
+      </Box>
 
       {/* Dialog para enlazar usuario */}
       <Dialog open={linkDialogOpen} onClose={() => setLinkDialogOpen(false)} maxWidth="sm" fullWidth>
@@ -330,6 +390,47 @@ const UserManagementPage = () => {
             disabled={!selectedPlayerId}
           >
             Enlazar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog para invitar usuario */}
+      <Dialog 
+        open={inviteDialogOpen} 
+        onClose={() => !sendingInvite && setInviteDialogOpen(false)} 
+        maxWidth="sm" 
+        fullWidth
+      >
+        <DialogTitle>Invitar Nuevo Usuario</DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 2 }}>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Ingresa el correo electrónico del usuario que deseas invitar a unirse a este grupo.
+            </Typography>
+            <TextField
+              label="Correo Electrónico"
+              type="email"
+              fullWidth
+              required
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              disabled={sendingInvite}
+              placeholder="ejemplo@correo.com"
+              sx={{ mt: 2 }}
+              autoFocus
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setInviteDialogOpen(false)} disabled={sendingInvite}>
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleSendInvite}
+            variant="contained"
+            disabled={sendingInvite || !inviteEmail.trim()}
+          >
+            {sendingInvite ? <CircularProgress size={24} /> : "Enviar Invitación"}
           </Button>
         </DialogActions>
       </Dialog>
