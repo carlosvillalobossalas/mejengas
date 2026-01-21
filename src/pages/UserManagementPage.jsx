@@ -257,9 +257,9 @@ const UserManagementPage = () => {
                       <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>
                         {user.email}
                       </Typography>
-                      {userMemberships[user.id] && (
+                      {userMemberships[user.id] && players.find(p => p.id === userMemberships[user.id]) && (
                         <Chip
-                          label={`Jugador: ${players.find(p => p.id === userMemberships[user.id])?.originalName}`}
+                          label={`Jugador: ${players.find(p => p.id === userMemberships[user.id])?.originalName || players.find(p => p.id === userMemberships[user.id])?.name}`}
                           size="small"
                           color="success"
                         />

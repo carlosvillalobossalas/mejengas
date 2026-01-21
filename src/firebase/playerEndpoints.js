@@ -118,12 +118,18 @@ export const unlinkUserFromPlayer = async (userId, groupId = "HpWjsA6l5WjJ7FNlC8
 
     const playerId = membership.playerId;
 
+    if (!playerId) {
+      throw new Error("El usuario no tiene un jugador enlazado");
+    }
+
     // Obtener el nombre actual del jugador antes de desenlazar
     const playerDoc = await getDoc(doc(db, "Players", playerId));
     const playerData = playerDoc.data();
 
-    // Eliminar el registro de groupMembers
-    await deleteDoc(doc(db, "groupMembers", membership.id));
+    // Actualizar el registro de groupMembers para quitar el playerId
+    await updateDoc(doc(db, "groupMembers", membership.id), {
+      playerId: null,
+    });
 
     // Actualizar documento de jugador - mantener solo campos permitidos
     const playerUpdates = {
@@ -554,7 +560,7 @@ export const getGroupById = async (groupId) => {
 };
 
 // Crear un nuevo grupo
-export const createGroup = async (groupData, userId, playerId = null) => {
+export const createGroup = async (groupData, userId) => {
   try {
     const newGroupRef = await addDoc(collection(db, "groups"), {
       name: groupData.name,
@@ -571,7 +577,7 @@ export const createGroup = async (groupData, userId, playerId = null) => {
     await addDoc(collection(db, "groupMembers"), {
       userId,
       groupId: newGroupRef.id,
-      playerId: playerId || null,
+      playerId: null,
       role: "owner",
       status: "active",
       joinedAt: new Date(),

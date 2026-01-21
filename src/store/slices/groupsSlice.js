@@ -34,9 +34,9 @@ export const fetchUserGroups = createAsyncThunk(
 
 export const createGroupAndRefresh = createAsyncThunk(
   "groups/createGroupAndRefresh",
-  async ({ userId, groupData, playerId }, { dispatch, rejectWithValue }) => {
+  async ({ userId, groupData }, { dispatch, rejectWithValue }) => {
     try {
-      const groupId = await createGroup(groupData, userId, playerId);
+      const groupId = await createGroup(groupData, userId);
       await dispatch(fetchUserGroups(userId)).unwrap();
       return groupId;
     } catch (error) {

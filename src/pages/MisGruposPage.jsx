@@ -62,20 +62,9 @@ function MisGruposPage() {
     try {
       setCreatingGroup(true);
 
-      // Intentar obtener el playerId del usuario en el grupo por defecto
-      let playerId = null;
-      try {
-        const player = await getPlayerByUserIdAndGroup(user.uid);
-        playerId = player?.id || null;
-      } catch (error) {
-        // Si no tiene jugador enlazado, continuar sin playerId
-        console.log("Usuario sin jugador enlazado");
-      }
-
       await dispatch(
         createGroupAndRefresh({
           userId: user.uid,
-          playerId,
           groupData: {
             name: newGroupName.trim(),
             description: newGroupDescription.trim(),
