@@ -19,17 +19,29 @@ const App = () => {
 
   useEffect(() => {
     const unsubscribe = getAllPlayers(setPlayers, activeGroupId);
-    return () => unsubscribe && unsubscribe();
+    return () => {
+      if (typeof unsubscribe === "function") {
+        unsubscribe();
+      }
+    };
   }, [activeGroupId]);
 
   useEffect(() => {
     const unsubscribe = getAllGKs(setGoalkeepers);
-    return () => unsubscribe && unsubscribe();
+    return () => {
+      if (typeof unsubscribe === "function") {
+        unsubscribe();
+      }
+    };
   }, []);
 
   useEffect(() => {
     const unsubscribe = getAllMatches(setMatches, activeGroupId);
-    return () => unsubscribe && unsubscribe();
+    return () => {
+      if (typeof unsubscribe === "function") {
+        unsubscribe();
+      }
+    };
   }, [activeGroupId]);
 
   return (

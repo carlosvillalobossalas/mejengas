@@ -28,6 +28,7 @@ import {
 } from "../store/slices/groupsSlice";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { getPlayerByUserIdAndGroup } from "../firebase/playerEndpoints";
 import GroupIcon from "@mui/icons-material/Group";
 import AddIcon from "@mui/icons-material/Add";
 import PeopleIcon from "@mui/icons-material/People";
@@ -60,9 +61,21 @@ function MisGruposPage() {
 
     try {
       setCreatingGroup(true);
+
+      // Intentar obtener el playerId del usuario en el grupo por defecto
+      let playerId = null;
+      try {
+        const player = await getPlayerByUserIdAndGroup(user.uid);
+        playerId = player?.id || null;
+      } catch (error) {
+        // Si no tiene jugador enlazado, continuar sin playerId
+        console.log("Usuario sin jugador enlazado");
+      }
+
       await dispatch(
         createGroupAndRefresh({
           userId: user.uid,
+          playerId,
           groupData: {
             name: newGroupName.trim(),
             description: newGroupDescription.trim(),

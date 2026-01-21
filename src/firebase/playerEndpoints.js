@@ -514,8 +514,8 @@ export const getUserGroups = async (userId) => {
         return {
           id: groupDoc.id,
           ...groupData,
-          createdAt: groupData.createdAt?.toDate ? groupData.createdAt.toDate() : groupData.createdAt,
-          updatedAt: groupData.updatedAt?.toDate ? groupData.updatedAt.toDate() : groupData.updatedAt,
+          createdAt: groupData.createdAt?.toDate ? groupData.createdAt.toDate().getTime() : groupData.createdAt,
+          updatedAt: groupData.updatedAt?.toDate ? groupData.updatedAt.toDate().getTime() : groupData.updatedAt,
           memberCount,
           membershipId: memberDoc.id,
           role: membershipData.role,
@@ -554,24 +554,27 @@ export const getGroupById = async (groupId) => {
 };
 
 // Crear un nuevo grupo
-export const createGroup = async (groupData, userId) => {
+export const createGroup = async (groupData, userId, playerId = null) => {
   try {
     const newGroupRef = await addDoc(collection(db, "groups"), {
-      ...groupData,
-      createdBy: userId,
+      name: groupData.name,
+      description: groupData.description || "",
+      type: groupData.type || "futbol_7",
+      visibility: groupData.visibility || "public",
+      ownerId: userId,
+      isActive: true,
       createdAt: new Date(),
       updatedAt: new Date(),
-      memberCount: 1,
     });
 
-    // Agregar al creador como owner del grupo
+    // Agregar al creador como owner del grupo en groupMembers
     await addDoc(collection(db, "groupMembers"), {
       userId,
       groupId: newGroupRef.id,
+      playerId: playerId || null,
       role: "owner",
       status: "active",
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      joinedAt: new Date(),
     });
 
     return newGroupRef.id;
