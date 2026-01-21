@@ -22,14 +22,16 @@ import { SportsSoccer, Stadium, Stars, Person, ShowChart, Analytics, CalendarMon
 import AssistIcon from "/assets/shoe.png";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAllPlayers, getAllPlayersSeasonStats } from "../firebase/playerEndpoints";
+import { getAllPlayersSeasonStats } from "../firebase/playerEndpoints";
 import { getPlayerDisplay } from "../utils/playersDisplayName";
+import { useSelector } from "react-redux";
+import { selectActiveGroupId } from "../store/slices/groupsSlice";
 
 // Función para combinar stats de PlayerSeasonStats con datos de jugadores
-const preparePlayerStatsFromSeasonStats = async (players) => {
+const preparePlayerStatsFromSeasonStats = async (players, groupId) => {
   try {
     // Obtener todas las estadísticas de PlayerSeasonStats agrupadas por temporada
-    const statsBySeason = await getAllPlayersSeasonStats();
+    const statsBySeason = await getAllPlayersSeasonStats(groupId);
 
     const stats = {
       historico: [],
@@ -105,6 +107,7 @@ const preparePlayerStatsFromSeasonStats = async (players) => {
 };
 
 export const PlayersTablePage = ({ players }) => {
+  const activeGroupId = useSelector(selectActiveGroupId);
   const [orderBy, setOrderBy] = useState("goals");
   const [order, setOrder] = useState("desc");
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
@@ -128,17 +131,22 @@ export const PlayersTablePage = ({ players }) => {
     }
   };
 
-  // Cargar stats desde PlayerSeasonStats una sola vez
+  // Cargar stats desde PlayerSeasonStats cuando cambia el grupo o los jugadores
   useEffect(() => {
     const loadStats = async () => {
+      if (!activeGroupId) return;
+
       setIsLoading(true);
-      const stats = await preparePlayerStatsFromSeasonStats(players);
+      setAllYearStats({ historico: [], 2025: [], 2026: [] });
+      setSelectedPlayer(null);
+
+      const stats = await preparePlayerStatsFromSeasonStats(players, activeGroupId);
       setAllYearStats(stats);
       setIsLoading(false);
     };
 
     loadStats();
-  }, [players]);
+  }, [players, activeGroupId]);
 
   // Obtener los jugadores del año seleccionado
   const currentYearPlayers = allYearStats[selectedYear] || [];
